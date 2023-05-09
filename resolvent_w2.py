@@ -8,10 +8,10 @@ colors = prop_cycle.by_key()['color']
 
 Ts = np.array([0.])
 Us = np.array([-2.0])
-Vs = np.array([-0.5])
+Vs = np.array([-0.5, -0.3, -0.1])
 
-folder = "data/L=60/"
-name_suffix = "CDW"
+folder = "data/L=70/"
+name_suffix = "SC"
 fig, ax = plt.subplots()
 
 #ax.set_xscale("log")
@@ -35,7 +35,7 @@ for q, T in enumerate(Ts):
             a_inf = (roots[0] + roots[1]) * 0.5
             b_inf = ((roots[1] - roots[0]) * 0.25)
 
-            ax.axvspan(np.sqrt(roots[1]), np.sqrt(roots[0]), alpha=.2, color="purple", label="Continuum")
+            #ax.axvspan(np.sqrt(roots[1]), np.sqrt(roots[0]), alpha=.2, color="purple", label="Continuum")
             for idx, type in enumerate(types):
                 file = f"{folder}{name}resolvent_{type}_{name_suffix}.dat.gz"
                 with gzip.open(file, 'rt') as f_open:
@@ -79,18 +79,22 @@ for q, T in enumerate(Ts):
 
                 if(idx == 0):
                     ax.plot(np.sqrt(w_lin.real), -dos( np.copy(w_lin) ).imag, color=colors[q+r+s],
-                        linestyle=lss[idx], linewidth=(plt.rcParams["lines.linewidth"]+idx*2),
-                        label="Amplitude")
-                        #label=f"$V={V}$")
+                        linestyle=lss[idx], linewidth=(plt.rcParams["lines.linewidth"]+idx*2), label=f"$V={V}$")
                 else:
                     ax.plot(np.sqrt(w_lin.real), -dos( np.copy(w_lin) ).imag, color=colors[q+r+s],
-                        linestyle=lss[idx], linewidth=(plt.rcParams["lines.linewidth"]+idx*2)
-                        ,label="Phase")
-                        #)
-                #ax.plot(B, "x", label=folder)
-                #        #label=f"$V={V}$")
+                        linestyle=lss[idx], linewidth=(plt.rcParams["lines.linewidth"]+idx*2))
 
-ax.legend()
+legend = plt.legend()
+
+import matplotlib.lines as mlines
+dummy_lines = []
+dummy_lines.append(mlines.Line2D([],[], color="k", linestyle="-"))
+dummy_lines.append(mlines.Line2D([],[], color="k", linestyle="--", linewidth=2*plt.rcParams["lines.linewidth"]))
+legend_extra = plt.legend([dummy_lines[i] for i in [0,1]], [r"Amplitude", r"Phase"], loc="upper center")
+
+ax.add_artist(legend)
+ax.add_artist(legend_extra)
+
 ax.set_xlabel(r"$\epsilon / t$")
 ax.set_ylabel(r"$A(z)$")
 fig.tight_layout()
