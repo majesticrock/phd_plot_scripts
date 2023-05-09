@@ -7,16 +7,20 @@ prop_cycle = plt.rcParams['axes.prop_cycle']
 colors = prop_cycle.by_key()['color']
 
 Ts = np.array([0.])
-Us = np.array([-1.0, -1.25, -1.5, -1.75])
+Us = np.array([-2.0])
 Vs = np.array([-0.5])
 
-folder = "data/L=50/"
-name_suffix = "SC"
+folder = "data/L=60/"
+name_suffix = "CDW"
 fig, ax = plt.subplots()
-types = ["higgs", "phase"]#
+
+#ax.set_xscale("log")
+ax.set_yscale("log")
+
+types = ["higgs", "phase"]#"higgs", 
 lss = ["-", "--", "-."]
 
-plot_upper_lim = 2
+plot_upper_lim = 8.5
 
 for q, T in enumerate(Ts):
     for r, U in enumerate(Us):
@@ -31,7 +35,7 @@ for q, T in enumerate(Ts):
             a_inf = (roots[0] + roots[1]) * 0.5
             b_inf = ((roots[1] - roots[0]) * 0.25)
 
-            #ax.axvspan(np.sqrt(roots[1]), np.sqrt(roots[0]), alpha=.2, color="purple", label="Continuum")
+            ax.axvspan(np.sqrt(roots[1]), np.sqrt(roots[0]), alpha=.2, color="purple", label="Continuum")
             for idx, type in enumerate(types):
                 file = f"{folder}{name}resolvent_{type}_{name_suffix}.dat.gz"
                 with gzip.open(file, 'rt') as f_open:
@@ -39,9 +43,9 @@ for q, T in enumerate(Ts):
                     A = M[0]
                     B = M[1]
 
-                w_vals = 10000
+                w_vals = 20000
                 w_lin = np.linspace(0, plot_upper_lim, w_vals, dtype=complex)**2
-                w_lin += 1e-3j
+                w_lin += 1e-8j
                 off = 1
 
                 def terminator(w):
@@ -61,7 +65,7 @@ for q, T in enumerate(Ts):
                 for i in range(0, len(A) - 1):
                     deviation_from_inf[i] = abs((A[i] - a_inf) / a_inf) + abs((np.sqrt(B[i + 1]) - b_inf) / b_inf)
 
-                off_termi = len(A) - 1 - np.argmin(deviation_from_inf)
+                off_termi = len(A) - off - np.argmin(deviation_from_inf)
                 print("Terminating at i=", np.argmin(deviation_from_inf))
                 def dos(w):
                     for i in range(0, len(w)):
@@ -76,16 +80,19 @@ for q, T in enumerate(Ts):
                 if(idx == 0):
                     ax.plot(np.sqrt(w_lin.real), -dos( np.copy(w_lin) ).imag, color=colors[q+r+s],
                         linestyle=lss[idx], linewidth=(plt.rcParams["lines.linewidth"]+idx*2),
-                        label=f"$U={U}$")
+                        label="Amplitude")
+                        #label=f"$V={V}$")
                 else:
                     ax.plot(np.sqrt(w_lin.real), -dos( np.copy(w_lin) ).imag, color=colors[q+r+s],
-                        linestyle=lss[idx], linewidth=(plt.rcParams["lines.linewidth"]+idx*2))
+                        linestyle=lss[idx], linewidth=(plt.rcParams["lines.linewidth"]+idx*2)
+                        ,label="Phase")
+                        #)
                 #ax.plot(B, "x", label=folder)
                 #        #label=f"$V={V}$")
 
-ax.set_yscale("log")
 ax.legend()
 ax.set_xlabel(r"$\epsilon / t$")
+ax.set_ylabel(r"$A(z)$")
 fig.tight_layout()
 
 import os

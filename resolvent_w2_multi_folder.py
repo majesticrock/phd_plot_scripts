@@ -7,14 +7,18 @@ prop_cycle = plt.rcParams['axes.prop_cycle']
 colors = prop_cycle.by_key()['color']
 
 Ts = np.array([0.])
-Us = np.array([-2.])
-Vs = np.array([-1.9])
+Us = np.array([-2.0])
+Vs = np.array([-0.5])
 
-folders = ["data/klein_1/", "data/klein_3/", "data/klein_2/"]
+folders = ["L=30", "L=40", "L=50", "L=60", "L=70"]
 name_suffix = "SC"
 fig, ax = plt.subplots()
 types = [ "phase"]#"higgs",
-lss = ["-", "--", "-."]
+lss = ["-", "-", "-", "--", ":", ]
+plt.rcParams["lines.linewidth"] *= 2
+
+ax.set_yscale("log")
+axins = ax.inset_axes([0.1, 0.04, 0.2, 0.4])
 
 for folder, ls in zip(folders, lss):
     for q, T in enumerate(Ts):
@@ -22,7 +26,7 @@ for folder, ls in zip(folders, lss):
             for s, V in enumerate(Vs):
                 name = f"T={T}/U={U}_V={V}/"
 
-                file = f"{folder}{name}one_particle.dat.gz"
+                file = f"data/{folder}/{name}one_particle.dat.gz"
                 with gzip.open(file, 'rt') as f_open:
                     one_particle = np.abs(np.loadtxt(f_open).flatten())
 
@@ -30,9 +34,9 @@ for folder, ls in zip(folders, lss):
                 a_inf = (roots[0] + roots[1]) * 0.5
                 b_inf = ((roots[1] - roots[0]) * 0.25)
 
-                #ax.axvspan(np.sqrt(roots[1]), np.sqrt(roots[0]), alpha=.2, color="purple", label="Continuum")
+                if(ls==":"): ax.axvspan(np.sqrt(roots[1]), np.sqrt(roots[0]), alpha=.2, color="purple", label="Continuum")
                 for idx, type in enumerate(types):
-                    file = f"{folder}{name}resolvent_{type}_{name_suffix}.dat.gz"
+                    file = f"data/{folder}/{name}resolvent_{type}_{name_suffix}.dat.gz"
                     with gzip.open(file, 'rt') as f_open:
                         M = np.loadtxt(f_open)
                         A = M[0][:20]
@@ -72,17 +76,25 @@ for folder, ls in zip(folders, lss):
                             G = w - A[j] - B[j + 1] / G
                         return B[0] / G
 
-                    ax.plot(np.sqrt(w_lin.real), -dos( np.copy(w_lin) ).imag, #color=colors[q+r+s],
-                            linestyle=ls, linewidth=(plt.rcParams["lines.linewidth"]+idx*2), label=folder)
-                            #label=f"$V={V}$")
-                    #ax.plot(B, "x", label=folder)
-                    #        #label=f"$V={V}$")
+                    ax.plot(np.sqrt(w_lin.real), -dos( np.copy(w_lin) ).imag, 
+                            linestyle=ls, label=f"${folder}$")
+                    axins.plot(np.sqrt(w_lin.real), -dos( np.copy(w_lin) ).imag, 
+                            linestyle=ls, label=f"${folder}$")
 
-ax.set_yscale("log")
+
 ax.legend()
+
 ax.set_xlabel(r"$\epsilon / t$")
+x1, x2, y1, y2 = 0, 0.15, 0.63, 650
+axins.set_xlim(x1, x2)
+axins.set_ylim(y1, y2)
+axins.set_xticklabels([])
+axins.set_yticklabels([])
+ax.indicate_inset_zoom(axins, edgecolor="black")
+
 fig.tight_layout()
 
 import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
-plt.show()
+plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.svg")
+if(plt.rcParams["backend"] != "pgf"):
+    plt.show()
