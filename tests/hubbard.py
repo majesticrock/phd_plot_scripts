@@ -10,7 +10,7 @@ import os
 
 def load_data(i):
     """ Returns the data for the Hubbard test with index i.
-    0: CDW-SC phase
+    0: SC-CDW phase
     1: SC phase
     2: CDW phase
     3: AFM phase
@@ -19,7 +19,7 @@ def load_data(i):
     __CUBE_DIR__ = os.path.join("hubbard", "cube")
     __SQUARE_DIR__ = os.path.join("hubbard", "square")
     if i == 0:
-        return load_panda(__CUBE_DIR__, "test", "resolvents.json.gz", **hubbard_params(0.0, -2.5, 0.))
+        return load_panda(__SQUARE_DIR__, "test", "resolvents.json.gz", **hubbard_params(0.0, -2.5, 0.))
     elif i == 1:
         return load_panda(__CUBE_DIR__, "test", "resolvents.json.gz", **hubbard_params(0.0, -2.5, -0.1))
     elif i == 2:

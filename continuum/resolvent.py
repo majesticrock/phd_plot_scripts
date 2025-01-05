@@ -21,7 +21,7 @@ plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][1], 150000, dtype=complex)
+w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][1], 15000, dtype=complex)
 #w_lin = np.linspace(0, 150, 15000, dtype=complex)
 w_lin += 1e-4j
 

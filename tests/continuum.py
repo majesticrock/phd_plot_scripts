@@ -28,7 +28,7 @@ def load_data(i):
         return load_panda("continuum", "test", "resolvents.json.gz",
                     **continuum_params(N_k=4000, T=0, coulomb_scaling=0, screening=0, k_F=4.25, g=1.5, omega_D=10))
     else:
-        raise ValueError("Hubbard test: Invalid index")
+        raise ValueError("Continuum test: Invalid index")
 
 def create_plot(i):
     pd_data = load_data(i)
@@ -43,7 +43,7 @@ def create_plot(i):
     plotter.set_individual_colors("nice")
     plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-    w_lin = np.linspace(-0.01, pd_data["continuum_boundaries"][1] + 0.3, 5000, dtype=complex)
+    w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][1], 5000, dtype=complex)
     w_lin += 1e-4j
 
     plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True), label="Phase")
