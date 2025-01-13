@@ -8,6 +8,16 @@ import plot_settings as ps
 import sys
 import os
 
+def plot_name(i):
+    if i == 0:
+        return "SC-CDW"
+    elif i == 1:
+        return "SC"
+    elif i == 2:
+        return "CDW"
+    elif i == 3:
+        return "AFM"
+
 def load_data(i):
     """ Returns the data for the Hubbard test with index i.
     0: SC-CDW phase
@@ -52,7 +62,7 @@ def create_plot(i):
     plotter.plot(w_lin, resolvents.spectral_density(w_lin, "amplitude_AFM_transversal"), label="t.AFM")
 
     resolvents.mark_continuum(ax)
-
+    ax.set_title(f"Hubbard: {plot_name(i)}")
     ax.legend()
     fig.tight_layout()
     plt.show()

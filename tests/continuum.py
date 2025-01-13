@@ -7,6 +7,16 @@ import continued_fraction_pandas as cf
 import plot_settings as ps
 import sys
 
+def plot_name(i):
+    if i == 0:
+        return "No Coulomb interaction"
+    elif i == 1:
+        return "$\\lambda = 1$"
+    elif i == 2:
+        return "$\\lambda = 10^{-4}$"
+    elif i == 3:
+        return "Large $g$"
+    
 def load_data(i):
     """ Returns the data for the Hubbard test with index i.
     0: No Coulomb interaction
@@ -52,6 +62,7 @@ def create_plot(i):
     resolvents.mark_continuum(ax, 1e3)
 
     ax.set_xlim(1e3 * np.min(w_lin.real), 1e3 * np.max(w_lin.real))
+    ax.set_title(f"Continuum: {plot_name(i)}")
     ax.legend()
     fig.tight_layout()
     plt.show()
