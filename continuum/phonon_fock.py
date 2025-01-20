@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
 
-OMEGA_D = 0.1 # eV
+OMEGA_D = 0.01 # eV
 K_F = 4.25
 LAMBDA = 1e-4
 SCREENING = LAMBDA * 0.4107320221286488672 / np.sqrt(K_F)
 K_MAX = 1e16
-EPS = 1e-8
+EPS = 1e-6
 
 def coulomb_fock(x):
     if LAMBDA == 0:
@@ -33,7 +33,7 @@ def phonon_fock(x):
     sqrt_plus = np.sqrt(x*x + omega_tilde)
     sqrt_minus = np.sqrt(np.abs(x*x - omega_tilde))
 
-    term1 = -0.5 * sqrt_plus  * np.log( (np.abs(1 - sqrt_plus) + EPS)  / ( np.abs(1 + sqrt_plus )) )
+    term1 = -0.5 * sqrt_plus * np.log( (np.abs(1 - sqrt_plus) + EPS)  / ( np.abs(1 + sqrt_plus )) )
     term2 = np.where(x*x > omega_tilde, 
                         0.5 * sqrt_minus * np.log((np.abs(1 - sqrt_minus) + EPS) / (np.abs(1 + sqrt_minus) )), 
                         sqrt_minus * np.arctan(2 / (sqrt_minus))) 
@@ -49,11 +49,11 @@ print("Phononic Fock energy at singularity =", phonon_fock(np.sqrt(1 - omega_til
 print("Integral on paper =", integrate.quad(phonon_fock, 0.5, 1.))
 fig, ax = plt.subplots(ncols=1, sharey=True)
 
-OFFSET=0.02
+OFFSET=0.002
 x = np.linspace(1 - OFFSET, 1 + OFFSET, 10000)
 #ax.plot(x, renormalization_cut(x), label="Renorm. CUT")
 #ax.plot(x, bare_dispersion(x), label=r"$\epsilon_0$")
-ax.plot(x, bare_dispersion(x) + phonon_fock(x) - renormalization_cut(x), label=r"$\epsilon_\mathrm{Fock}^\mathrm{Ph}$")
+ax.plot(x, bare_dispersion(x) + phonon_fock(x), label=r"$\epsilon_\mathrm{Fock}^\mathrm{Ph}$")
 #ax.plot(x, bare_dispersion(x) + phonon_fock(x) - renormalization_cut(x), label=r"$\epsilon$")
 #ax.plot(x, coulomb_fock(x) - coulomb_fock(1), label=r"$\epsilon_\mathrm{Fock}^\mathrm{C} (\lambda=10^{-4})$")
 #twinx = ax.twinx()
@@ -65,3 +65,4 @@ ax.grid()
 fig.tight_layout()
 fig.subplots_adjust(wspace=0)
 plt.show()
+#fig.savefig("phonon_fock.pdf")

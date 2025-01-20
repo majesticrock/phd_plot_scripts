@@ -5,9 +5,12 @@ from matplotlib import colors
 LEVELS = 400
 N_EPSILON = 100
 
-X_LABEL = r"$\Delta \epsilon (k, q) / \omega_\mathrm{D}$"
-Y_LABEL = r"$\Delta \epsilon (k', q) / \omega_\mathrm{D}$"
-G_LABEL = r"$G(k, k', q) / (M^2 / \omega_\mathrm{D})$"
+def latex_vector(name):
+    return f"\\mathbf{{{name}}}"
+
+X_LABEL = rf"$\Delta \epsilon ({latex_vector('k')},  {latex_vector('q')}) / \omega_\mathrm{{D}}$"
+Y_LABEL = rf"$\Delta \epsilon ({latex_vector('k')}', {latex_vector('q')}) / \omega_\mathrm{{D}}$"
+G_LABEL = rf"$G({latex_vector('k')}, {latex_vector('k')}', {latex_vector('q')}) / (M^2 / \omega_\mathrm{{D}})$"
 
 def alpha(delta_epsilon):
     return delta_epsilon + 1.
@@ -44,7 +47,7 @@ divnorm = colors.TwoSlopeNorm(vmin=-limit, vcenter=0, vmax=limit)
 contour = ax.contourf(X, Y, Z, levels=LEVELS, cmap='seismic', norm=divnorm)
 cbar = fig.colorbar(contour)
 
-ax.set_title("CUT")
+#ax.set_title("CUT")
 ax.set_xlabel(X_LABEL)
 ax.set_ylabel(Y_LABEL)
 cbar.set_label(G_LABEL)
@@ -56,7 +59,7 @@ divnorm2 = colors.TwoSlopeNorm(vmin=-limit2, vcenter=0, vmax=limit2)
 contour2 = ax2.contourf(X, Y, Z2, levels=LEVELS, cmap='seismic', norm=divnorm2)
 cbar2 = fig2.colorbar(contour2, extend='both')
 
-ax2.set_title("Lenz-Wegner")
+#ax2.set_title("Lenz-Wegner")
 ax2.set_xlabel(X_LABEL)
 ax2.set_ylabel(Y_LABEL)
 cbar2.set_label(G_LABEL)
@@ -68,9 +71,16 @@ divnorm3 = colors.TwoSlopeNorm(vmin=-limit3, vcenter=0, vmax=limit3)
 contour3 = ax3.contourf(X, Y, Z3, levels=LEVELS, cmap='seismic', norm=divnorm3)
 cbar3 = fig3.colorbar(contour3, extend='both')
 
-ax3.set_title("Fröhlich")
+#ax3.set_title("Fröhlich")
 ax3.set_xlabel(X_LABEL)
 ax3.set_ylabel(Y_LABEL)
 cbar3.set_label(G_LABEL)
 
+contour.set_edgecolor('face')
+contour2.set_edgecolor('face')
+contour3.set_edgecolor('face')
+
 plt.show()
+#fig.savefig("cut.pdf")
+#fig2.savefig("lenz_wegner.pdf")
+#fig3.savefig("froehlich.pdf")
