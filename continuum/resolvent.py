@@ -5,15 +5,15 @@ __ap.append()
 from create_zoom import *
 from get_data import load_panda, continuum_params
 pd_data = load_panda("continuum", "offset_10", "resolvents.json.gz",
-                    **continuum_params(N_k=20000, T=0, coulomb_scaling=0, screening=1, k_F=4.25, g=0.8, omega_D=10))
+                    **continuum_params(N_k=20000, T=0, coulomb_scaling=1, screening=1, k_F=4.25, g=0.39, omega_D=10))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(pd_data, ignore_first=30, ignore_last=90)
+resolvents = cf.ContinuedFraction(pd_data, ignore_first=80, ignore_last=90)
 
 fig, ax = plt.subplots()
-ax.set_ylim(-0.05, 1)
+ax.set_ylim(-0.05, 10)
 ax.set_xlabel(r"$\omega [\mathrm{meV}]$")
 ax.set_ylabel(r"$\mathcal{A} (\omega) [\mathrm{eV}^{-1}]$")
 
@@ -21,9 +21,9 @@ plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][1], 15000, dtype=complex)
+w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][1], 150000, dtype=complex)
 #w_lin = np.linspace(0, 150, 15000, dtype=complex)
-w_lin += 1e-8j
+w_lin += 1e-6j
 
 plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True), label="Phase")
 plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True), label="Higgs")

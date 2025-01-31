@@ -7,42 +7,59 @@ import spectral_peak_analyzer as spa
 from get_data import load_panda, continuum_params
 from scipy.signal import find_peaks
 
-pd_data = load_panda("continuum", "offset_20", "resolvents.json.gz",
-                    **continuum_params(N_k=20000, T=0, coulomb_scaling=0, screening=1, k_F=4.25, g=0.8, omega_D=10))
-resolvents = cf.ContinuedFraction(pd_data, ignore_first=30, ignore_last=90)
+FIT_PEAK_N = 0
+MODE_TYPE = "amplitude_SC"
+
+__INV_MEV__ = 1e-3
+__MEV__ = 1e3
+def is_phase_peak(peak):
+    return abs(peak) < __INV_MEV__
+
+pd_data = load_panda("continuum", "offset_10", "resolvents.json.gz",
+                    **continuum_params(N_k=20000, T=0, coulomb_scaling=0, screening=1, k_F=4.25, g=0.6, omega_D=10))
+resolvents = cf.ContinuedFraction(pd_data, ignore_first=80, ignore_last=90)
 
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$\ln (\omega / \mathrm{meV})$")
 ax.set_ylabel(r"$\ln (\Re [G] (\omega) \cdot \mathrm{eV})]$")
 
-w_lin = np.linspace(0, 0.99999 * pd_data["continuum_boundaries"][0], 15000, dtype=complex)
-w_lin += 1e-4j
+w_lin = np.linspace(0, pd_data["continuum_boundaries"][0], 150000, dtype=complex)
+w_lin += 1e-8j
 
-__higgs = resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True)
-__phase = resolvents.spectral_density(w_lin, "phase_SC", withTerminator=True)
+spectral = resolvents.spectral_density(w_lin, MODE_TYPE, withTerminator=True)
 
-__higgs_indizes = find_peaks(__higgs, distance=int(1 / (w_lin[1].real - w_lin[0].real)))[0]
-__higgs_positions = np.array([w_lin[i].real for i in __higgs_indizes])
+spectral_indizes = find_peaks(spectral)[0]
+spectral_positions = np.array([w_lin[i].real for i in spectral_indizes])
 
-peak_data = spa.analyze_peak(lambda x: resolvents.continued_fraction(x, "amplitude_SC", withTerminator=True).real,
-                 lambda x: resolvents.continued_fraction(x, "amplitude_SC", withTerminator=True).imag,
-                 __higgs_positions[0], lower_continuum_edge=pd_data["continuum_boundaries"][0],
-                 imaginary_offset=1e-6,
-                 reversed=True,
-                 range=0.1,
-                 begin_offset=0.1,
-                 scaling=1e-3, # so we can give the range in meV rather than eV
-                 plotter=ax)
+spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, withTerminator=True).real
+spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, withTerminator=True).imag
+
+if is_phase_peak(spectral_positions[FIT_PEAK_N]):
+    begin_offset = min(1, 5e2 * resolvents.continuum_edges()[0])
+    range = 0.01 * min(1, 5e2 * resolvents.continuum_edges()[0])
+else:
+    begin_offset = 1e-7
+    range = 1e-6
+
+peak_data = spa.analyze_peak(spectral_real, spectral_imag, 
+                             peak_position=spectral_positions[FIT_PEAK_N], 
+                             lower_continuum_edge=pd_data["continuum_boundaries"][0],
+                             reversed=False,
+                             range=range,
+                             begin_offset=begin_offset,
+                             scaling=__INV_MEV__, # so we can give the range in meV rather than eV
+                             improve_peak_position=True,#not is_phase_peak(spectral_positions[FIT_PEAK_N]),
+                             plotter=ax)
 
 ax2 = ax.twinx().twiny()
-ax2.plot(1e3 * w_lin.real, __higgs, color="red")
-ax2.plot(1e3 * w_lin.real, resolvents.continued_fraction(w_lin, "amplitude_SC", withTerminator=True).real, color="blue")
+ax2.plot(__MEV__ * w_lin.real, spectral_imag(w_lin), color="red")
+ax2.plot(__MEV__ * w_lin.real, spectral_real(w_lin), color="blue")
+ax2.axvline(__MEV__ * peak_data.position, color="k", linestyle=":")
+ax2.axvline(__MEV__ * spectral_positions[FIT_PEAK_N], color="k", linestyle="--")
 ax2.set_xlabel("$\\omega$ [meV]")
 ax2.set_ylabel("$\\mathcal{A} (\\omega)$ [1/meV]")
+ax2.set_ylim(-5, 5)
 
-
-print(__higgs_positions)
-print(peak_data.position)
-
+print(peak_data)
 
 plt.show()
