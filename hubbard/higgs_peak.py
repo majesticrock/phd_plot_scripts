@@ -13,7 +13,7 @@ V = -0.1
 
 use_XP = True
 
-folder = "data/modes/cube/dos_3k/"
+folder = "data/pre_pandas/modes/cube/dos_6000/"
 fig, ax = plt.subplots()
 
 #ax.set_xscale("log")
@@ -45,5 +45,5 @@ ax.set_ylabel(r"$\ln(-\Im G^\mathrm{ret}(z - z_0))$")
 fig.tight_layout()
 
 import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
+#plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()
