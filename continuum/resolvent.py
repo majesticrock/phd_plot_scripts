@@ -4,13 +4,14 @@ import __path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import load_panda, continuum_params
-pd_data = load_panda("continuum", "offset_10", "resolvents.json.gz",
-                    **continuum_params(N_k=20000, T=0, coulomb_scaling=1, screening=1, k_F=4.25, g=0.39, omega_D=10))
+pd_data = load_panda("continuum", "test", "resolvents.json.gz",
+                    **continuum_params(N_k=4000, T=0, coulomb_scaling=1, screening=1e-4, k_F=5, g=1, omega_D=10))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
 resolvents = cf.ContinuedFraction(pd_data, ignore_first=80, ignore_last=90)
+print("Delta_true = ", 0.5e3 * resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
 ax.set_ylim(-0.05, 10)
