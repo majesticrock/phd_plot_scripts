@@ -4,9 +4,6 @@ from matplotlib import colors
 
 class HeatmapPlotter:
     def __init__(self, data_frame, parameter_name, xlabel=r'$k / k_\mathrm{F}$', ylabel='Y-axis', zlabel=r'$\gamma$'):
-        for i, row in data_frame.iterrows():
-            print(row["g"])
-        print("\n\n\n#######################")
         df = data_frame.query(f"{parameter_name} > 8 & {parameter_name} < 25").sort_values(parameter_name)
         data_size = data_frame["inner_discretization"].iloc[0] // 2
         additional_skip = int(0.75 * data_size)
@@ -26,7 +23,6 @@ class HeatmapPlotter:
         self.plot()
 
     def plot(self, cmap='magma'):
-        #divnorm=colors.TwoSlopeNorm(vmin=self.z.min(), vcenter=0., vmax=-self.z.min())
         norm = colors.PowerNorm(gamma=0.33, vmin=0, vmax=self.z.max())
         contour = self.ax.pcolormesh(self.x, self.y, self.z, cmap=cmap, norm=norm,
                                      shading="gouraud", 
@@ -56,7 +52,7 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-all_data = load_pickle("continuum/offset_25/", "gaps.pkl").query("discretization == 30000 & T == 0")
+all_data = load_pickle("continuum/offset_10/", "gaps.pkl").query("discretization == 20000 & T == 0")
 
 g_small_screening = HeatmapPlotter(all_data.query("coulomb_scaling == 1 & lambda_screening == 0.0001 & k_F == 4.25 & omega_D == 10"), "Delta_max", ylabel=r"$\Delta_{max}$ $(\mathrm{meV})$")
 g_large_screening = HeatmapPlotter(all_data.query("coulomb_scaling == 1 & lambda_screening == 1      & k_F == 4.25 & omega_D == 10"), "Delta_max", ylabel=r"$\Delta_{max}$ $(\mathrm{meV})$")

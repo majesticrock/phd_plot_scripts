@@ -9,12 +9,12 @@ fig, ax = plt.subplots()
 def energy(xi, delta):
     return np.sqrt(xi**2 + 1e-6 * delta**2)
 
-GS = [1.15, 1.175, 1.2]
-SCREENING = 0
+GS = [2, 2.02, 2.03, 2.04, 2.05]
+SCREENING = 1e-4
 OFFS = 0.0001
 
 for g in GS:
-    main_df = load_panda("continuum", "offset_20", "gap.json.gz", print_date=False,
+    main_df = load_panda("continuum", "offset_20", "gap.json.gz", print_date=True,
                         **continuum_params(N_k=20000, T=0, coulomb_scaling=int(SCREENING!=0), screening=SCREENING, k_F=4.25, g=g, omega_D=10))
     pd_data = main_df["data"]
     pd_data["ks"] /= main_df["k_F"]

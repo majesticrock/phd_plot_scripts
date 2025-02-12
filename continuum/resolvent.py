@@ -4,8 +4,8 @@ import __path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import load_panda, continuum_params
-pd_data = load_panda("continuum", "test", "resolvents.json.gz",
-                    **continuum_params(N_k=4000, T=0, coulomb_scaling=1, screening=1e-4, k_F=5, g=1, omega_D=10))
+pd_data = load_panda("continuum", "offset_20", "resolvents.json.gz",
+                    **continuum_params(N_k=20000, T=0, coulomb_scaling=1, screening=1e-4, k_F=4.25, g=2.025, omega_D=10))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
@@ -22,9 +22,9 @@ plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][1], 150000, dtype=complex)
+w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][0], 150000, dtype=complex)
 #w_lin = np.linspace(0, 150, 15000, dtype=complex)
-w_lin += 1e-6j
+w_lin += 1e-8j
 
 plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True), label="Phase")
 plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True), label="Higgs")
