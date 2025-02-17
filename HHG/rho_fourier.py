@@ -6,28 +6,25 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-from scipy.fft import rfft, rfftfreq
+from scipy.fft import rfftfreq
 
-main_df = load_panda("HHG", "test", "test_data.json.gz")
+main_df = load_panda("HHG", "test", "current_density.json.gz")
 
-#times = np.linspace(main_df["t_begin"], main_df["t_end"], main_df["n_measurements"] + 1)
-sample_spacing = (main_df["t_end"] - main_df["t_begin"]) / (main_df["n_measurements"] + 1)
-
+sample_spacing = (main_df["t_end"] - main_df["t_begin"]) / (main_df["n_measurements"])
 frequencies = 2 * np.pi * rfftfreq(main_df["n_measurements"] + 1, sample_spacing)
 
 fig, ax = plt.subplots()
+for i in range(33):
+    ax.axvline(i, ls="--", color="grey", linewidth=1, alpha=0.5)
+    
+#ax.plot(frequencies, main_df["current_density_frequency_imag"], label=r"$\Im [\hat{\rho}(\omega)]$")
+#ax.plot(frequencies, main_df["current_density_frequency_real"], label=r"$\Re [\hat{\rho}(\omega)]$")
+ax.plot(frequencies, np.sqrt(main_df["current_density_frequency_real"]** 2 + main_df["current_density_frequency_imag"]**2))
 
-ax.plot(frequencies, main_df["fourier_rho_imag"], label=r"$\Im [\hat{\rho}(\omega)]$")
-ax.plot(frequencies, main_df["fourier_rho_real"], label=r"$\Re [\hat{\rho}(\omega)]$")
-
-
-y = rfft((main_df["alphas"] - main_df["betas"]))
-
-ax.plot(frequencies, np.real(y), label=r"$\Im [\mathrm{scipy}]$", ls="--")
-ax.plot(frequencies, np.imag(y), label=r"$\Re [\mathrm{scipy}]$", ls="--")
+ax.set_yscale("log")
 
 ax.set_xlabel(legend(r"\omega / \omega_L"))
-ax.set_ylabel(legend(r"\hat{\rho}(\omega)"))
+ax.set_ylabel(legend(r"j(\omega)"))
 
 fig.tight_layout()
 plt.show()
