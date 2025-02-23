@@ -9,7 +9,7 @@ from legend import *
 from scipy.fft import rfftfreq
 
 main_df = load_panda("HHG", "test", "current_density.json.gz", 
-                     **hhg_params(T=300, E_F=118, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
 
 sample_spacing = (main_df["t_end"] - main_df["t_begin"]) / (main_df["n_measurements"])
 frequencies = 2 * np.pi * rfftfreq(main_df["n_measurements"] + 1, sample_spacing)
