@@ -12,7 +12,7 @@ main_df = load_panda("HHG", "test", "current_density.json.gz",
 times = np.linspace(main_df["t_begin"], main_df["t_end"], main_df["n_measurements"], endpoint=False)
 
 fig, ax = plt.subplots()    
-ax.plot(times, main_df["alphas"] - main_df["betas"])
+ax.plot(times, main_df["current_density_time"])
 
 ax.set_xlabel(legend(r"t / T_\mathrm{L}"))
 ax.set_ylabel(legend(r"j(\omega)"))
