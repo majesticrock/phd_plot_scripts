@@ -12,8 +12,17 @@ main_df = load_panda("HHG", "test", "current_density.json.gz",
 fig, axes = plt.subplots(ncols=2)
 axes[0].plot(main_df["k_zs"], main_df["pick_current_density_z"])
 
-axes[1].plot(main_df["kappas"], main_df["pick_current_density_kappa"])
-axes[1].plot(main_df["kappas"], main_df["pick_current_density_kappa_minus"], ls="--")
+x_plu = main_df["pick_current_density_kappa"].transpose()[0]
+x_min = main_df["pick_current_density_kappa_minus"].transpose()[0]
+
+y_plu = main_df["pick_current_density_kappa"].transpose()[1]      
+y_min = main_df["pick_current_density_kappa_minus"].transpose()[1]
+
+y_plu[y_plu == None] = 0.0
+y_min[y_min == None] = 0.0
+
+axes[1].plot(x_plu[x_plu > 0], y_plu[x_plu > 0] / x_plu[x_plu > 0] )
+axes[1].plot(x_min[x_min > 0], y_min[x_min > 0] / x_min[x_min > 0] , ls="--")
 
 axes[0].set_xlabel(legend(r"v_F k_z / \omega_L"))
 axes[1].set_xlabel(legend(r"v_F \varkappa / \omega_L"))
