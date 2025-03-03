@@ -8,17 +8,19 @@ from legend import *
 
 from scipy.fft import rfftfreq
 
-main_df = load_panda("HHG", "test", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=5, field_amplitude=1.6, photon_energy=5.25))
 
 sample_spacing = (main_df["t_end"] - main_df["t_begin"]) / (main_df["n_measurements"])
-frequencies = 2 * np.pi * rfftfreq(main_df["n_measurements"] + 1, sample_spacing)
+frequencies = main_df["frequencies"]
 
 fig, ax = plt.subplots()
 for i in range(33):
     ax.axvline(i, ls="--", color="grey", linewidth=1, alpha=0.5)
     
-y_data = np.sqrt(main_df["current_density_frequency_real"]** 2 + main_df["current_density_frequency_imag"]**2)
+current_density = frequencies * (main_df["current_density_frequency_real"] + 1.0j * main_df["current_density_frequency_imag"])
+current_density += 1.0j * main_df["current_density_time"][-1] * np.exp(1.0j * main_df["t_end"] * frequencies)
+y_data = np.abs(current_density)
 ax.plot(frequencies, y_data / np.max(y_data))
 
 ax.set_yscale("log")
