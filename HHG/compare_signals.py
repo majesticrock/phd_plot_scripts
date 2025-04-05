@@ -44,12 +44,12 @@ def plot_data(df, label, **kwargs):
 #                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=100, field_amplitude=1.6, photon_energy=5.25))
 #plot_data(main_df, r"$W=100 \hbar \omega_L$", ls="--")
 
-main_df = load_panda("HHG", "test_cos/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"cos")
-main_df = load_panda("HHG", "test_sin/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"sin")
+#main_df = load_panda("HHG", "test_cos/cosine_laser", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+#plot_data(main_df, r"cos")
+#main_df = load_panda("HHG", "test_sin/cosine_laser", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+#plot_data(main_df, r"sin")
 
 #main_df = load_panda("HHG", "test_2/cosine_laser", "current_density.json.gz", 
 #                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
@@ -57,6 +57,13 @@ plot_data(main_df, r"sin")
 #main_df = load_panda("HHG", "test_ff/cosine_laser", "current_density.json.gz", 
 #                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
 #plot_data(main_df, r"fast-math")
+
+main_df = load_panda("HHG", "test_base/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+plot_data(main_df, r"Old")
+main_df = load_panda("HHG", "test_magnus/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+plot_data(main_df, r"Magnus", ls="--")
 
 ax.set_yscale("log")
 ax.set_xlabel(legend(r"\omega / \omega_L"))
