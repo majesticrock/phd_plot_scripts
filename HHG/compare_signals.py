@@ -22,48 +22,23 @@ def plot_data(df, label, **kwargs):
 
 #main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
 #                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"$W=5 \hbar \omega_L$")
-#
-#main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=10, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"$W=10 \hbar \omega_L$")
-#
-#main_df = load_panda("HHG", "nz1000/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=20, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"$W=20 \hbar \omega_L$")
-#
-#main_df = load_panda("HHG", "nz2000/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=40, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"$W=40 \hbar \omega_L$")
-#
-#main_df = load_panda("HHG", "nz5000/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=100, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"$W=100 \hbar \omega_L$")
-#
-#main_df = load_panda("HHG", "nz10000/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=100, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"$W=100 \hbar \omega_L$", ls="--")
+#plot_data(main_df, r"Old")
+#main_df = load_panda("HHG", "test2/cosine_laser", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+#plot_data(main_df, r"Magnus", ls="--")
 
-#main_df = load_panda("HHG", "test_cos/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"cos")
-#main_df = load_panda("HHG", "test_sin/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"sin")
-
-#main_df = load_panda("HHG", "test_2/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"normal")
-#main_df = load_panda("HHG", "test_ff/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"fast-math")
-
-main_df = load_panda("HHG", "test_base/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"Old")
-main_df = load_panda("HHG", "test_magnus/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"Magnus", ls="--")
+main_df = load_panda("HHG", "test2/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+plot_data(main_df, r"$T=0$")
+main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=300, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+plot_data(main_df, r"$T=300$K", ls="--")
+main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=300, E_F=118, v_F=1.5e3, band_width=100, field_amplitude=1.6, photon_energy=5.25))
+plot_data(main_df, r"$T=300$K, $E_F>0$", ls="--")
+main_df = load_panda("HHG", "test2/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=300, E_F=118, v_F=1.5e3, band_width=100, field_amplitude=1.6, photon_energy=5.25))
+plot_data(main_df, r"$T=300$K, $E_F>0$ v2", ls="-.")
 
 ax.set_yscale("log")
 ax.set_xlabel(legend(r"\omega / \omega_L"))
