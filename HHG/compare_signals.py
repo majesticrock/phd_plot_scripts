@@ -20,25 +20,28 @@ def plot_data(df, label, **kwargs):
     ax.plot(frequencies, y_data / np.max(y_data), label=label, **kwargs)
 
 
-#main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"Old")
-#main_df = load_panda("HHG", "test2/cosine_laser", "current_density.json.gz", 
-#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-#plot_data(main_df, r"Magnus", ls="--")
+#main_df = load_panda("HHG", "test_no_decay/cosine_laser", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=10, field_amplitude=1.6, photon_energy=5.25))
+#plot_data(main_df, r"No decay")
+#main_df = load_panda("HHG", "test_small_decay/cosine_laser", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=10, field_amplitude=1.6, photon_energy=5.25))
+#plot_data(main_df, r"Small decay", ls="--")
+#main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=10, field_amplitude=1.6, photon_energy=5.25))
+#plot_data(main_df, r"Normal decay", ls="-.")
 
-main_df = load_panda("HHG", "test2/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"$T=0$")
-main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=300, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"$T=300$K", ls="--")
-main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=300, E_F=118, v_F=1.5e3, band_width=100, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"$T=300$K, $E_F>0$", ls="--")
-main_df = load_panda("HHG", "test2/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=300, E_F=118, v_F=1.5e3, band_width=100, field_amplitude=1.6, photon_energy=5.25))
-plot_data(main_df, r"$T=300$K, $E_F>0$ v2", ls="-.")
+main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=20, field_amplitude=1.6, photon_energy=5.25, decay_time=30))
+plot_data(main_df, r"$W=20$")
+main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=40, field_amplitude=1.6, photon_energy=5.25, decay_time=30))
+plot_data(main_df, r"$W=40$", ls="--")
+main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=40, field_amplitude=1.6, photon_energy=5.25, decay_time=10))
+plot_data(main_df, r"$W=40, \tau=10$", ls="--")
+main_df = load_panda("HHG", "test_decay_2/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=40, field_amplitude=1.6, photon_energy=5.25, decay_time=10))
+plot_data(main_df, r"$W=40, \tau=10$ v2", ls="-.")
 
 ax.set_yscale("log")
 ax.set_xlabel(legend(r"\omega / \omega_L"))

@@ -6,10 +6,9 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=5, field_amplitude=1.6, photon_energy=5.25))
+main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=40, field_amplitude=1.6, photon_energy=5.25, decay_time=30))
 
-sample_spacing = (main_df["t_end"] - main_df["t_begin"]) / (main_df["n_measurements"])
 frequencies = main_df["frequencies"]
 
 fig, ax = plt.subplots()
