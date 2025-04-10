@@ -30,16 +30,16 @@ def plot_data(df, label, **kwargs):
 #                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=10, field_amplitude=1.6, photon_energy=5.25))
 #plot_data(main_df, r"Normal decay", ls="-.")
 
-main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+main_df = load_panda("HHG", "decay/cosine_laser", "current_density.json.gz", 
                      **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=20, field_amplitude=1.6, photon_energy=5.25, decay_time=30))
 plot_data(main_df, r"$W=20$")
-main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+main_df = load_panda("HHG", "decay/cosine_laser", "current_density.json.gz", 
                      **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=40, field_amplitude=1.6, photon_energy=5.25, decay_time=30))
 plot_data(main_df, r"$W=40$", ls="--")
-main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
+main_df = load_panda("HHG", "decay/cosine_laser", "current_density.json.gz", 
                      **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=40, field_amplitude=1.6, photon_energy=5.25, decay_time=10))
 plot_data(main_df, r"$W=40, \tau=10$", ls="--")
-main_df = load_panda("HHG", "test_decay_2/cosine_laser", "current_density.json.gz", 
+main_df = load_panda("HHG", "test_decay/cosine_laser", "current_density.json.gz", 
                      **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=40, field_amplitude=1.6, photon_energy=5.25, decay_time=10))
 plot_data(main_df, r"$W=40, \tau=10$ v2", ls="-.")
 
