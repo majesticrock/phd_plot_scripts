@@ -3,8 +3,6 @@ import tkinter as tk
 from tkinter import filedialog, ttk
 from collections import defaultdict
 
-import threading
-
 import __path_appender
 __path_appender.append()
 from get_data import *
@@ -21,6 +19,7 @@ class ParamSelector(tk.Tk):
         self.param_order = []
         self.current_selection = {}
         self.dropdowns = {}
+        self.dd_vars = {}
 
         # Optional dialog, only if you want it
         ask_user = True  # flip this to True to show dialog
@@ -68,16 +67,18 @@ class ParamSelector(tk.Tk):
             label = tk.Label(self, text=param)
             label.grid(row=i, column=0, padx=5, pady=5)
 
-            var = tk.StringVar(self)
-            var.trace_add("write", lambda *_: self.update_options())
+            self.dd_vars[param] = tk.StringVar(self)
+            #self.dd_vars[param].trace_add("write", lambda *_: self.update_options())
 
-            dropdown = ttk.Combobox(self, textvariable=var, state="readonly")
+            dropdown = ttk.Combobox(self, textvariable=self.dd_vars[param], state="readonly")
             dropdown.grid(row=i, column=1, padx=5, pady=5)
 
             self.dropdowns[param] = dropdown
             self.current_selection[param] = None
 
         self.update_options()
+        #for param in self.param_order:
+        #    self.dropdowns[param].current(0)
 
     def update_options(self):
         selection = {param: self.dropdowns[param].get() for param in self.param_order if self.dropdowns[param].get()}

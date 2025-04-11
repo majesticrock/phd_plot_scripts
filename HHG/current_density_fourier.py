@@ -1,5 +1,7 @@
-import matplotlib
-print("Current backend:", matplotlib.get_backend())
+if __name__ != '__main__x':
+    import matplotlib
+    
+    print("Current backend:", matplotlib.get_backend())
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,6 +34,6 @@ def plot_j(main_df):
     
     
 if __name__ == '__main__':
-    main_df = load_panda("HHG", "4_cycle/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=20, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+    main_df = load_panda("HHG", "2_cycle/cosine_laser", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=20, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
     plot_j(main_df)
