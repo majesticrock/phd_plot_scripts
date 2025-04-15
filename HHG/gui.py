@@ -61,8 +61,8 @@ class ParamSelector(tk.Tk):
             self.base_dir = new_dir
             
             path_parts = os.path.normpath(new_dir).split(os.sep)
-            if len(path_parts) >= 2:
-                self.name_type = os.path.join(path_parts[-2], path_parts[-1])
+            if len(path_parts) >= 3:
+                self.name_type = os.path.join(path_parts[-3], path_parts[-2], path_parts[-1])
                 print("Selected:", self.name_type)
             else:
                 self.name_type = ""

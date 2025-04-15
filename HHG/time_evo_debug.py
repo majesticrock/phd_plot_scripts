@@ -9,8 +9,8 @@ from get_data import *
 from legend import *
 
 # Load the main dataframe
-main_df = load_panda("HHG", "test_decay/cosine_laser", "time_evolution.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=10, field_amplitude=1.6, photon_energy=5.25))
+main_df = load_panda("HHG", "test/cosine_laser/PiFlux", "time_evolution.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
 
 frequencies = main_df["frequencies"]
 times = np.linspace(0, 8, len(main_df["time_evolutions"][0]))
@@ -28,10 +28,10 @@ for i in range(num_lines):
     axes[0].plot(times, main_df["time_evolutions"][i], color=colors[i], rasterized=True)
     
     # Compute current density and plot with colored lines
-    current_density = frequencies * (main_df["debug_fft_real"][i] + 1.0j * main_df["debug_fft_imag"][i])
-    current_density += 1.0j * main_df["time_evolutions"][i][-1] * np.exp(1.0j * 16. * np.pi * frequencies)
+    current_density = frequencies[::8] * (main_df["debug_fft_real"][i] + 1.0j * main_df["debug_fft_imag"][i])
+    current_density += 1.0j * main_df["time_evolutions"][i][-1] * np.exp(1.0j * 16. * np.pi * frequencies[::8])
     
-    axes[1].plot(frequencies, np.abs(current_density), color=colors[i], rasterized=True)
+    axes[1].plot(frequencies[::8], np.abs(current_density), color=colors[i], rasterized=True)
     axes[1].set_yscale("log")
 
 # Add labels to both plots
