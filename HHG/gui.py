@@ -21,11 +21,14 @@ class ParamSelector(tk.Tk):
         self.dropdowns = {}
         self.dd_vars = {}
 
-        # Optional dialog, only if you want it
-        ask_user = False  # flip this to True to show dialog
-        default_path = os.path.abspath("data/HHG/4_cycle/cosine_laser")
-        self.name_type = "4_cycle/cosine_laser"
+        default_path_file = ".default_path.txt"
+        if os.path.exists(default_path_file):
+            with open(default_path_file, "r") as f:
+                default_path = f.read().strip()
+        else:
+            default_path = os.path.abspath("data/HHG/4_cycle/cosine_laser/Dirac")
 
+        ask_user = False
         if ask_user:
             self.base_dir = filedialog.askdirectory(
                 title="Select base directory", initialdir=default_path
@@ -38,6 +41,14 @@ class ParamSelector(tk.Tk):
         if not self.base_dir:
             self.destroy()
             return
+        
+        path_parts = os.path.normpath(self.base_dir).split(os.sep)
+        if len(path_parts) >= 3:
+            self.name_type = os.path.join(path_parts[-3], path_parts[-2], path_parts[-1])
+            print("Selected:", self.name_type)
+        else:
+            self.name_type = ""
+            print("Warning: Could not extract name/type")
 
         self.parse_directory()
         self.create_dropdowns()
@@ -59,6 +70,9 @@ class ParamSelector(tk.Tk):
         new_dir = filedialog.askdirectory(title="Select new base directory", initialdir=self.base_dir)
         if new_dir:
             self.base_dir = new_dir
+            
+            with open(".default_path.txt", "w") as f:
+                f.write(self.base_dir)
             
             path_parts = os.path.normpath(new_dir).split(os.sep)
             if len(path_parts) >= 3:
