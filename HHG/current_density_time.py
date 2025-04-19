@@ -48,7 +48,7 @@ if __name__ == '__main__':
     #plot_data(main_df, ax, r"2 cycles", ls="-")
     ##########
 
-    main_df = load_panda("HHG", "2_cycle/cosine_laser", "current_density.json.gz", 
-                         **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=20, field_amplitude=1.6, photon_energy=5.25, decay_time=10))
+    main_df = load_panda("HHG", "test/cosine_laser/PiFlux", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
     plot_data(main_df, ax, r"No decay $W=100$")
     plt.show()

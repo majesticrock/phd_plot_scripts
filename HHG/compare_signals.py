@@ -6,30 +6,30 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-fig, ax = plt.subplots()
+import current_density_fourier as cdf
 
-def plot_data(df, label, **kwargs):
-    frequencies = df["frequencies"]
+fig, ax = cdf.create_frame()
 
-    for i in range(1, int(np.max(frequencies)) + 1, 2):
-        ax.axvline(i, ls="--", color="grey", linewidth=1, alpha=0.5)
-    
-    current_density = frequencies * (df["current_density_frequency_real"] + 1.0j * df["current_density_frequency_imag"])
-    current_density += 1.0j * df["current_density_time"][-1] * np.exp(1.0j * df["t_end"] * frequencies)
-    y_data = np.abs(current_density)
-    ax.plot(frequencies, y_data / np.max(y_data), label=label, **kwargs)
+#main_df = load_panda("HHG", "nz_100/cosine_laser/PiFlux", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+#cdf.add_current_density_to_plot(main_df, ax, label="$n_z = 100$")
+#main_df = load_panda("HHG", "nz_200/cosine_laser/PiFlux", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+#cdf.add_current_density_to_plot(main_df, ax, label="$n_z = 200$")
+#main_df = load_panda("HHG", "nz_400/cosine_laser/PiFlux", "current_density.json.gz", 
+#                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+#cdf.add_current_density_to_plot(main_df, ax, label="$n_z = 400$")
+
+main_df = load_panda("HHG", "nz_100/cosine_laser/PiFlux", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+cdf.add_current_density_to_plot(main_df, ax, label="Main")
+main_df = load_panda("HHG", "test/cosine_laser/PiFlux", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+cdf.add_current_density_to_plot(main_df, ax, label="Alternative")
 
 
-main_df = load_panda("HHG", "test_old/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=20, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
-plot_data(main_df, r"old")
-main_df = load_panda("HHG", "test/cosine_laser", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=20, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
-plot_data(main_df, r"new")
+cdf.add_verticals(main_df["frequencies"],ax)
 
-ax.set_yscale("log")
-ax.set_xlabel(legend(r"\omega / \omega_L"))
-ax.set_ylabel(legend(r"\omega j(\omega)", "normalized"))
 ax.legend(loc="upper right")
 fig.tight_layout()
 plt.show()
