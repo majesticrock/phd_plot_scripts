@@ -26,7 +26,7 @@ class ParamSelector(tk.Tk):
             with open(default_path_file, "r") as f:
                 default_path = f.read().strip()
         else:
-            default_path = os.path.abspath("data/HHG/4_cycle/cosine_laser/Dirac")
+            default_path = os.path.abspath("data/HHG")
 
         ask_user = False
         if ask_user:
@@ -42,20 +42,13 @@ class ParamSelector(tk.Tk):
             self.destroy()
             return
         
-        path_parts = os.path.normpath(self.base_dir).split(os.sep)
-        if len(path_parts) >= 3:
-            self.name_type = os.path.join(path_parts[-3], path_parts[-2], path_parts[-1])
-            print("Selected:", self.name_type)
-        else:
-            self.name_type = ""
-            print("Warning: Could not extract name/type")
-
+        self.create_system_selector()
         self.parse_directory()
         self.create_dropdowns()
         self.create_menu_buttons()
 
     def create_menu_buttons(self):
-        row = len(self.param_order) + 1
+        row = len(self.param_order) + 2
 
         self.change_btn = tk.Button(self, text="Change Directory", command=self.change_directory)
         self.change_btn.grid(row=row, column=0, columnspan=2, pady=5)
@@ -74,23 +67,17 @@ class ParamSelector(tk.Tk):
             with open(".default_path.txt", "w") as f:
                 f.write(self.base_dir)
             
-            path_parts = os.path.normpath(new_dir).split(os.sep)
-            if len(path_parts) >= 3:
-                self.name_type = os.path.join(path_parts[-3], path_parts[-2], path_parts[-1])
-                print("Selected:", self.name_type)
-            else:
-                self.name_type = ""
-                print("Warning: Could not extract name/type")
-            
             self.parse_directory()
             self.create_dropdowns()
             self.create_menu_buttons()
 
     def parse_directory(self):
         records = []
-        for root, dirs, files in os.walk(self.base_dir):
+        walker = os.path.join(self.base_dir, self.name_type())
+        print(walker)
+        for root, dirs, files in os.walk(walker):
             if any(f.endswith('.json.gz') for f in files):
-                rel_path = os.path.relpath(root, self.base_dir)
+                rel_path = os.path.relpath(root, walker)
                 parts = rel_path.split(os.sep)
                 param_dict = {}
                 for part in parts:
@@ -102,6 +89,29 @@ class ParamSelector(tk.Tk):
         self.df_paths = pd.DataFrame(records)
         self.df_paths.dropna(how='any', inplace=True)
         self.param_order = sorted(self.df_paths.columns.tolist())
+
+    def create_system_selector(self):
+        def callback(*args):
+            self.parse_directory()
+            self.update_options()
+            
+        self.system_selector_vars = {}
+        self.system_selector_vars['data_set'] = tk.StringVar(self, name='data_set')
+        self.system_selector_vars['laser'] = tk.StringVar(self, name='laser')
+        self.system_selector_vars['system'] = tk.StringVar(self, name='system')
+        
+        self.system_selector_vars['data_set'].trace_add("write", callback)
+        self.system_selector_vars['laser'].trace_add("write", callback)
+        self.system_selector_vars['system'].trace_add("write", callback)
+        
+        tk.Label(self, text='Data Set').grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(self, text='Laser').grid(row=0, column=1, padx=5, pady=5)
+        tk.Label(self, text='System').grid(row=0, column=2, padx=5, pady=5)
+        
+        data_dirs = [ d for d in os.listdir(self.base_dir) if os.path.isdir(os.path.join(self.base_dir, d)) ]
+        ttk.Combobox(self, textvariable=self.system_selector_vars['data_set'], state="readonly", values=data_dirs).grid(row=1, column=0, padx=5, pady=5)
+        ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", values=["cosine_laser", "continuous_laser"]).grid(row=1, column=1, padx=5, pady=5)
+        ttk.Combobox(self, textvariable=self.system_selector_vars['system'], state="readonly", values=["Dirac", "PiFlux"]).grid(row=1, column=2, padx=5, pady=5)
 
     def create_dropdowns(self):
         def make_callback(p, v):
@@ -115,13 +125,13 @@ class ParamSelector(tk.Tk):
         
         for i, param in enumerate(self.param_order):
             label = tk.Label(self, text=param)
-            label.grid(row=i, column=0, padx=5, pady=5)
+            label.grid(row=i+2, column=0, padx=5, pady=5)
 
             self.dd_vars[param] = tk.StringVar(self, name=param)        
             self.dd_vars[param].trace_add("write", make_callback(param, self.dd_vars[param]))
 
             dropdown = ttk.Combobox(self, textvariable=self.dd_vars[param], state="readonly")
-            dropdown.grid(row=i, column=1, padx=5, pady=5)
+            dropdown.grid(row=i+2, column=1, padx=5, pady=5)
 
             self.dropdowns[param] = dropdown
 
@@ -166,6 +176,16 @@ class ParamSelector(tk.Tk):
             else:
                 self.dropdowns[param]['values'] = valid_values
 
+    def name_type(self):
+        temp = [self.base_dir]
+        if self.system_selector_vars['data_set'].get() != '':
+            temp.append(self.system_selector_vars['data_set'].get())
+        if self.system_selector_vars['laser'].get() != '':
+            temp.append(self.system_selector_vars['laser'].get())
+        if self.system_selector_vars['system'].get() != '':
+            temp.append(self.system_selector_vars['system'].get())
+        return os.path.join(*temp)        
+
     def fft(self):
         selected_values = {param: self.dropdowns[param].get() for param in self.param_order}
         if not all(selected_values.values()):
@@ -174,7 +194,7 @@ class ParamSelector(tk.Tk):
 
         # Call your function
         main_df = load_panda(
-            "HHG", self.name_type, "current_density.json.gz",
+            "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**selected_values)
         )
 
@@ -188,7 +208,7 @@ class ParamSelector(tk.Tk):
 
         # Call your function
         main_df = load_panda(
-            "HHG", self.name_type, "current_density.json.gz",
+            "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**selected_values)
         )
         current_density_time.plot_j(main_df)
