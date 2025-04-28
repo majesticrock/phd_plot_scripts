@@ -8,10 +8,10 @@ from get_data import *
 from legend import *
 
 # Load the main dataframe
-main_df = load_panda("HHG", "test/cosine_laser", "time_evolution.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=10, field_amplitude=1.6, photon_energy=5.25))
+main_df = load_panda("HHG", "test_200/cosine_laser/PiFlux", "time_evolution.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
 
-frequencies = main_df["frequencies"]
+frequencies = main_df["frequencies"][::8]
 times = np.linspace(0, 8, len(main_df["time_evolutions"][0]))
 
 # Prepare data for heatmaps

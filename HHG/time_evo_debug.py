@@ -9,8 +9,8 @@ from get_data import *
 from legend import *
 
 # Load the main dataframe
-main_df = load_panda("HHG", "test/cosine_laser/PiFlux", "time_evolution.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e6, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+main_df = load_panda("HHG", "test_200/cosine_laser/PiFlux", "time_evolution.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
 
 frequencies = main_df["frequencies"]
 times = np.linspace(0, 8, len(main_df["time_evolutions"][0]))
@@ -36,10 +36,10 @@ for i in range(num_lines):
 
 # Add labels to both plots
 axes[0].set_xlabel(legend(r"t \omega_L / (2\pi)"))
-axes[0].set_ylabel(legend(r"j(t)"))
+axes[0].set_ylabel(legend(r"\sigma^z (t)"))
 
 axes[1].set_xlabel(legend(r"\omega / \omega_L"))
-axes[1].set_ylabel(legend(r"j(\omega)", "normalized"))
+axes[1].set_ylabel(legend(r"\sigma^z (\omega)", "normalized"))
 
 # Create a colorbar for the line colors
 sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)  # ScalarMappable for color mapping

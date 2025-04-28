@@ -20,12 +20,21 @@ fig, ax = cdf.create_frame()
 #                     **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
 #cdf.add_current_density_to_plot(main_df, ax, label="$n_z = 400$")
 
-main_df = load_panda("HHG", "nz_100/cosine_laser/PiFlux", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
-cdf.add_current_density_to_plot(main_df, ax, label="Main")
-main_df = load_panda("HHG", "test/cosine_laser/PiFlux", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e4, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+main_df = load_panda("HHG", "test_200/cosine_laser/PiFlux", "current_density.json.gz", 
+                 **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+cdf.add_current_density_to_plot(main_df, ax, label="200")
+main_df = load_panda("HHG", "test_400/cosine_laser/PiFlux", "current_density.json.gz", 
+                 **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+cdf.add_current_density_to_plot(main_df, ax, label="400")
+main_df = load_panda("HHG", "test_cont_200/cosine_laser/PiFlux", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
 cdf.add_current_density_to_plot(main_df, ax, label="Alternative")
+main_df = load_panda("HHG", "test_cont_60/cosine_laser/PiFlux", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+cdf.add_current_density_to_plot(main_df, ax, label="Alternative 2")
+main_df = load_panda("HHG", "test_cont_120/cosine_laser/PiFlux", "current_density.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+cdf.add_current_density_to_plot(main_df, ax, label="Alternative 3")
 
 
 cdf.add_verticals(main_df["frequencies"],ax)

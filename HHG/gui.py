@@ -51,7 +51,10 @@ class ParamSelector(tk.Tk):
         row = len(self.param_order) + 2
 
         self.change_btn = tk.Button(self, text="Change Directory", command=self.change_directory)
-        self.change_btn.grid(row=row, column=0, columnspan=2, pady=5)
+        self.change_btn.grid(row=row, column=0, pady=5)
+        
+        self.update_btn = tk.Button(self, text="Update Options", command=self.update_options)
+        self.update_btn.grid(row=row, column=1, pady=5)
 
         self.j_time_button = tk.Button(self, text="Plot j(t)", command=self.j_time)
         self.j_time_button.grid(row=row + 1, column=0, pady=5, padx=5)
@@ -109,9 +112,16 @@ class ParamSelector(tk.Tk):
         tk.Label(self, text='System').grid(row=0, column=2, padx=5, pady=5)
         
         data_dirs = [ d for d in os.listdir(self.base_dir) if os.path.isdir(os.path.join(self.base_dir, d)) ]
-        ttk.Combobox(self, textvariable=self.system_selector_vars['data_set'], state="readonly", values=data_dirs).grid(row=1, column=0, padx=5, pady=5)
-        ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", values=["cosine_laser", "continuous_laser"]).grid(row=1, column=1, padx=5, pady=5)
-        ttk.Combobox(self, textvariable=self.system_selector_vars['system'], state="readonly", values=["Dirac", "PiFlux"]).grid(row=1, column=2, padx=5, pady=5)
+        data_box = ttk.Combobox(self, textvariable=self.system_selector_vars['data_set'], state="readonly", values=data_dirs)
+        data_box.grid(row=1, column=0, padx=5, pady=5)
+        
+        laser_box = ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", values=["cosine_laser", "continuous_laser"])
+        laser_box.grid(row=1, column=1, padx=5, pady=5)
+        #laser_box.current(0)
+        
+        system_box = ttk.Combobox(self, textvariable=self.system_selector_vars['system'], state="readonly", values=["Dirac", "PiFlux"])
+        system_box.grid(row=1, column=2, padx=5, pady=5)
+        #system_box.current(1)
 
     def create_dropdowns(self):
         def make_callback(p, v):
