@@ -46,6 +46,10 @@ class ParamSelector(tk.Tk):
         self.parse_directory()
         self.create_dropdowns()
         self.create_menu_buttons()
+        
+        tk.Label(self, text='Max. frequency').grid(row=2, column=2, padx=5, pady=5)
+        self.max_frequency_scale = tk.Scale(self, from_=0, to=200, orient=tk.HORIZONTAL)
+        self.max_frequency_scale.grid(row=3, column=2, padx=5, pady=5)
 
     def create_menu_buttons(self):
         row = len(self.param_order) + 2
@@ -208,7 +212,7 @@ class ParamSelector(tk.Tk):
             **hhg_params(**selected_values)
         )
 
-        current_density_fourier.plot_j(main_df)
+        current_density_fourier.plot_j(main_df, max_freq=self.max_frequency_scale.get())
         
     def j_time(self):
         selected_values = {param: self.dropdowns[param].get() for param in self.param_order}

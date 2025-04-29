@@ -11,12 +11,12 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-def add_current_density_to_plot(main_df, ax, **plot_kwargs):
+def add_current_density_to_plot(main_df, ax, label=None, shift=1, **plot_kwargs):
     frequencies = main_df["frequencies"]
     current_density = frequencies * (main_df["current_density_frequency_real"] + 1.0j * main_df["current_density_frequency_imag"])
     current_density += 1.0j * main_df["current_density_time"][-1] * np.exp(1.0j * main_df["t_end"] * frequencies)
     y_data = np.abs(current_density)
-    ax.plot(frequencies, y_data / np.max(y_data), **plot_kwargs)
+    ax.plot(frequencies, shift * y_data / np.max(y_data), label=label, **plot_kwargs)
 
 def add_verticals(frequencies, ax):
     for i in range(1, int(np.max(frequencies)) + 1, 2):
@@ -30,12 +30,15 @@ def create_frame():
     
     return fig, ax
 
-def plot_j(main_df):
+def plot_j(main_df, max_freq=None):
     fig, ax = create_frame()
     
     frequencies = main_df["frequencies"]
     add_verticals(frequencies, ax)
     add_current_density_to_plot(main_df, ax)
+
+    if max_freq is not None:
+        ax.set_xlim(0, max_freq)
 
     fig.tight_layout()
     plt.show()
