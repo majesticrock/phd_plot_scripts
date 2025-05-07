@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.cm import get_cmap
 from matplotlib.colors import Normalize
 
 import __path_appender
@@ -9,15 +8,15 @@ from get_data import *
 from legend import *
 
 # Load the main dataframe
-main_df = load_panda("HHG", "test_200/cosine_laser/PiFlux", "time_evolution.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+main_df = load_panda("HHG", "test/cosine_laser/PiFlux", "time_evolution.json.gz", 
+                     **hhg_params(T=0, E_F=0, v_F=1.5e6, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
 
 frequencies = main_df["frequencies"]
 times = np.linspace(0, 8, len(main_df["time_evolutions"][0]))
 
 # Set up colormap for line colors
 num_lines = len(main_df["time_evolutions"])
-cmap = get_cmap("gist_rainbow")  # Use the 'viridis' colormap (you can choose another one)
+cmap = plt.get_cmap("gist_rainbow")  # Use the 'viridis' colormap (you can choose another one)
 norm = Normalize(vmin=0, vmax=num_lines - 1)  # Normalize dataset indices to [0, 1]
 colors = cmap(norm(range(num_lines)))  # Generate colors for each dataset index
 
