@@ -49,6 +49,7 @@ class ParamSelector(tk.Tk):
         
         tk.Label(self, text='Max. frequency').grid(row=2, column=2, padx=5, pady=5)
         self.max_frequency_scale = tk.Scale(self, from_=0, to=200, orient=tk.HORIZONTAL)
+        self.max_frequency_scale.set(40)
         self.max_frequency_scale.grid(row=3, column=2, padx=5, pady=5)
 
     def create_menu_buttons(self):
