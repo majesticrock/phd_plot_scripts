@@ -34,9 +34,9 @@ def add_verticals(frequencies, ax, max_freq=None):
 def create_frame():
     fig, ax = plt.subplots()
     ax.set_yscale("log")
-    ax.set_xlabel(legend(r"\omega / \omega_L"))
+    ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
     ax.set_ylabel(legend(r"j(\omega)", "normalized"))
-    
+    fig.tight_layout()
     return fig, ax
 
 def plot_j(main_df, max_freq=None):
