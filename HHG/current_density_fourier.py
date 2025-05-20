@@ -14,7 +14,10 @@ from legend import *
 def add_current_density_to_plot(main_df, ax, label=None, shift=1, max_freq=None, **plot_kwargs):
     frequencies = main_df["frequencies"]
     current_density = frequencies * (main_df["current_density_frequency_real"] + 1.0j * main_df["current_density_frequency_imag"])
-    #current_density += 1.0j * main_df["current_density_time"][-1] * np.exp(1.0j * main_df["t_end"] * frequencies)
+    if main_df["decay_time"] > 0:
+        current_density += (1.0j * main_df["current_density_time"][-1] * frequencies / ((1. / main_df["decay_time"]) + 1.0j * frequencies)) * np.exp(-main_df["t_end"] * ((1. / main_df["decay_time"]) + 1.0j * frequencies))
+    else:
+        current_density += main_df["current_density_time"][-1] * np.exp(-1.0j * main_df["t_end"] * frequencies)
     y_data = np.abs(current_density)
     
     if max_freq is not None:
