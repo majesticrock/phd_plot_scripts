@@ -26,19 +26,20 @@ def add_current_density_to_plot(main_df, ax, label=None, shift=1, max_freq=None,
         y_data = y_data[mask]
     ax.plot(frequencies, shift * y_data / np.max(y_data), label=label, **plot_kwargs)
 
-def add_verticals(frequencies, ax, max_freq=None):
+def add_verticals(frequencies, ax, max_freq=None, positions='odd'):
+    shift = 1 if positions=='odd' else 0
     if max_freq is not None:
-        for i in range(1, int(np.max(frequencies[frequencies < max_freq])) + 1, 2):
+        for i in range(shift, int(np.max(frequencies[frequencies < max_freq])) + 1, 2):
             ax.axvline(i, ls="--", color="grey", linewidth=1, alpha=0.5)
     else:
-        for i in range(1, int(np.max(frequencies)) + 1, 2):
+        for i in range(shift, int(np.max(frequencies)) + 1, 2):
             ax.axvline(i, ls="--", color="grey", linewidth=1, alpha=0.5)
 
 def create_frame():
     fig, ax = plt.subplots()
     ax.set_yscale("log")
     ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
-    ax.set_ylabel(legend(r"j(\omega)", "normalized"))
+    ax.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
     fig.tight_layout()
     return fig, ax
 
