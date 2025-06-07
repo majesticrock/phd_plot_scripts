@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, ttk
-from collections import defaultdict
 
 import pandas as pd
 
@@ -10,6 +9,7 @@ __path_appender.append()
 from get_data import *
 import current_density_fourier
 import current_density_time
+import laser_function
 
 class ParamSelector(tk.Tk):
     def __init__(self):
@@ -66,6 +66,13 @@ class ParamSelector(tk.Tk):
         
         self.fft_button = tk.Button(self, text="Plot j(w)", command=self.fft)
         self.fft_button.grid(row=row + 1, column=1, pady=5, padx=5)
+        
+        self.laser_mode = tk.BooleanVar()
+        self.laser_mode_button = tk.Checkbutton(self, text="Electric Field?", onvalue=1, offvalue=0, variable=self.laser_mode)
+        self.laser_mode_button.grid(row=row, column=2, pady=5, padx=5)
+        
+        self.laser_button = tk.Button(self, text="Plot laser", command=self.laser)
+        self.laser_button.grid(row=row + 1, column=2, pady=5, padx=5)
 
     def change_directory(self):
         new_dir = filedialog.askdirectory(title="Select new base directory", initialdir=self.base_dir)
@@ -120,7 +127,7 @@ class ParamSelector(tk.Tk):
         data_box = ttk.Combobox(self, textvariable=self.system_selector_vars['data_set'], state="readonly", values=data_dirs)
         data_box.grid(row=1, column=0, padx=5, pady=5)
         
-        laser_box = ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", values=["cosine_laser", "continuous_laser"])
+        laser_box = ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", values=["cosine_laser", "continuous_laser", "exp_laser"])
         laser_box.grid(row=1, column=1, padx=5, pady=5)
         #laser_box.current(0)
         
@@ -201,32 +208,34 @@ class ParamSelector(tk.Tk):
             temp.append(self.system_selector_vars['system'].get())
         return os.path.join(*temp)        
 
-    def fft(self):
+    def __get_selected(self):
         selected_values = {param: self.dropdowns[param].get() for param in self.param_order}
         if not all(selected_values.values()):
             print("Please make sure all parameters are selected.")
             return
+        return selected_values
 
-        # Call your function
+    def fft(self):
         main_df = load_panda(
             "HHG", self.name_type(), "current_density.json.gz",
-            **hhg_params(**selected_values)
+            **hhg_params(**self.__get_selected())
         )
 
         current_density_fourier.plot_j(main_df, max_freq=self.max_frequency_scale.get())
         
     def j_time(self):
-        selected_values = {param: self.dropdowns[param].get() for param in self.param_order}
-        if not all(selected_values.values()):
-            print("Please make sure all parameters are selected.")
-            return
-
-        # Call your function
         main_df = load_panda(
             "HHG", self.name_type(), "current_density.json.gz",
-            **hhg_params(**selected_values)
+            **hhg_params(**self.__get_selected())
         )
         current_density_time.plot_j(main_df)
+        
+    def laser(self):
+        main_df = load_panda(
+            "HHG", self.name_type(), "current_density.json.gz",
+            **hhg_params(**self.__get_selected())
+        )
+        laser_function.plot_laser(main_df, self.laser_mode.get())
 
 if __name__ == "__main__":
     app = ParamSelector()
