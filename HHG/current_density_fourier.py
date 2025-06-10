@@ -11,14 +11,18 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-def add_current_density_to_plot(main_df, ax, label=None, shift=1, max_freq=None, **plot_kwargs):
+def compute_current_density(main_df):
     frequencies = main_df["frequencies"]
     current_density = frequencies * (main_df["current_density_frequency_real"] + 1.0j * main_df["current_density_frequency_imag"])
     if main_df["decay_time"] > 0:
         current_density += (1.0j * main_df["current_density_time"][-1] * frequencies / ((1. / main_df["decay_time"]) + 1.0j * frequencies)) * np.exp(-main_df["t_end"] * ((1. / main_df["decay_time"]) + 1.0j * frequencies))
     else:
         current_density += main_df["current_density_time"][-1] * np.exp(-1.0j * main_df["t_end"] * frequencies)
-    y_data = np.abs(current_density)
+    return current_density
+    
+def add_current_density_to_plot(main_df, ax, label=None, shift=1, max_freq=None, substract=None, **plot_kwargs):
+    frequencies = main_df["frequencies"]
+    y_data = np.abs(compute_current_density(main_df)) if substract is None else np.abs(compute_current_density(main_df) - substract)
     
     if max_freq is not None:
         mask = frequencies < max_freq
@@ -35,11 +39,23 @@ def add_verticals(frequencies, ax, max_freq=None, positions='odd'):
         for i in range(shift, int(np.max(frequencies)) + 1, 2):
             ax.axvline(i, ls="--", color="grey", linewidth=1, alpha=0.5)
 
-def create_frame():
-    fig, ax = plt.subplots()
-    ax.set_yscale("log")
-    ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
-    ax.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
+def create_frame(nrows=1, ylabel_list=None, **kwargs):
+    fig, ax = plt.subplots(nrows=nrows, sharex=True, **kwargs)
+    if (nrows == 1):
+        ax.set_yscale("log")
+        if ylabel_list is None:
+            ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
+        else:
+            ax.set_xlabel(ylabel_list)
+        ax.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
+    else:
+        ax[-1].set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
+        for i, a in enumerate(ax):
+            a.set_yscale("log")
+            if ylabel_list is None:
+                a.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
+            else:
+                a.set_ylabel(ylabel_list[i])
     fig.tight_layout()
     return fig, ax
 

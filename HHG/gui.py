@@ -127,7 +127,8 @@ class ParamSelector(tk.Tk):
         data_box = ttk.Combobox(self, textvariable=self.system_selector_vars['data_set'], state="readonly", values=data_dirs)
         data_box.grid(row=1, column=0, padx=5, pady=5)
         
-        laser_box = ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", values=["cosine_laser", "continuous_laser", "exp_laser"])
+        laser_box = ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", 
+                                 values=["cosine_laser", "continuous_laser", "exp_laser", "expA_laser", "expB_laser"])
         laser_box.grid(row=1, column=1, padx=5, pady=5)
         #laser_box.current(0)
         
