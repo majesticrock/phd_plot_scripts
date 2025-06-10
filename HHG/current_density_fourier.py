@@ -20,7 +20,7 @@ def compute_current_density(main_df):
         current_density += main_df["current_density_time"][-1] * np.exp(-1.0j * main_df["t_end"] * frequencies)
     return current_density
     
-def add_current_density_to_plot(main_df, ax, label=None, shift=1, max_freq=None, substract=None, **plot_kwargs):
+def add_current_density_to_plot(main_df, ax, label=None, shift=1, max_freq=None, substract=None, normalize=True, **plot_kwargs):
     frequencies = main_df["frequencies"]
     y_data = np.abs(compute_current_density(main_df)) if substract is None else np.abs(compute_current_density(main_df) - substract)
     
@@ -28,7 +28,9 @@ def add_current_density_to_plot(main_df, ax, label=None, shift=1, max_freq=None,
         mask = frequencies < max_freq
         frequencies = frequencies[mask]
         y_data = y_data[mask]
-    ax.plot(frequencies, shift * y_data / np.max(y_data), label=label, **plot_kwargs)
+    if normalize:
+        y_data /= np.max(y_data)
+    ax.plot(frequencies, shift * y_data, label=label, **plot_kwargs)
 
 def add_verticals(frequencies, ax, max_freq=None, positions='odd'):
     shift = 1 if positions=='odd' else 0

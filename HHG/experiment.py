@@ -8,35 +8,48 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-df_A = load_panda("HHG", "test/expA_laser/Honeycomb", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1e6, band_width=3300, field_amplitude=1., photon_energy=1., decay_time=1000))
-df_B = load_panda("HHG", "test/expB_laser/Honeycomb", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1e6, band_width=3300, field_amplitude=1., photon_energy=1., decay_time=1000))
+MODEL = "PiFlux"
+v_F = 1.5e5
+W = 400
+
+df_A = load_panda("HHG", f"test/expA_laser/{MODEL}", "current_density.json.gz", 
+                    **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., decay_time=100))
+df_B = load_panda("HHG", f"test/expB_laser/{MODEL}", "current_density.json.gz", 
+                    **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., decay_time=100))
 
 signal_A = cdf.compute_current_density(df_A)
 signal_B = cdf.compute_current_density(df_B)
-signal_AB = signal_A + signal_B
 
-fig, axes = cdf.create_frame(nrows=3, figsize=(6.4, 8))
+def combined_signal(omega, t0):
+    if t0 > 0:
+        return signal_A + signal_B * np.exp(1.0j * omega + t0)
+    else:
+        return signal_A * np.exp(-1.0j * omega + t0) + signal_B
+
+fig, axes = cdf.create_frame(nrows=3, figsize=(6.4, 8), 
+                             ylabel_list=[legend(r"|\omega j_\mathrm{lin}(\omega) |", "a.b."), 
+                                          legend(r"|\omega j_\mathrm{sim}(\omega) |", "a.b."), 
+                                          legend(r"|\omega (j_\mathrm{sim}(\omega) - j_\mathrm{lin}(t))|", "a.b.")])
+
 frequencies = df_A["frequencies"]
-cdf.add_verticals(frequencies, axes[0], max_freq=40)
-cdf.add_verticals(frequencies, axes[1], max_freq=40)
-cdf.add_verticals(frequencies, axes[2], max_freq=40)
+cdf.add_verticals(frequencies, axes[0], max_freq=40, positions='odd' if MODEL != "Honeycomb" else 'even')
+cdf.add_verticals(frequencies, axes[1], max_freq=40, positions='odd' if MODEL != "Honeycomb" else 'even')
+cdf.add_verticals(frequencies, axes[2], max_freq=40, positions='odd' if MODEL != "Honeycomb" else 'even')
 
-axes[0].plot(frequencies, np.abs(signal_A), label="FFT A")
-axes[0].plot(frequencies, np.abs(signal_B), label="FFT B")
-axes[0].plot(frequencies, np.abs(signal_AB), label="FFT A+B")
 axes[0].set_xlim(0, 40)
-axes[0].legend()
 
-for i, t0 in enumerate([0, 0.5, 1, 1.5]):
-    main_df = load_panda("HHG", f"test_{t0}/exp_laser/Honeycomb", "current_density.json.gz", 
-                        **hhg_params(T=300, E_F=118, v_F=1e6, band_width=3300, field_amplitude=1., photon_energy=1., decay_time=1000))
-    cdf.add_current_density_to_plot(main_df, axes[1], max_freq=40, label=f"Proper $t_0 = {t0}$ ps", shift=10**(-i))
-    cdf.add_current_density_to_plot(main_df, axes[2], max_freq=40, substract=signal_AB * np.exp(1.0j * frequencies * t0), label=f"NL $t_0 = {t0}$ ps", shift=10**(-i))
+for i, t0 in enumerate([0, 0.5, 1, 2, 3, 4]):
+    main_df = load_panda("HHG", f"test_{t0}/exp_laser/{MODEL}", "current_density.json.gz", 
+                        **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., decay_time=100))
+    
+    t0_unitless = t0 * main_df["photon_energy"] / (0.6582119569509065) # the number is hbar in meV * ps
+    frequencies2 = main_df["frequencies"]
+    axes[0].plot(frequencies, np.abs(combined_signal(frequencies, t0_unitless)), label=f"$t_0 = {t0}$ ps")
+    cdf.add_current_density_to_plot(main_df, axes[1], max_freq=40, label=f"Proper $t_0 = {t0}$ ps", shift=10**(-i), normalize=True)
+    cdf.add_current_density_to_plot(main_df, axes[2], max_freq=40, substract=combined_signal(frequencies, t0_unitless), label=f"NL $t_0 = {t0}$ ps", shift=10**(-i), normalize=True)
 
-axes[1].legend(loc='upper right')
-axes[2].legend(loc='upper right')
+axes[0].legend(loc='upper right')
+
 
 fig.tight_layout()
 plt.show()

@@ -6,18 +6,33 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-def create_frame():
-    fig, ax = plt.subplots()
-    ax.set_xlabel(legend(r"t / T_\mathrm{L}"))
-    ax.set_ylabel(legend(r"j(t)", "normalized"))
+def create_frame(nrows=1, ylabel_list=None, **kwargs):
+    fig, ax = plt.subplots(nrows=nrows, sharex=True, **kwargs)
+    if (nrows == 1):
+        if ylabel_list is None:
+            ax.set_xlabel(legend(r"t / T_\mathrm{L}"))
+        else:
+            ax.set_xlabel(ylabel_list)
+        ax.set_ylabel(legend(r"j(t)", "normalized"))
+    else:
+        ax[-1].set_xlabel(legend(r"t / T_\mathrm{L}"))
+        for i, a in enumerate(ax):
+            if ylabel_list is None:
+                a.set_ylabel(legend(r"j(t)", "normalized"))
+            else:
+                a.set_ylabel(ylabel_list[i])
     fig.tight_layout()
-    
     return fig, ax
 
-def add_current_density_to_plot(df, ax, label=None, sigma=None, **kwargs):
+def add_current_density_to_plot(df, ax, label=None, sigma=None, normalize=True, substract=None, **kwargs):
     times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
-    normalization = 1. / np.max(np.abs(df["current_density_time"]))
-    y_data = df["current_density_time"] * normalization
+    if substract is None:
+        normalization = 1. / np.max(np.abs(df["current_density_time"])) if normalize else 1.0
+        y_data = df["current_density_time"] * normalization
+    else:
+        y_data = df["current_density_time"] - substract(times)
+        if normalize:
+            y_data /= np.max(y_data)
     ax.plot(times, y_data, label=label, **kwargs)
     if sigma is not None:
         worst_case = 4 * sigma * normalization
