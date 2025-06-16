@@ -12,7 +12,7 @@ from legend import *
 from scipy.fft import rfft, rfftfreq
 
 MODEL = "PiFlux"
-v_F = 1.5e6
+v_F = 1.5e5
 W = 400
 
 df_A = load_panda("HHG", f"exp_base/expA_laser/{MODEL}", "current_density.json.gz", 
