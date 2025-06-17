@@ -11,13 +11,14 @@ from legend import *
 
 from scipy.fft import rfft, rfftfreq
 
+DIR = "exp_cl1"
 MODEL = "PiFlux"
-v_F = 1.5e5
+v_F = 1.5e6
 W = 400
 
-df_A = load_panda("HHG", f"exp_base/expA_laser/{MODEL}", "current_density.json.gz", 
+df_A = load_panda("HHG", f"{DIR}_base/expA_laser/{MODEL}", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., decay_time=100))
-df_B = load_panda("HHG", f"exp_base/expB_laser/{MODEL}", "current_density.json.gz", 
+df_B = load_panda("HHG", f"{DIR}_base/expB_laser/{MODEL}", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., decay_time=100))
 
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
@@ -60,7 +61,7 @@ def combined_laser(t, t0):
     return A + B
 
 for i, t0 in enumerate([0, 0.5, 1, 2, 3, 4, 6]):
-    main_df = load_panda("HHG", f"exp_{t0}/exp_laser/{MODEL}", "current_density.json.gz", 
+    main_df = load_panda("HHG", f"{DIR}_{t0}/exp_laser/{MODEL}", "current_density.json.gz", 
                         **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., decay_time=100))
     times2 = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
     

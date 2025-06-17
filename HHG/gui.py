@@ -10,6 +10,7 @@ from get_data import *
 import current_density_fourier
 import current_density_time
 import laser_function
+import matplotlib.pyplot as plt
 
 class ParamSelector(tk.Tk):
     def __init__(self):
@@ -66,6 +67,10 @@ class ParamSelector(tk.Tk):
         
         self.fft_button = tk.Button(self, text="Plot j(w)", command=self.fft)
         self.fft_button.grid(row=row + 1, column=1, pady=5, padx=5)
+        
+        self.overlay_laser = tk.BooleanVar()
+        self.overlay_laser_button = tk.Checkbutton(self, text="Overlay laser?", onvalue=1, offvalue=0, variable=self.overlay_laser)
+        self.overlay_laser_button.grid(row=row - 1, column=2, pady=5, padx=5)
         
         self.laser_mode = tk.BooleanVar()
         self.laser_mode_button = tk.Checkbutton(self, text="Electric Field?", onvalue=1, offvalue=0, variable=self.laser_mode)
@@ -229,7 +234,29 @@ class ParamSelector(tk.Tk):
             "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**self.__get_selected())
         )
-        current_density_time.plot_j(main_df)
+        if self.overlay_laser.get():
+            fig, ax = current_density_time.create_frame()
+            current_density_time.add_current_density_to_plot(main_df, ax, label="$j$")
+            laser_ax = ax.twinx()
+            laser_ax.set_ylabel("Laser")
+            laser_function.add_laser_to_plot(main_df, laser_ax, self.laser_mode.get(), color="red")
+            
+            lower, upper = ax.get_ylim()
+            lower_laser, upper_laser = laser_ax.get_ylim()
+            
+            if -lower > upper:
+                ax.set_ylim(lower, -lower)
+            else:
+                ax.set_ylim(-upper, upper)
+            
+            if -lower_laser > upper_laser:
+                laser_ax.set_ylim(lower_laser, -lower_laser)
+            else:
+                laser_ax.set_ylim(-upper_laser, upper_laser)
+            ax.axhline(0, c="k", ls="--")
+            plt.show()
+        else:
+            current_density_time.plot_j(main_df)
         
     def laser(self):
         main_df = load_panda(
