@@ -156,11 +156,11 @@ class ParamSelector(tk.Tk):
             label.grid(row=i+2, column=0, padx=5, pady=5)
 
             self.dd_vars[param] = tk.StringVar(self, name=param)        
-            self.dd_vars[param].trace_add("write", make_callback(param, self.dd_vars[param]))
-
+        
             dropdown = ttk.Combobox(self, textvariable=self.dd_vars[param], state="readonly")
             dropdown.grid(row=i+2, column=1, padx=5, pady=5)
-
+            dropdown.bind("<<ComboboxSelected>>", make_callback(param, self.dd_vars[param]))
+            
             self.dropdowns[param] = dropdown
 
         self.update_options()
@@ -185,15 +185,12 @@ class ParamSelector(tk.Tk):
                         continue
                     self.dropdowns[param].set('')      
         
-        # Build selection from dropdowns
         selection = {param: self.dd_vars[param].get() for param in self.param_order if self.dd_vars[param].get()}
     
-        # Filter paths according to current valid selection
         df_filtered = self.df_paths.copy()
         for param, val in selection.items():
             df_filtered = df_filtered[df_filtered[param] == val]
     
-        # Update each dropdown's value list
         for param in self.param_order:
             all_values = sorted(self.df_paths[param].dropna().unique())
             valid_values = sorted(df_filtered[param].dropna().unique())
@@ -203,6 +200,10 @@ class ParamSelector(tk.Tk):
                 self.dropdowns[param]['values'] = all_values
             else:
                 self.dropdowns[param]['values'] = valid_values
+        
+        for key, dropdown in self.dropdowns.items():
+            if len(dropdown['values']) == 1:
+                dropdown.set(dropdown['values'][0])
 
     def name_type(self):
         temp = [self.base_dir]
