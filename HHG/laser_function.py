@@ -33,19 +33,24 @@ def plot_laser(df, electric_field=False):
     plt.show()
 
 if __name__ == '__main__':
-    __PLOT_E_FIELD__ = True
+    __PLOT_E_FIELD__ = False
     fig, ax = create_frame(__PLOT_E_FIELD__)
     
-    main_df = load_panda("HHG", "test/expA_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
-    add_laser_to_plot(main_df, ax, __PLOT_E_FIELD__)
+    #main_df = load_panda("HHG", "test/expA_laser/PiFlux", "current_density.json.gz", 
+    #                **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
+    #add_laser_to_plot(main_df, ax, __PLOT_E_FIELD__)
 
     main_df = load_panda("HHG", "test/expB_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
-    add_laser_to_plot(main_df, ax, __PLOT_E_FIELD__)
+                    **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
+    add_laser_to_plot(main_df, ax, False, label="Vector potential")
+    main_df = load_panda("HHG", "test/expB_laser/PiFlux", "current_density.json.gz", 
+                    **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
+    add_laser_to_plot(main_df, ax, True, label="Electric field")
     ax.axhline(0, c="k", ls="--", linewidth=1.5)
     
-    dt = main_df["t_end"] / main_df["n_measurements"]
-    ax.axvline(16 * dt, c="k")
-    ax.axvline()
+    N_extra = 16
+    time_scale = 6.67111 * 5.889401182228545 / (6.582119569509065698e-1 * 2 * np.pi)
+    dt = time_scale / 201 # number of sample points of the electric field
+    ax.axvline(N_extra * dt, c="k")
+    ax.axvline(time_scale + N_extra * dt, c="k")
     plt.show()
