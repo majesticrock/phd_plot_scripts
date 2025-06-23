@@ -14,16 +14,21 @@ def create_frame(electric_field=False):
     
     return fig, ax
 
-def add_laser_to_plot(df, ax, electric_field=False, label=None, **kwargs):
+def add_laser_to_plot(df, ax, electric_field=False, label=None, normalize=False, **kwargs):
     times = np.linspace(0, df["t_end"] - df["t_begin"], df["n_measurements"]) / (2 * np.pi)
     A = df["laser_function"]
 
     if electric_field:
         dt = (times[1] - times[0])
         E = -np.gradient(A, dt)
+        if normalize:
+            E /= np.max(np.abs(E))
         ax.plot(times, E, label=label, **kwargs)
     else:
-        ax.plot(times, A, label=label, **kwargs)
+        if normalize:
+            ax.plot(times, A / np.max(np.abs(A)), label=label, **kwargs)
+        else:
+            ax.plot(times, A, label=label, **kwargs)
 
 def plot_laser(df, electric_field=False):
     fig, ax = create_frame(electric_field)
