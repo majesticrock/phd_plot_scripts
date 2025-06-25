@@ -49,13 +49,13 @@ def plot_j(df):
 if __name__ == '__main__':
     fig, ax = create_frame()
     main_df = load_panda("HHG", "test0/cosine_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, tau_diag=30, tau_offdiag=-1, t0=0))
     add_current_density_to_plot(main_df, ax, f"$0$")
     main_df = load_panda("HHG", "test1/cosine_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, tau_diag=30, tau_offdiag=-1, t0=0))
     add_current_density_to_plot(main_df, ax, f"$1$", ls="--")
     main_df = load_panda("HHG", "test05/cosine_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, decay_time=-1))
+                    **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, tau_diag=30, tau_offdiag=-1, t0=0))
     add_current_density_to_plot(main_df, ax, f"$0.5$", ls="-.")
     
     ax.legend()
