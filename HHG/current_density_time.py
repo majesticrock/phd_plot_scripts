@@ -33,7 +33,7 @@ def add_current_density_to_plot(df, ax, label=None, sigma=None, normalize=True, 
         y_data = df["current_density_time"] - substract(times)
         if normalize:
             y_data /= np.max(y_data)
-    y_data *= -1 # only the magnitude matters, but the inverted sign looks better
+    #y_data *= -1 # only the magnitude matters, but the inverted sign looks better
     ax.plot(times, y_data, label=label, **kwargs)
     if sigma is not None:
         worst_case = 4 * sigma * normalization
