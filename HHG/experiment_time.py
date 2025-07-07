@@ -15,11 +15,11 @@ from legend import *
 
 from scipy.fft import rfft, rfftfreq
 
-DIR = "cascade_cl1"
+DIR = "icelake_cl1"
 MODEL = "PiFlux"
 v_F = 1.5e6
 W = 400
-TAU_DIAG = 30
+TAU_DIAG = 10
 
 df_A = load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., tau_diag=TAU_DIAG, tau_offdiag=-1, t0=0))

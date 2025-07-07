@@ -8,8 +8,8 @@ V = -0.1
 
 use_XP = True
 
-folder = "data/modes/square/test/"
-name_suffix = "phase_SC"
+folder = "data/pre_pandas/modes/square/dos_6000/"
+name_suffix = "higgs_SC"
 name = f"T={T}/U={U}/V={V}/"
 element_names = ["a", "a+b", "a+ib"]
 
@@ -46,5 +46,5 @@ ax.set_ylabel("Lanczos coefficient")
 fig.tight_layout()
 
 import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
+#plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()
