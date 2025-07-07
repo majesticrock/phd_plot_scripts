@@ -4,18 +4,18 @@ import __path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-pd_data = load_panda("lattice_cut", "test/free_electrons3", "resolvents.json.gz",
+pd_data = load_panda("lattice_cut", "test/simple_cubic", "resolvents.json.gz",
                     **lattice_cut_params(N=1001, 
-                                         g=1, 
+                                         g=5, 
                                          U=0, 
-                                         band_width=10, 
-                                         E_F=5,
+                                         band_width=6, 
+                                         E_F=0,
                                          omega_D=0.05))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(pd_data, ignore_first=5, ignore_last=90)
+resolvents = cf.ContinuedFraction(pd_data, ignore_first=5, ignore_last=60)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
