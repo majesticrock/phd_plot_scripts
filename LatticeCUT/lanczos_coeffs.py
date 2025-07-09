@@ -4,19 +4,19 @@ import __path_appender as __ap
 __ap.append()
 
 from get_data import *
-pd_data = load_panda("lattice_cut", "test/simple_cubic", "resolvents.json.gz",
+SYSTEM = "fcc"#"simple_cubic"#"free_electrons3"
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=1001, 
-                                         g=12, 
+                                         g=5, 
                                          U=0, 
-                                         band_width=6, 
                                          E_F=0,
                                          omega_D=1))
 
-a_inf = (pd_data["continuum_boundaries"][0]**2 + pd_data["continuum_boundaries"][1]**2) * 0.5
-b_inf = (pd_data["continuum_boundaries"][1]**2 - pd_data["continuum_boundaries"][0]**2) * 0.25
+a_inf = (main_df["continuum_boundaries"][0]**2 + main_df["continuum_boundaries"][1]**2) * 0.5
+b_inf = (main_df["continuum_boundaries"][1]**2 - main_df["continuum_boundaries"][0]**2) * 0.25
 
-A = pd_data["resolvents.amplitude_SC"][0]["a_i"]
-B = pd_data["resolvents.amplitude_SC"][0]["b_i"]
+A = main_df["resolvents.amplitude_SC"][0]["a_i"]
+B = main_df["resolvents.amplitude_SC"][0]["b_i"]
 
 fig, ax = plt.subplots()
 ax.plot(A, ls="-", marker='x', label="$a_i$")

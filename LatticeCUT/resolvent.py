@@ -4,18 +4,18 @@ import __path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-pd_data = load_panda("lattice_cut", "test/simple_cubic", "resolvents.json.gz",
-                    **lattice_cut_params(N=1001, 
-                                         g=5, 
+SYSTEM = "hc"#"sc"#"free_electrons3"
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=1000, 
+                                         g=10, 
                                          U=0, 
-                                         band_width=6, 
-                                         E_F=0,
+                                         E_F=0.5,
                                          omega_D=0.05))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(pd_data, ignore_first=5, ignore_last=60)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=5, ignore_last=60)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
@@ -26,7 +26,7 @@ plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.1 * pd_data["continuum_boundaries"][1], 15000, dtype=complex)
+w_lin = np.linspace(-0.005 * main_df["continuum_boundaries"][1], 1.1 * main_df["continuum_boundaries"][1], 15000, dtype=complex)
 w_lin += 1e-4j
 
 plotter.plot(w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True), label="Phase")
