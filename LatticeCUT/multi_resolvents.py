@@ -44,6 +44,6 @@ for system in systems:
     ax[1].set_title(system)
     ax[0].set_ylabel(r"$\mathcal{A} (\omega)$")
     
-    fig.savefig(f"phd_plot_scripts/LatticeCUT/build/{os.path.basename(__file__).split('.')[0]}_{system}.pdf")
+    fig.savefig(f"phd_plot_scripts/LatticeCUT/build/{os.path.basename(__file__).split('.')[0]}_{system}.svg")
     
 plt.show()
