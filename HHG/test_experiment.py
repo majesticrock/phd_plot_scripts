@@ -17,12 +17,12 @@ from scipy.fft import rfft, rfftfreq
 
 DIR = "test"
 MODEL = "PiFlux"
-v_F = 1.5e6
-W = 200
-T = 0
+v_F = 5e5
+W = 800
+T = 300
 E_F = 118
 
-tau_diag_values = [10, 50, 100, 200]  # Add more values as needed
+tau_diag_values = [500, 1000, 2000]  # Add more values as needed
 t0_values = [0]  # You can loop over multiple t0 as well
 
 colors = plt.cm.viridis(np.linspace(0, 1, len(tau_diag_values)))

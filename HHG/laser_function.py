@@ -46,10 +46,8 @@ if __name__ == '__main__':
     #add_laser_to_plot(main_df, ax, __PLOT_E_FIELD__)
 
     main_df = load_panda("HHG", "test/expB_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
+                    **hhg_params(T=300, E_F=118, v_F=5e5, band_width=800, field_amplitude=1., photon_energy=1, tau_diag=100, tau_offdiag=-1, t0=0))
     add_laser_to_plot(main_df, ax, False, label="Vector potential")
-    main_df = load_panda("HHG", "test/expB_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
     add_laser_to_plot(main_df, ax, True, label="Electric field")
     ax.axhline(0, c="k", ls="--", linewidth=1.5)
     
