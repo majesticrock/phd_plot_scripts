@@ -22,7 +22,7 @@ W = 800
 T = 300
 E_F = 118
 
-tau_diag_values = [500, 1000, 2000]  # Add more values as needed
+tau_diag_values = [10, 100, 1000, 2000]  # Add more values as needed
 t0_values = [0]  # You can loop over multiple t0 as well
 
 colors = plt.cm.viridis(np.linspace(0, 1, len(tau_diag_values)))
