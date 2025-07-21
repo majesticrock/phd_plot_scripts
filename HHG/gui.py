@@ -22,6 +22,8 @@ class ParamSelector(tk.Tk):
         self.dropdowns = {}
         self.dd_vars = {}
 
+        self.clear_plots()
+
         default_path_file = ".default_path.txt"
         if os.path.exists(default_path_file):
             with open(default_path_file, "r") as f:
@@ -78,6 +80,12 @@ class ParamSelector(tk.Tk):
         
         self.laser_button = tk.Button(self, text="Plot laser", command=self.laser)
         self.laser_button.grid(row=row + 1, column=2, pady=5, padx=5)
+        
+        self.show_button = tk.Button(self, text="Show Plots", command=self.show_plots)
+        self.show_button.grid(row=row + 2, column=0, padx=5, pady=5)
+
+        self.clear_button = tk.Button(self, text="Clear Plots", command=self.clear_plots)
+        self.clear_button.grid(row=row + 2, column=2, padx=5, pady=5)
 
     def change_directory(self):
         new_dir = filedialog.askdirectory(title="Select new base directory", initialdir=self.base_dir)
@@ -223,12 +231,18 @@ class ParamSelector(tk.Tk):
         return selected_values
 
     def fft(self):
+        if self.frequency_fig is None:
+            self.frequency_fig, self.frequency_ax = current_density_fourier.create_frame()
+
         main_df = load_panda(
             "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**self.__get_selected())
         )
-
-        current_density_fourier.plot_j(main_df, max_freq=self.max_frequency_scale.get())
+        current_density_fourier.add_current_density_to_plot(main_df, self.frequency_ax, label=f"${self.count_freq}$")
+        if self.frequencies is None:
+            self.frequencies = main_df["frequencies"]
+            
+        self.count_freq += 1
         
     def j_time(self):
         main_df = load_panda(
@@ -236,35 +250,73 @@ class ParamSelector(tk.Tk):
             **hhg_params(**self.__get_selected())
         )
         if self.overlay_laser.get():
-            fig, ax = current_density_time.create_frame()
-            current_density_time.add_current_density_to_plot(main_df, ax, label="$j$")
-            laser_ax = ax.twinx()
-            laser_ax.set_ylabel("Laser")
-            laser_function.add_laser_to_plot(main_df, laser_ax, self.laser_mode.get(), color="red")
+            if self.time_fig is None:
+                self.time_fig, self.time_ax = current_density_time.create_frame()
+            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label="$j$")
+            if self.laser_ax is None:
+                self.laser_ax = self.time_ax.twinx()
+            self.laser_ax = self.time_ax.twinx()
+            self.laser_ax.set_ylabel("Laser")
+            laser_function.add_laser_to_plot(main_df, self.laser_ax, self.laser_mode.get(), color="red")
             
-            lower, upper = ax.get_ylim()
-            lower_laser, upper_laser = laser_ax.get_ylim()
+            lower, upper = self.time_ax.get_ylim()
+            lower_laser, upper_laser = self.laser_ax.get_ylim()
             
             if -lower > upper:
-                ax.set_ylim(lower, -lower)
+                self.time_ax.set_ylim(lower, -lower)
             else:
-                ax.set_ylim(-upper, upper)
+                self.time_ax.set_ylim(-upper, upper)
             
             if -lower_laser > upper_laser:
-                laser_ax.set_ylim(lower_laser, -lower_laser)
+                self.laser_ax.set_ylim(lower_laser, -lower_laser)
             else:
-                laser_ax.set_ylim(-upper_laser, upper_laser)
-            ax.axhline(0, c="k", ls="--")
+                self.laser_ax.set_ylim(-upper_laser, upper_laser)
+            self.time_ax.axhline(0, c="k", ls="--")
             plt.show()
         else:
-            current_density_time.plot_j(main_df)
+            if self.time_fig is None:
+                self.time_fig, self.time_ax = current_density_time.create_frame()
+            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label=f"${self.count_time}$", normalize=False)
+            self.count_time += 1
         
     def laser(self):
         main_df = load_panda(
             "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**self.__get_selected())
         )
-        laser_function.plot_laser(main_df, self.laser_mode.get())
+        if self.laser_ax is None:
+            if self.time_ax is None:
+                self.time_fig, self.time_ax = current_density_time.create_frame()
+            self.laser_ax = self.time_ax.twinx()
+        
+        laser_function.add_laser_to_plot(main_df, self.laser_ax, self.laser_mode.get(), color="red")
+
+    def show_plots(self):
+        if self.frequency_ax is not None:
+            self.frequency_ax.set_xlim(0, self.max_frequency_scale.get())
+            
+            if not self.verticals:
+                current_density_fourier.add_verticals(self.frequencies, self.frequency_ax, self.max_frequency_scale.get())
+                self.verticals = False
+        
+        if self.frequency_fig is not None:
+            self.frequency_ax.legend()
+            self.frequency_fig.show()
+        if self.time_fig is not None:
+            self.time_ax.legend()
+            self.time_fig.show()
+
+    def clear_plots(self):
+        self.frequency_fig = None
+        self.frequency_ax = None
+        self.count_freq = 0
+        self.verticals = False
+        self.frequencies = None
+        
+        self.time_fig = None
+        self.time_ax = None
+        self.laser_ax = None
+        self.count_time = 0
 
 if __name__ == "__main__":
     app = ParamSelector()

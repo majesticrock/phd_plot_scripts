@@ -4,13 +4,13 @@ import __path_appender as __ap
 __ap.append()
 
 from get_data import *
-SYSTEM = "fcc"#"simple_cubic"#"free_electrons3"
-main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=1001, 
-                                         g=5, 
+SYSTEM = "sc"#"sc"#"free_electrons3"
+main_df = load_panda("lattice_cut", f"test3/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=8000, 
+                                         g=0.25, 
                                          U=0, 
                                          E_F=0,
-                                         omega_D=1))
+                                         omega_D=0.01))
 
 a_inf = (main_df["continuum_boundaries"][0]**2 + main_df["continuum_boundaries"][1]**2) * 0.5
 b_inf = (main_df["continuum_boundaries"][1]**2 - main_df["continuum_boundaries"][0]**2) * 0.25

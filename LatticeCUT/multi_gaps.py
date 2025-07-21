@@ -24,7 +24,7 @@ for system in systems:
                                                  U=0, 
                                                  E_F=Ef,
                                                  omega_D=0.05))
-        energy_space = main_df["Delta_epsilon"] * (np.linspace(0, main_df["N"], main_df["N"])) + main_df["min_energy"]
+        energy_space = main_df["energies"]
         ax.plot(energy_space, main_df["Delta"], label=f"$g={g}$")
 
     rho_ax = ax.twinx()

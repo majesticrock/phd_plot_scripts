@@ -4,13 +4,13 @@ import __path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-SYSTEM = "hc"#"sc"#"free_electrons3"
-main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=1000, 
-                                         g=10, 
+SYSTEM = "sc"#"sc"#"free_electrons3"
+main_df = load_panda("lattice_cut", f"test3/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=10000, 
+                                         g=0.5, 
                                          U=0, 
-                                         E_F=0.5,
-                                         omega_D=0.05))
+                                         E_F=0,
+                                         omega_D=0.01))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
@@ -34,7 +34,7 @@ plotter.plot(w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", with
 
 resolvents.mark_continuum(ax)
 
-ax.set_ylim(-0.05, 0.5)
+ax.set_ylim(-0.05, 5)
 ax.set_xlim(np.min(w_lin.real), np.max(w_lin.real))
 ax.legend()
 fig.tight_layout()

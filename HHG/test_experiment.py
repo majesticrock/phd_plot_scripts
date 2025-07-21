@@ -15,14 +15,15 @@ from legend import *
 
 from scipy.fft import rfft, rfftfreq
 
+BASE_SHIFT = 10.
 DIR = "test"
 MODEL = "PiFlux"
-v_F = 5e5
-W = 800
+v_F = 1.5e6
+W = 300
 T = 300
 E_F = 118
 
-tau_diag_values = [10, 100, 1000, 2000]  # Add more values as needed
+tau_diag_values = [30]  # Add more values as needed
 t0_values = [0]  # You can loop over multiple t0 as well
 
 colors = plt.cm.viridis(np.linspace(0, 1, len(tau_diag_values)))
@@ -90,13 +91,13 @@ for tau_idx, TAU_DIAG in enumerate(tau_diag_values):
         dt = times2[1] - times2[0]
         freqs_scipy = rfftfreq(n, dt)
 
-        fftplot = np.abs(rfft(plot_data_combined, n))*(10**(-2*tau_idx))
+        fftplot = np.abs(rfft(plot_data_combined, n))*(BASE_SHIFT**(-2*tau_idx))
         axes_fft[0].plot(freqs_scipy, fftplot, label=label, color=color)
 
-        fftplot = np.abs(rfft(main_df["current_density_time"], n))*(10**(-2*tau_idx))
+        fftplot = np.abs(rfft(main_df["current_density_time"], n))*(BASE_SHIFT**(-2*tau_idx))
         axes_fft[1].plot(freqs_scipy, fftplot, color=color)
 
-        fftplot = np.abs(rfft(main_df["current_density_time"] - plot_data_combined, n))*(10**(-2*tau_idx))
+        fftplot = np.abs(rfft(main_df["current_density_time"] - plot_data_combined, n))*(BASE_SHIFT**(-2*tau_idx))
         axes_fft[2].plot(freqs_scipy, fftplot, color=color)
 
         # Optional: Add vertical lines for harmonics
