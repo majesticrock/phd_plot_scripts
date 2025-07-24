@@ -24,7 +24,7 @@ def create_frame(nrows=1, ylabel_list=None, **kwargs):
     fig.tight_layout()
     return fig, ax
 
-def add_current_density_to_plot(df, ax, label=None, sigma=None, normalize=True, substract=None, **kwargs):
+def add_current_density_to_plot(df, ax, label=None, sigma=None, normalize=True, substract=None, shift=0, **kwargs):
     times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
     if substract is None:
         normalization = 1. / np.max(np.abs(df["current_density_time"])) if normalize else 1.0
@@ -34,7 +34,7 @@ def add_current_density_to_plot(df, ax, label=None, sigma=None, normalize=True, 
         if normalize:
             y_data /= np.max(y_data)
     #y_data *= -1 # only the magnitude matters, but the inverted sign looks better
-    ax.plot(times, y_data, label=label, **kwargs)
+    ax.plot(times, y_data - shift, label=label, **kwargs)
     if sigma is not None:
         worst_case = 4 * sigma * normalization
         ax.fill_between(times, y_data - worst_case, y_data + worst_case, alpha=0.2, **kwargs)

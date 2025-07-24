@@ -5,9 +5,9 @@ __ap.append()
 from create_zoom import *
 from get_data import *
 SYSTEM = "sc"#"sc"#"free_electrons3"
-main_df = load_panda("lattice_cut", f"test3/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=10000, 
-                                         g=0.5, 
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=8000, 
+                                         g=2, 
                                          U=0, 
                                          E_F=0,
                                          omega_D=0.01))

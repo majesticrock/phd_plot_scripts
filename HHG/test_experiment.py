@@ -15,15 +15,15 @@ from legend import *
 
 from scipy.fft import rfft, rfftfreq
 
-BASE_SHIFT = 10.
-DIR = "test"
+BASE_SHIFT = 5.
+DIR = "cascade_cl1"
 MODEL = "PiFlux"
 v_F = 1.5e6
-W = 300
-T = 300
+W = 200
+T = 0
 E_F = 118
 
-tau_diag_values = [30]  # Add more values as needed
+tau_diag_values = [10, 20, 30, 50]  # Add more values as needed
 t0_values = [0]  # You can loop over multiple t0 as well
 
 colors = plt.cm.viridis(np.linspace(0, 1, len(tau_diag_values)))
@@ -81,10 +81,10 @@ for tau_idx, TAU_DIAG in enumerate(tau_diag_values):
         label = f"$\\tau_\\mathrm{{diag}} = {TAU_DIAG}$ ps"
 
         # Time domain plots
-        axes[0].plot(times2, plot_data_combined, label=label, color=color)
-        cdt.add_current_density_to_plot(main_df, axes[1], normalize=False, color=color)
+        axes[0].plot(times2, plot_data_combined - 0.03 * tau_idx * BASE_SHIFT, label=label, color=color)
+        cdt.add_current_density_to_plot(main_df, axes[1], normalize=False, color=color, shift=0.03 * tau_idx * BASE_SHIFT)
         cdt.add_current_density_to_plot(main_df, axes[2], substract=lambda t: combined_inter(t, t0_unitless), 
-                                        label=label, normalize=False, color=color)
+                                        label=label, normalize=False, color=color, shift=0.03 * tau_idx * BASE_SHIFT)
 
         # Frequency domain (FFT)
         n = len(times2) * 4
