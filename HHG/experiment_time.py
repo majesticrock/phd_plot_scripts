@@ -18,7 +18,7 @@ from scipy.fft import rfft, rfftfreq
 DIR = "icelake_cl1"
 MODEL = "PiFlux"
 v_F = 1.5e6
-W = 400
+W = 200
 TAU_DIAG = 50
 
 df_A = load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz", 
