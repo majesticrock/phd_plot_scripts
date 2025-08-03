@@ -18,7 +18,7 @@ from scipy.fft import rfft, rfftfreq
 MAX_FREQ = 20
 BASE_SHIFT = 2.5
 TIME_RATIO = 0.03
-DIR = "icelake_cl1"
+DIR = "cascade_prec"
 MODEL = "PiFlux"
 v_F = 1.5e6
 W = 200
@@ -27,7 +27,7 @@ E_F = 118
 TAU_OFFDIAG=-1
 TAU_DIAG=-1
 
-tau_diag_values = [10, 20, 30, 50]  # Add more values as needed
+tau_diag_values = [10, 20, 50]  # Add more values as needed
 t0_values = [0]  # You can loop over multiple t0 as well
 
 colors = plt.cm.viridis(np.linspace(0, 1, len(tau_diag_values)))

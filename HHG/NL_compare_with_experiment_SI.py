@@ -116,7 +116,7 @@ laser_plot = -(LASER_DATA[1] + LASER_DATA[2])
 
 for i in range(3):
     axes[i].plot(exp_times, -exp_signals[i] / np.max(exp_signals[i]), label="Experimental data")
-    axes[i].plot(laser_times, laser_plot / np.max(laser_plot), label="Laser pulse", linestyle='--')
+    #axes[i].plot(laser_times, laser_plot / np.max(laser_plot), label="Laser pulse", linestyle='--')
     
     exp_fft = np.abs(rfft(exp_signals[i][exp_fft_mask], n_exp))**2
     axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experimental data")
