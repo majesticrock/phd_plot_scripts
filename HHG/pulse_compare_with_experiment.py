@@ -10,7 +10,7 @@ from get_data import *
 from legend import *
 
 # Fixed Parameters
-DIR = "icelake_cl1"
+DIR = "cascade_new"
 MODEL = "PiFlux"
 v_F = 1.5e6
 T = 300
@@ -18,12 +18,13 @@ E_F = 118
 TAU_OFFDIAG = -1
 
 # Parameter grids
-W_values = [200, 300, 400, 500]
-TAU_DIAG_values = [10, 20, 30, 50]
+W_values = [150, 200, 250, 300]
+TAU_DIAG_values = [10, 15, 20, 25]
 T_AVE_values = [0.025, 0.035, 0.05]
 
-# Experimental data
-EXPERIMENTAL_DATA = np.loadtxt("../raw_data_phd//HHG/emitted_signals_in_the_time_domain.dat").transpose()
+import os
+EXP_PATH = "../raw_data_phd_HHG/" if os.name == "nt" else "data/"
+EXPERIMENTAL_DATA = np.loadtxt(f"{EXP_PATH}HHG/emitted_signals_in_the_time_domain.dat").transpose()
 exp_times_raw = 15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
 exp_signals = np.array([EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[2], EXPERIMENTAL_DATA[1]])  # A, B, A+B
 

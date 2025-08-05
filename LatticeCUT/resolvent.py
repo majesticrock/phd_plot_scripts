@@ -5,9 +5,9 @@ __ap.append()
 from create_zoom import *
 from get_data import *
 SYSTEM = "sc"#"sc"#"free_electrons3"
-main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=8000, 
-                                         g=2, 
+main_df = load_panda("lattice_cut", f"{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=12000, 
+                                         g=1.5, 
                                          U=0, 
                                          E_F=0,
                                          omega_D=0.01))
@@ -15,7 +15,7 @@ main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(main_df, ignore_first=5, ignore_last=60)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=15, ignore_last=60)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
