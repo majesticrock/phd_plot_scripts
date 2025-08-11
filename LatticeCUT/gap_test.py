@@ -6,13 +6,13 @@ from get_data import *
 
 fig, ax = plt.subplots()
 
-SYSTEM = 'sc'#'sc'#'free_electrons3'
+SYSTEM = 'hc'
 main_df = load_panda('lattice_cut', f'test/{SYSTEM}', 'gap.json.gz',
-                    **lattice_cut_params(N=4000, 
-                                         g=1, 
+                    **lattice_cut_params(N=2000, 
+                                         g=2, 
                                          U=0, 
                                          E_F=0,
-                                         omega_D=0.01))
+                                         omega_D=0.05))
 
 energy_space = main_df['energies']
 ax.plot(energy_space, main_df['Delta'], 'k-', marker='x', markevery=20)
