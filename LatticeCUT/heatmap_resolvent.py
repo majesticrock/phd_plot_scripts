@@ -6,9 +6,9 @@ from HeatmapPlotter import BUILD_DIR, FILE_ENDING, G_MAX_LOAD, G_MAX_PLOT
 from legend import *
 import matplotlib.pyplot as plt
 
-N=12000
+N=16000
 DOS="sc"
-OMEGA_D=0.02
+OMEGA_D=0.01
 E_F=0.0
 
 all_data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz")

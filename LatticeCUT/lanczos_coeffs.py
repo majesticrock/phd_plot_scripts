@@ -5,9 +5,10 @@ __ap.append()
 
 from get_data import *
 SYSTEM = "sc"#"sc"#"free_electrons3"
-main_df = load_panda("lattice_cut", f"test3/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=8000, 
-                                         g=0.25, 
+SYSTEM = "sc"#"sc"#"free_electrons3"
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=1.7, 
                                          U=0, 
                                          E_F=0,
                                          omega_D=0.01))
@@ -15,8 +16,8 @@ main_df = load_panda("lattice_cut", f"test3/{SYSTEM}", "resolvents.json.gz",
 a_inf = (main_df["continuum_boundaries"][0]**2 + main_df["continuum_boundaries"][1]**2) * 0.5
 b_inf = (main_df["continuum_boundaries"][1]**2 - main_df["continuum_boundaries"][0]**2) * 0.25
 
-A = main_df["resolvents.amplitude_SC"][0]["a_i"]
-B = main_df["resolvents.amplitude_SC"][0]["b_i"]
+A = main_df["resolvents.phase_SC"][0]["a_i"]
+B = main_df["resolvents.phase_SC"][0]["b_i"]
 
 fig, ax = plt.subplots()
 ax.plot(A, ls="-", marker='x', label="$a_i$")
