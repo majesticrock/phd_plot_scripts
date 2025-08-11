@@ -26,19 +26,25 @@ T_AVE_values = [0.025, 0.035, 0.05]
 import os
 EXP_PATH = "../raw_data_phd_HHG/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(f"{EXP_PATH}HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times_raw = 15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
+exp_times_raw = 14 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
 exp_signals = np.array([EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[2]])  # A+B, A, B
 
 NORMALIZATION_EXPERIMENT = np.max(np.abs(EXPERIMENTAL_DATA[1]))
 exp_signals /= NORMALIZATION_EXPERIMENT
 
-
-summed_diffs = np.zeros((len(W_values), len(TAU_DIAG_values), len(T_AVE_values)))
+def gaussian(x, mu=0, sigma=1):
+    return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
 
 def compute_simulation_signal(times, df, T_AVE):
+    sigma = (T_AVE * 2 * np.pi * 0.6582119569509065 / df["photon_energy"]) 
     N = int(len(times) * (T_AVE * 2 * np.pi * 0.6582119569509065 / df["photon_energy"]))
-    return -np.convolve(df["current_density_time"], np.ones(N)/N, mode='same')
+    __data = -df["current_density_time"]
+    #__data = -np.diff(__data, append=0.0) / (times[1] - times[0])
+    __kernel = np.ones(N)/N#gaussian(times[len(times)//4:3*len(times)//4], times[len(times)//2], sigma) #np.ones(N)/N
+    
+    return np.convolve(__data, __kernel, mode='same')
 
+summed_diffs = np.zeros((len(W_values), len(TAU_DIAG_values), len(T_AVE_values)))
 for i, W in enumerate(W_values):
     for j, TAU_DIAG in enumerate(TAU_DIAG_values):
         dfs = [

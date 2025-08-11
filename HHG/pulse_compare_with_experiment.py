@@ -25,10 +25,21 @@ T_AVE_values = [0.025, 0.035, 0.05]
 import os
 EXP_PATH = "../raw_data_phd_HHG/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(f"{EXP_PATH}HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times_raw = 15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
+exp_times_raw = 16 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
 exp_signals = np.array([EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[2], EXPERIMENTAL_DATA[1]])  # A, B, A+B
 
-# Helper to create each figure
+def gaussian(x, mu=0, sigma=1):
+    return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
+
+def compute_simulation_signal(times, df, T_AVE):
+    sigma = (T_AVE * 2 * np.pi * 0.6582119569509065 / df["photon_energy"]) 
+    N = int(len(times) * (T_AVE * 2 * np.pi * 0.6582119569509065 / df["photon_energy"]))
+    __data = -df["current_density_time"]
+    #__data = -np.diff(__data, append=0.0) / (times[1] - times[0])
+    __kernel = gaussian(times[len(times)//4:3*len(times)//4], times[len(times)//2], sigma) #np.ones(N)/N
+    
+    return np.convolve(__data, __kernel, mode='same')
+
 def create_figure_and_plot(signal_index, title_label):
     fig, axes = plt.subplots(len(W_values), len(TAU_DIAG_values), figsize=(16, 12), sharex=True, sharey=True)
     axes = np.array(axes).reshape(len(W_values), len(TAU_DIAG_values))
@@ -54,11 +65,8 @@ def create_figure_and_plot(signal_index, title_label):
                 
             for T_AVE in T_AVE_values:
                 times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
-
-                N = int(len(times) * (T_AVE * 2 * np.pi * 0.6582119569509065 / df["photon_energy"]))
-                signal = np.convolve(-df["current_density_time"], np.ones(N)/N, mode='same')
-
-                    
+                signal = compute_simulation_signal(times, df, T_AVE)
+     
                 label = f"$t_\\mathrm{{ave}}={T_AVE}$"
                 ax.plot(times, signal / np.max(signal), label=label)
 
