@@ -13,54 +13,60 @@ main_df = load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "occupations.json.gz",
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=275, 
                                   field_amplitude=1., photon_energy=1., 
                                   tau_diag=10, tau_offdiag=-1, t0=0))
-time = 0
 
-data_top = main_df["upper_band"][time]
-data_bottom = main_df["lower_band"][time]
+#main_df = load_panda("HHG", f"{DIR}/quench_laser/PiFlux", "occupations.json.gz", 
+#                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=275, 
+#                                  field_amplitude=1.6, photon_energy=5.25, 
+#                                  tau_diag=10, tau_offdiag=-1, t0=8))
 
-nx, nz = data_top.shape
-x = np.linspace(0, np.pi, nx)
-z = np.linspace(-np.pi, np.pi, nz)
-X, Z = np.meshgrid(x, z, indexing='ij')
+for i, laser in enumerate(main_df["laser_function"]):
+    print(i, ":", laser)
+print("Select time:")
+time = int(input())
 
-# 5.889401182228545meV = photon energy
-Y_surf = 275 * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2)
-Y_surf_neg = -Y_surf
+while time >= 0:
+    data_top = main_df["upper_band"][time]
+    data_bottom = main_df["lower_band"][time]
 
-# Single normalization for both datasets (0 to 1)
-norm = plt.Normalize(vmin=0, vmax=1)
+    nx, nz = data_top.shape
+    x = np.linspace(0, np.pi, nx)
+    z = np.linspace(-np.pi, np.pi, nz)
+    X, Z = np.meshgrid(x, z, indexing='ij')
 
-# Diverging colormap (example: coolwarm)
-cmap = cm.coolwarm
+    # 5.889401182228545meV = photon energy
+    #Y_surf = 275 * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2)
+    Y_surf = main_df["dispersion"][time]
+    Y_surf_neg = -Y_surf
 
-# Facecolors for both surfaces using the same colormap
-facecolors_top = cmap(norm(data_top))
-facecolors_bottom = cmap(norm(data_bottom))
+    norm = plt.Normalize(vmin=0, vmax=1)
+    cmap = cm.viridis
 
-fig = plt.figure(figsize=(9, 7))
-ax = fig.add_subplot(111, projection='3d')
+    facecolors_top = cmap(norm(data_top))
+    facecolors_bottom = cmap(norm(data_bottom))
 
-# Top surface (+sqrt)
-ax.plot_surface(X, Z, Y_surf,
-                facecolors=facecolors_top,
-                rstride=1, cstride=1,
-                linewidth=0, antialiased=False)
+    fig = plt.figure(figsize=(9, 7))
+    ax = fig.add_subplot(111, projection='3d')
 
-# Bottom surface (-sqrt)
-ax.plot_surface(X, Z, Y_surf_neg,
-                facecolors=facecolors_bottom,
-                rstride=1, cstride=1,
-                linewidth=0, antialiased=False)
+    # Top surface (+sqrt)
+    ax.plot_surface(X, Z, Y_surf,
+                    facecolors=facecolors_top,
+                    rstride=1, cstride=1,
+                    linewidth=0, antialiased=False)
 
-# Single shared colorbar
-mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
-mappable.set_array(np.concatenate([data_top.ravel(), data_bottom.ravel()]))
-fig.colorbar(mappable, ax=ax, shrink=0.6, pad=0.1, label='Occupation')
+    # Bottom surface (-sqrt)
+    ax.plot_surface(X, Z, Y_surf_neg,
+                    facecolors=facecolors_bottom,
+                    rstride=1, cstride=1,
+                    linewidth=0, antialiased=False)
 
-# Labels and view
-ax.set_xlabel('$k_x$')
-ax.set_ylabel('$k_z$')
-ax.set_zlabel('$E(k_x, \\pi / 2, k_z)$ (meV)')
-ax.view_init(elev=30, azim=-60)
+    mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
+    mappable.set_array(np.concatenate([data_top.ravel(), data_bottom.ravel()]))
+    fig.colorbar(mappable, ax=ax, shrink=0.6, pad=0.1, label='Occupation')
 
-plt.show()
+    ax.set_xlabel('$k_x$')
+    ax.set_ylabel('$k_z$')
+    ax.set_zlabel('$E(k_x, \\pi / 2, k_z)$ (meV)')
+    ax.view_init(elev=47, azim=-30)
+
+    plt.show()
+    time = int(input())
