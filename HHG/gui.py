@@ -301,10 +301,11 @@ class ParamSelector(tk.Tk):
         
         if self.frequency_fig is not None:
             self.frequency_ax.legend()
-            self.frequency_fig.show()
+            #self.frequency_fig.show()
         if self.time_fig is not None:
             self.time_ax.legend()
-            self.time_fig.show()
+            #self.time_fig.show()
+        plt.show()
 
     def clear_plots(self):
         self.frequency_fig = None

@@ -17,14 +17,16 @@ CBAR_EXP = 2
 # Settings the importer
 BUILD_DIR = "plots/"
 FILE_ENDING = ".pdf"
-G_MAX_LOAD = 2.
-G_MAX_PLOT = 2.
+G_MAX_LOAD = 1.5
+G_MAX_PLOT = 1.5
 
-__BEGIN__OFFSET__ = 1e-6
+__BEGIN__OFFSET__ = 1e-4
 __RANGE__ = 1e-5
-__SECOND_BEGIN__ = 1e-8
+__SECOND_BEGIN__ = 1e-7
 __SECOND_RANGE__ = 1e-6
+__PEAK_PROMINCE__ = 0.05
 
+__INITIAL_IMAG__ = 1e-4j
 __FIT_COMPLEX_SHIFT__ = 1e-8j
 __CONTINUUM_CUT_SHIFT__ = 1e-5
 
@@ -35,7 +37,7 @@ def derivative_gaussian_bell(x, mu, sigma):
     return -((x - mu) / sigma**2) * gaussian_bell(x, mu, sigma)
 
 def is_phase_peak(peak):
-    return abs(peak) < 1e-4
+    return abs(peak) < 2e-4
 
 def extract_model_settings(ds):
     return f"dos={ds['dos_name']}  omega_D={ds['omega_D']}  g={ds['g']}  U={ds['U']}  E_F={ds['E_F']}"
@@ -45,10 +47,10 @@ class HeatmapPlotter:
                  energy_range=(1e-10, 2.5), scale_energy_by_gaps=False):
         self.data_frame = data_frame_param.sort_values(parameter_name).reset_index(drop=True)
         
-        self.y = np.linspace(energy_range[0], energy_range[1], 10000) # meV
+        self.y = np.linspace(energy_range[0], energy_range[1], 5000) # meV
         self.x = (self.data_frame[parameter_name]).to_numpy()
         self.scale_energy_by_gaps = scale_energy_by_gaps
-        self.resolvents = [cf.ContinuedFraction(pd_row, messages=False, ignore_first=70, ignore_last=110) for index, pd_row in self.data_frame.iterrows()]
+        self.resolvents = [cf.ContinuedFraction(pd_row, messages=False, ignore_first=70, ignore_last=150) for index, pd_row in self.data_frame.iterrows()]
         self.max_gaps   = np.array([2 * gap for gap in self.data_frame["Delta_max"]]) # meV
         self.true_gaps  = np.array([float(t_gap[0]) for t_gap in self.data_frame["continuum_boundaries"]]) # meV
         self.N_data = len(self.max_gaps)
@@ -75,10 +77,9 @@ class HeatmapPlotter:
     def identify_modes(self, spectral, pos):
         if self.max_gaps[pos] == 0:
             return np.array([])
-        indizes = find_peaks(spectral)[0] #, distance=int(1 / (self.y[1] - self.y[0]))
+        indizes = find_peaks(spectral, prominence=__PEAK_PROMINCE__)[0]
         positions = np.array([self.__scale_if__(self.y[i], pos) for i in indizes])
         positions = positions[positions < self.true_gaps[pos] - __CONTINUUM_CUT_SHIFT__]
-        print(positions)
         positions[positions < 1e-4] = 0
         return positions
 
@@ -162,13 +163,13 @@ class HeatmapPlotter:
             
             __phase_result = [ spa.analyze_peak(__phase__real, __phase__imag, 
                                                 peak_position         = peak_position,
-                                                range                 = __RANGE__ if not is_phase_peak(peak_position) else 0.5 * min(1, 0.5 * self.true_gaps[i]),
-                                                begin_offset          = __BEGIN__OFFSET__ if not is_phase_peak(peak_position) else min(1, 0.5 * self.true_gaps[i]),
+                                                range                 = __RANGE__ if not is_phase_peak(peak_position) else __RANGE__ * (1 if self.data_frame["g"].iloc[i] > 0.8 else 50),
+                                                begin_offset          = __BEGIN__OFFSET__ if not is_phase_peak(peak_position) else peak_position + __BEGIN__OFFSET__* (1 if self.data_frame["g"].iloc[i] > 0.8 else 50),
                                                 reversed              = self.__decide_if_to_reverse__(__i, __phase_peak_positions[i], self.true_gaps[i]),
                                                 lower_continuum_edge  = self.true_gaps[i],
                                                 ) 
                                 for __i, peak_position in enumerate(__phase_peak_positions[i]) ]
-            
+
             for j, result in enumerate(__phase_result):
                 if is_phase_peak(result.position):
                     # The data for small g can be fitted in accordance to expecation
@@ -182,7 +183,7 @@ class HeatmapPlotter:
                         print(result)
                         print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, __phase_peak_positions[i], self.true_gaps[i]), "\n")
                 else:
-                    if abs(result.slope.nominal_value + 1) > 0.05:
+                    if abs(result.slope.nominal_value + 1) > 0.05: 
                         __phase_result[j] = spa.analyze_peak(__phase__real, __phase__imag, 
                                                 peak_position         = result.position,
                                                 range                 = __SECOND_RANGE__,
@@ -195,21 +196,18 @@ class HeatmapPlotter:
                         print("WARNING in Phase! Expected slope of '-1' does not match fitted slope!")
                         print(result)
                         print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, __phase_peak_positions[i], self.true_gaps[i]), "\n")
-                        print(result.position, __SECOND_RANGE__, __SECOND_BEGIN__,
-                                self.__decide_if_to_reverse__(j, __phase_peak_positions[i], self.true_gaps[i]),
-                                self.true_gaps[i])
             
             # There are numerical artifacts in the data that have tiny weights which we want to remove here
             # These vanish with increasing numerical accuracy, so they are certainly not physical
             __higgs_result = [result for result in __higgs_result if result.weight >= 5e-6] 
             __phase_result = [result for result in __phase_result if result.weight >= 5e-6 or is_phase_peak(result.position)] 
             
-            __higgs_peak_positions[i] =  [ result.position     for result in __higgs_result  ]
-            __higgs_peak_weights.append( [ result.weight       for result in __higgs_result  ])
+            __higgs_peak_positions[i] =  [ result.position      for result in __higgs_result ]
+            __higgs_peak_weights.append( [ result.weight        for result in __higgs_result ])
             __higgs_peak_errors.append(  [ result.weight_error  for result in __higgs_result ])
             
-            __phase_peak_positions[i] =  [ result.position     for result in __phase_result  ]
-            __phase_peak_weights.append( [ result.weight       for result in __phase_result  ])
+            __phase_peak_positions[i] =  [ result.position      for result in __phase_result ]
+            __phase_peak_weights.append( [ result.weight        for result in __phase_result ])
             __phase_peak_errors.append(  [ result.weight_error  for result in __phase_result ])
         
         return (__higgs_peak_positions, __higgs_peak_weights, __higgs_peak_errors, 
@@ -224,8 +222,8 @@ class HeatmapPlotter:
                 spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
 
     def plot(self, axes, cmap, cbar_max = CBAR_MAX, labels=True):
-        spectral_functions_higgs = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + 1e-6j, "amplitude_SC") for __i, res in enumerate(self.resolvents)]).transpose()
-        spectral_functions_phase = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + 1e-6j, "phase_SC")     for __i, res in enumerate(self.resolvents)]).transpose()
+        spectral_functions_higgs = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, "amplitude_SC") for __i, res in enumerate(self.resolvents)]).transpose()
+        spectral_functions_phase = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, "phase_SC")     for __i, res in enumerate(self.resolvents)]).transpose()
 
         if not self.scale_energy_by_gaps:
             (__higgs_peak_positions, __higgs_peak_weights, __higgs_peak_errors,
@@ -318,7 +316,7 @@ class HeatmapPlotter:
     
 def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='inferno', cbar_max=CBAR_MAX, energy_range=None, fig=None, axes=None):
     if energy_range is None:
-        energy_range = (0., 0.1) if not scale_energy_by_gaps else (0., 1.95)
+        energy_range = (0., 0.5) if not scale_energy_by_gaps else (0., 1.95)
     if fig is None:
         assert(axes is None)
         fig, axes = plt.subplots(nrows=2, ncols=len(tasks), figsize=(12.8 if len(tasks) > 2 else 6.4, 4.8), sharex=True, sharey=True)
