@@ -29,7 +29,7 @@ spectral_phase = resolvents.spectral_density(lower_continuum_edge + np.exp(w_log
 spectral = np.log(spectral_higgs )
 
 ax.plot(w_log, spectral, label="Data")
-popt, pcov = ez_linear_fit(w_log, spectral, ax, label="Fit", ls="--")
+popt, pcov, line = ez_linear_fit(w_log, spectral, ax, label="Fit", ls="--")
 
 u_slope  = ufloat(popt[0], np.sqrt(pcov[0][0]))
 u_offset = ufloat(popt[1], np.sqrt(pcov[1][1]))

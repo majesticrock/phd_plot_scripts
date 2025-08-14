@@ -44,7 +44,7 @@ plot_data = nc.query("coulomb_scaling == 0 & lambda_screening == 0").sort_values
 E_F = plot_data["E_F"].iloc[0]
 x_data = x_func(plot_data["g"], 0)
 ax.plot(x_data, np.log(plot_data["Delta_max"]), "X", color="C0", label="No Coulomb")
-popt, pcov = ez_linear_fit(x_data, np.log(plot_data["Delta_max"]), ax, 
+popt, pcov, line = ez_linear_fit(x_data, np.log(plot_data["Delta_max"]), ax, 
               x_bounds=[0.8 * min(x_data), 1.2 * max(x_data)], color="C0")
 print(popt)
 
@@ -55,7 +55,7 @@ plot_data = ls.query("coulomb_scaling == 1 & lambda_screening == 1").sort_values
 E_F = plot_data["E_F"].iloc[0]
 x_data = x_func(plot_data["g"], mu_star(E_F, am_mu(screening_factor)))
 ax.plot(x_data, np.log(plot_data["Delta_max"]), "X", color="C1", label=r"$\lambda=1$")
-popt, pcov = ez_linear_fit(x_data, np.log(plot_data["Delta_max"]), ax, 
+popt, pcov, line = ez_linear_fit(x_data, np.log(plot_data["Delta_max"]), ax, 
               x_bounds=[0.8 * min(x_data), 1.2 * max(x_data)], color="C1")
 print(popt)
 
@@ -65,7 +65,7 @@ plot_data = ss.query("coulomb_scaling == 1 & lambda_screening == 0.0001").sort_v
 E_F = plot_data["E_F"].iloc[0]
 x_data = x_func(plot_data["g"], 2.85 * mu_star(E_F, am_mu(1e-4 * screening_factor)))
 ax.plot(x_data, np.log(plot_data["Delta_max"]), "X", color="C2", label=r"$\lambda=10^{-4}$")
-popt, pcov = ez_linear_fit(x_data, np.log(plot_data["Delta_max"]), ax, 
+popt, pcov, line = ez_linear_fit(x_data, np.log(plot_data["Delta_max"]), ax, 
               x_bounds=[0.8 * min(x_data), 1.2 * max(x_data)], color="C2")
 print(popt)
 

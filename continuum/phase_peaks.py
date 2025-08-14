@@ -36,7 +36,7 @@ ax.plot(screenings, peak_positions, "o", label=r"$\omega_P$")
 
 from ez_fit import ez_linear_fit
 cut = slice(0, 45)
-popt, pcov = ez_linear_fit(screenings[cut], peak_positions[cut], ax, x_bounds=(min(screenings), max(screenings)), label=r"Fit $a \ln(\omega) + b$")
+popt, pcov, line = ez_linear_fit(screenings[cut], peak_positions[cut], ax, x_bounds=(min(screenings), max(screenings)), label=r"Fit $a \ln(\omega) + b$")
 ax.text(0.3, 0.9, f"$a = {popt[0]:1.5f} \pm {np.sqrt(pcov[0][0]):1.5f}$", transform=ax.transAxes)
 ax.text(0.3, 0.8, f"$b = {popt[1]:1.5f} \pm {np.sqrt(pcov[1][1]):1.5f}$", transform=ax.transAxes)
 ax.set_xlabel(r'$\ln (\lambda)$')
