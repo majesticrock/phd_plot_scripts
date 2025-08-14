@@ -6,10 +6,10 @@ from create_zoom import *
 from get_data import *
 from scipy.signal import find_peaks
 
-SYSTEM = "sc"#"sc"#"free_electrons3"
+SYSTEM = "fcc"
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=1.5, 
+                                         g=1.1, 
                                          U=0, 
                                          E_F=0,
                                          omega_D=0.05))
@@ -39,14 +39,14 @@ plotter.plot(w_lin.real, A_higgs, label="Higgs")
 
 resolvents.mark_continuum(ax)
 
-find_peaks_result = find_peaks(A_phase, prominence=0.01)[0]
-for res in find_peaks_result:
-    x = w_lin[res].real
-    ax.axvline(x, c="red", ls=":")
-find_peaks_result = find_peaks(A_higgs, prominence=0.01)[0]
-for res in find_peaks_result:
-    x = w_lin[res].real
-    ax.axvline(x, c="green", ls=":")
+#find_peaks_result = find_peaks(A_phase, prominence=0.01)[0]
+#for res in find_peaks_result:
+#    x = w_lin[res].real
+#    ax.axvline(x, c="red", ls=":")
+#find_peaks_result = find_peaks(A_higgs, prominence=0.01)[0]
+#for res in find_peaks_result:
+#    x = w_lin[res].real
+#    ax.axvline(x, c="green", ls=":")
 
 ax.set_ylim(-0.05, 5)
 ax.set_xlim(np.min(w_lin.real), np.max(w_lin.real))

@@ -7,7 +7,7 @@ from legend import *
 import matplotlib.pyplot as plt
 
 N=16000
-DOS="sc"
+DOS="fcc"
 OMEGA_D=0.05
 E_F=0.0
 
