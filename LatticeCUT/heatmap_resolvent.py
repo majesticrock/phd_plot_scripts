@@ -7,8 +7,8 @@ from legend import *
 import matplotlib.pyplot as plt
 
 N=16000
-DOS="fcc"
-OMEGA_D=0.05
+DOS="sc"
+OMEGA_D=0.02
 E_F=0.0
 
 all_data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz")

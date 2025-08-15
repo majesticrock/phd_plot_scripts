@@ -29,8 +29,8 @@ X, Z = np.meshgrid(x, z, indexing='ij')
 laser_function = np.array(main_df["laser_function"])
 time_steps = np.arange(len(laser_function))
 
-norm = plt.Normalize(vmin=0, vmax=1)
-cmap = cm.viridis
+norm = plt.Normalize(vmin=-1, vmax=1)
+cmap = cm.PiYG
 
 from matplotlib import gridspec
 fig = plt.figure(figsize=(14, 7))
@@ -43,7 +43,7 @@ ax2d = fig.add_subplot(gs[1])
 ax3d.set_xlabel('$k_x$')
 ax3d.set_ylabel('$k_z$')
 ax3d.set_zlabel('$E(k_x, \\pi / 2, k_z)$ (meV)')
-ax3d.view_init(elev=47, azim=-30)
+ax3d.view_init(elev=63, azim=-18)
 
 ax2d.plot(time_steps, laser_function, color='blue', label="$\\tilde{A}(t)$")
 ax2d.plot(time_steps[:-1], -3 * np.diff(laser_function), color="k", ls="--", label="$\\tilde{E}(t)$")
@@ -55,30 +55,22 @@ ax2d.legend()
 
 mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
 mappable.set_array([])
-fig.colorbar(mappable, ax=ax3d, shrink=0.6, pad=0.1, label='Occupation')
+fig.colorbar(mappable, ax=ax3d, shrink=0.6, pad=0.1, label='Change in occupation')
 
 # 5.889401182228545meV = photon energy
 Y_surf = 275 * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2)
-Y_surf_neg = -Y_surf
+equilibrium_data = main_df["upper_band"][0]
 
-def shift_occupations_back(data, laser_shift):
-    nz = data.shape[1]
-    dz = (2 * np.pi) / nz
-    shift_cols = int(round(laser_shift / dz))
-    return np.roll(data, -shift_cols, axis=1)
 
 def update(frame):
     for coll in ax3d.collections[:]:
         coll.remove()
 
-    data_top = main_df["upper_band"][frame]
-    data_bottom = main_df["lower_band"][frame]
-    facecolors_top = cmap(norm(data_top))
-    facecolors_bottom = cmap(norm(data_bottom))
+    data = -equilibrium_data + main_df["upper_band"][frame]
+    
+    facecolors = cmap(norm(data))
 
-    ax3d.plot_surface(X, Z, Y_surf, facecolors=facecolors_top,
-                      rstride=1, cstride=1, linewidth=0, antialiased=False)
-    ax3d.plot_surface(X, Z, Y_surf_neg, facecolors=facecolors_bottom,
+    ax3d.plot_surface(X, Z, Y_surf, facecolors=facecolors,
                       rstride=1, cstride=1, linewidth=0, antialiased=False)
 
     ax3d.set_title(f"Frame {frame+1}/{len(main_df['upper_band'])}")
@@ -86,6 +78,6 @@ def update(frame):
     vertical_line.set_xdata([frame])
 
 ani = FuncAnimation(fig, update, frames=len(main_df["upper_band"]), repeat=True)
-ani.save("animation.gif", writer="pillow", fps=15)
+ani.save("change.gif", writer="pillow", fps=15)
 
 #plt.show()

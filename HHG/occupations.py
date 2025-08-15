@@ -29,13 +29,12 @@ while time >= 0:
     data_bottom = main_df["lower_band"][time]
 
     nx, nz = data_top.shape
-    x = np.linspace(0, np.pi, nx)
-    z = np.linspace(-np.pi, np.pi, nz)
+    x = np.linspace(0, np.pi, nx, endpoint=False)
+    z = np.linspace(0, np.pi, nz, endpoint=False)
     X, Z = np.meshgrid(x, z, indexing='ij')
 
     # 5.889401182228545meV = photon energy
-    #Y_surf = 275 * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2)
-    Y_surf = main_df["dispersion"][time]
+    Y_surf = 275 * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2)
     Y_surf_neg = -Y_surf
 
     norm = plt.Normalize(vmin=0, vmax=1)
