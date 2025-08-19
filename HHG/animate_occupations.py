@@ -8,17 +8,24 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-DIR = "test"
+BAND_WIDTH=300
 
+DIR = "local"
 main_df = load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "occupations.json.gz", 
-                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=275, 
-                                  field_amplitude=0.1, photon_energy=1., 
-                                  tau_diag=10, tau_offdiag=-1, t0=0))
+                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
+                                  field_amplitude=1, photon_energy=1., 
+                                  tau_diag=15, tau_offdiag=-1, t0=0))
 
+#DIR = "test"
 #main_df = load_panda("HHG", f"{DIR}/quench_laser/PiFlux", "occupations.json.gz", 
-#                     **hhg_params(T=300, E_F=250, v_F=1.5e6, band_width=275, 
+#                     **hhg_params(T=300, E_F=250, v_F=1.5e6, band_width=BAND_WIDTH, 
 #                                  field_amplitude=1.6, photon_energy=5.25, 
 #                                  tau_diag=10, tau_offdiag=-1, t0=8))
+
+#main_df = load_panda("HHG", f"{DIR}/powerlaw1_laser/PiFlux", "occupations.json.gz", 
+#                     **hhg_params(T=300, E_F=250, v_F=1.5e6, band_width=BAND_WIDTH, 
+#                                  field_amplitude=1.6, photon_energy=5.25, 
+#                                  tau_diag=15, tau_offdiag=-1, t0=8))
 
 # Meshgrid for surfaces
 nx, nz = main_df["upper_band"][0].shape
@@ -40,10 +47,31 @@ fig.subplots_adjust(left=0.03, right=0.97, wspace=0.15)
 ax3d = fig.add_subplot(gs[0], projection='3d')
 ax2d = fig.add_subplot(gs[1])
 
-ax3d.set_xlabel('$k_x$')
-ax3d.set_ylabel('$k_z$')
-ax3d.set_zlabel('$E(k_x, \\pi / 2, k_z)$ (meV)')
+ax3d.set_xlabel('$k_x$', labelpad=15)
+ax3d.set_ylabel('$k_z(t)$', labelpad=15)
+ax3d.set_zlabel('$E(k_x, \\pi / 2, k_z(t))$ (eV)', labelpad=15)
 ax3d.view_init(elev=47, azim=-30)
+
+import matplotlib.ticker as ticker
+def pi_formatter(x, pos):
+    frac = x / np.pi
+    if np.isclose(frac, 0):
+        return "0"
+    elif np.isclose(frac, 1):
+        return r"$\pi$"
+    elif np.isclose(frac, 0.5):
+        return r"$\pi/2$"
+    elif np.isclose(frac, 0.25):
+        return r"$\pi/4$"
+    elif np.isclose(frac, 0.75):
+        return r"$3\pi/4$"
+    else:
+        return f"{frac:.2f}$\pi$"
+    
+ax3d.xaxis.set_major_locator(ticker.MultipleLocator(np.pi/2))
+ax3d.xaxis.set_major_formatter(ticker.FuncFormatter(pi_formatter))
+ax3d.yaxis.set_major_locator(ticker.MultipleLocator(np.pi/2))
+ax3d.yaxis.set_major_formatter(ticker.FuncFormatter(pi_formatter))
 
 ax2d.plot(time_steps, laser_function, color='blue', label="$\\tilde{A}(t)$")
 ax2d.plot(time_steps[:-1], -3 * np.diff(laser_function), color="k", ls="--", label="$\\tilde{E}(t)$")
@@ -58,14 +86,8 @@ mappable.set_array([])
 fig.colorbar(mappable, ax=ax3d, shrink=0.6, pad=0.1, label='Occupation')
 
 # 5.889401182228545meV = photon energy
-Y_surf = 275 * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2)
+Y_surf = (2. / np.sqrt(12.)) * BAND_WIDTH * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2) / 1000
 Y_surf_neg = -Y_surf
-
-def shift_occupations_back(data, laser_shift):
-    nz = data.shape[1]
-    dz = (2 * np.pi) / nz
-    shift_cols = int(round(laser_shift / dz))
-    return np.roll(data, -shift_cols, axis=1)
 
 def update(frame):
     for coll in ax3d.collections[:]:
@@ -85,7 +107,7 @@ def update(frame):
 
     vertical_line.set_xdata([frame])
 
-ani = FuncAnimation(fig, update, frames=len(main_df["upper_band"]), repeat=True)
-ani.save("animation.gif", writer="pillow", fps=15)
+ani = FuncAnimation(fig, update, frames=len(main_df["upper_band"]), repeat=True, interval=33)
+#ani.save("animation.gif", writer="pillow", fps=15)
 
-#plt.show()
+plt.show()

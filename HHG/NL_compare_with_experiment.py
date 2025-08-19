@@ -14,14 +14,14 @@ from legend import *
 from scipy.fft import rfft, rfftfreq
 
 MAX_FREQ = 20
-DIR = "icelake_cl1"
+DIR = "cascade_prec"
 MODEL = "PiFlux"
 v_F = 1.5e6
-W = 400
+W = 275
 T = 300
 E_F = 118
 TAU_OFFDIAG=-1
-TAU_DIAG=30
+TAU_DIAG=20
 
 
 fig, axes = cdt.create_frame(nrows=3, figsize=(8.4, 8), 
@@ -101,7 +101,7 @@ cdf.add_verticals(freqs_scipy, axes_fft[1], max_freq=MAX_FREQ)
 cdf.add_verticals(freqs_scipy, axes_fft[2], max_freq=MAX_FREQ)
 
 
-EXPERIMENTAL_DATA = np.loadtxt("../raw_data_phd//HHG/emitted_signals_in_the_time_domain.dat").transpose()
+EXPERIMENTAL_DATA = np.loadtxt("data/HHG/emitted_signals_in_the_time_domain.dat").transpose()
 exp_times = (14 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / (2*np.pi * 0.6582119569509065)
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 

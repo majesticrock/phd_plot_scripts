@@ -11,7 +11,7 @@ from get_data import *
 from legend import *
 
 # Fixed Parameters
-DIR = "cascade_new"
+DIR = "cascade_prec"
 MODEL = "PiFlux"
 v_F = 1.5e6
 T = 300
@@ -19,8 +19,8 @@ E_F = 118
 TAU_OFFDIAG = -1
 
 # Parameter grids
-W_values = [150, 175, 200, 225, 250, 275, 300]
-TAU_DIAG_values = [10, 15, 20, 25]
+W_values = [225, 250, 275, 300]
+TAU_DIAG_values = [10, 15, 20]
 T_AVE_values = [0.025, 0.035, 0.05]
 
 import os
