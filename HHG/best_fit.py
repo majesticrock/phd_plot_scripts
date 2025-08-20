@@ -21,7 +21,10 @@ TAU_OFFDIAG = -1
 # Parameter grids
 W_values = [225, 250, 275, 300]
 TAU_DIAG_values = [10, 15, 20]
-T_AVE_values = [0.025, 0.035, 0.05]
+
+FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
+TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
+T_AVE_values = 0.001 * np.array([25, 30, 35, 40, 45, 50])
 
 import os
 EXP_PATH = "../raw_data_phd_HHG/" if os.name == "nt" else "data/"
@@ -36,13 +39,15 @@ def gaussian(x, mu=0, sigma=1):
     return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
 
 def compute_simulation_signal(times, df, T_AVE):
-    sigma = (T_AVE * 2 * np.pi * 0.6582119569509065 / df["photon_energy"]) 
-    N = int(len(times) * (T_AVE * 2 * np.pi * 0.6582119569509065 / df["photon_energy"]))
+    sigma = T_AVE * df["photon_energy"] / TIME_TO_UNITLESS
+    N = int( T_AVE * df["photon_energy"] / (times[1] - times[0]) )
     __data = -df["current_density_time"]
-    #__data = -np.diff(__data, append=0.0) / (times[1] - times[0])
-    __kernel = np.ones(N)/N#gaussian(times[len(times)//4:3*len(times)//4], times[len(times)//2], sigma) #np.ones(N)/N
     
-    return np.convolve(__data, __kernel, mode='same')
+    __kernel = gaussian(times, times[len(times)//2], sigma) #np.ones(N)/N
+    __ret = np.convolve(__data, __kernel, mode='same')
+    
+    #__ret = -np.diff(__ret, append=0.0) / (times[1] - times[0])
+    return __ret
 
 summed_diffs = np.zeros((len(W_values), len(TAU_DIAG_values), len(T_AVE_values)))
 for i, W in enumerate(W_values):
@@ -63,7 +68,7 @@ for i, W in enumerate(W_values):
             ]
         
         for exp_signal, df in zip(exp_signals, dfs):
-            exp_times = exp_times_raw * df["photon_energy"] / (2*np.pi * 0.6582119569509065)
+            exp_times = exp_times_raw * df["photon_energy"] / TIME_TO_UNITLESS
             times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
                 
             for k, T_AVE in enumerate(T_AVE_values):
@@ -109,7 +114,7 @@ dfs = [
     ]
 
 for k, (ax, exp_signal, df) in enumerate(zip(axes, exp_signals, dfs)):
-    exp_times = exp_times_raw * df["photon_energy"] / (2*np.pi * 0.6582119569509065)
+    exp_times = exp_times_raw * df["photon_energy"] / TIME_TO_UNITLESS
         
     times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
     signal = compute_simulation_signal(times, df, T_AVE)

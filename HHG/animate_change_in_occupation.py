@@ -9,10 +9,13 @@ from get_data import *
 from legend import *
 
 BAND_WIDTH = 300
+GAMMA = 5.889401182228545
+T_AVE = 0.035
+
 DIR = "local"
 main_df = load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "occupations.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
-                                  field_amplitude=1, photon_energy=1., 
+                                  field_amplitude=.1, photon_energy=1., 
                                   tau_diag=15, tau_offdiag=-1, t0=0))
 
 #DIR = "test"
@@ -85,7 +88,7 @@ mappable.set_array([])
 fig.colorbar(mappable, ax=ax3d, pad=0.1, label='Occupation')
 
 # 5.889401182228545meV = photon energy
-Y_surf = (2. / np.sqrt(12.)) * 300 * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2) / 1000
+Y_surf = (2. / np.sqrt(12.)) * BAND_WIDTH * GAMMA * np.sqrt(np.cos(X)**2 + np.cos(Z)**2) / 1000
 Y_surf_neg = -Y_surf
 
 equilibrium_top = main_df["upper_band"][0]
@@ -110,6 +113,6 @@ def update(frame):
     vertical_line.set_xdata([frame])
 
 ani = FuncAnimation(fig, update, frames=len(main_df["upper_band"]), repeat=True, interval=33)
-#ani.save("animation.gif", writer="pillow", fps=15)
+ani.save("change.gif", writer="pillow", fps=15)
 
-plt.show()
+#plt.show()

@@ -9,9 +9,9 @@ from get_data import *
 from legend import *
 
 BAND_WIDTH=300
-
-DIR = "local"
-main_df = load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "occupations.json.gz", 
+MOD_FLUX = False
+DIR = "test"
+main_df = load_panda("HHG", f"{DIR}/exp_laser/{'ModifiedPiFlux' if MOD_FLUX else 'PiFlux'}", "occupations.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
                                   field_amplitude=1, photon_energy=1., 
                                   tau_diag=15, tau_offdiag=-1, t0=0))
@@ -29,8 +29,8 @@ main_df = load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "occupations.json.gz",
 
 # Meshgrid for surfaces
 nx, nz = main_df["upper_band"][0].shape
-x = np.linspace(0, np.pi, nx, endpoint=False)
-z = np.linspace(0, np.pi, nz, endpoint=False)
+x = np.linspace(-np.pi if MOD_FLUX else 0, np.pi, nx, endpoint=False)
+z = np.linspace(-np.pi if MOD_FLUX else 0, np.pi, nz, endpoint=False)
 X, Z = np.meshgrid(x, z, indexing='ij')
 
 laser_function = np.array(main_df["laser_function"])
@@ -86,7 +86,7 @@ mappable.set_array([])
 fig.colorbar(mappable, ax=ax3d, shrink=0.6, pad=0.1, label='Occupation')
 
 # 5.889401182228545meV = photon energy
-Y_surf = (2. / np.sqrt(12.)) * BAND_WIDTH * 5.889401182228545 * np.sqrt(np.cos(X)**2 + np.cos(Z)**2) / 1000
+Y_surf = 1e-3 * (2. / np.sqrt(12.)) * BAND_WIDTH * 5.889401182228545 * np.sqrt((1. - np.cos(X))**2 + (1. - np.cos(Z))**2 if MOD_FLUX else np.cos(X)**2 + np.cos(Z)**2)
 Y_surf_neg = -Y_surf
 
 def update(frame):
@@ -108,6 +108,6 @@ def update(frame):
     vertical_line.set_xdata([frame])
 
 ani = FuncAnimation(fig, update, frames=len(main_df["upper_band"]), repeat=True, interval=33)
-#ani.save("animation.gif", writer="pillow", fps=15)
+#ani.save("occupation.gif", writer="pillow", fps=15)
 
 plt.show()

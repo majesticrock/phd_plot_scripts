@@ -16,10 +16,10 @@ from legend import *
 from scipy.fft import rfft, rfftfreq
 
 MAX_FREQ = 20
-DIR = "icelake_cl1"
+DIR = "cascade_prec"
 MODEL = "PiFlux"
 v_F = 1.5e6
-W = 200
+W = 275
 T = 300
 E_F = 118
 TAU_OFFDIAG=-1
@@ -102,7 +102,7 @@ axes_fft[1].plot(freqs_scipy, fftplot / np.max(fftplot))
 fftplot = np.abs(rfft(main_df["current_density_time"][fft_mask] - plot_data_combined[fft_mask], n))**2
 axes_fft[2].plot(freqs_scipy, fftplot / np.max(fftplot))
 
-EXPERIMENTAL_DATA = np.loadtxt("../raw_data_phd//HHG/emitted_signals_in_the_time_domain.dat").transpose()
+EXPERIMENTAL_DATA = np.loadtxt("data/HHG/emitted_signals_in_the_time_domain.dat").transpose()
 exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0])
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 
@@ -110,7 +110,7 @@ n_exp = len(exp_times)
 exp_freqs = rfftfreq(n_exp, exp_times[1] - exp_times[0])
 exp_fft_mask = (exp_times >= FFT_CUTS[0]) & (exp_times <= FFT_CUTS[1])
 
-LASER_DATA = np.loadtxt("../raw_data_phd//HHG/pulse_AB.dat").transpose()
+LASER_DATA = np.loadtxt("data/HHG/pulse_AB.dat").transpose()
 laser_times = 15 * 0.03318960199004975 + LASER_DATA[0]
 laser_plot = -(LASER_DATA[1] + LASER_DATA[2])
 
