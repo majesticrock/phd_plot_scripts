@@ -7,16 +7,22 @@ from legend import *
 import matplotlib.pyplot as plt
 
 N=16000
-DOS="sc"
 OMEGA_D=0.02
 E_F=0.0
 
-all_data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz")
+n_mode = 0
 
-tasks = [
-    (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g <= {G_MAX_LOAD}"), "g", legend("g")),
-]
-
-fig, axes, plotters, cbar = hp.create_plot(tasks)
+for DOS in ["sc", "bcc", "fcc"]:#
+    all_data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz")
+    tasks = [
+        (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g <= {G_MAX_LOAD}"), "g", legend("g")),
+    ]
+    fig, axes, plotters, cbar = hp.create_plot(tasks)
+    fig.suptitle(f"{DOS} lattice")
+    
+    for plotter in plotters:
+        plotter.HiggsModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/higgs_{n_mode}.pkl")
+        plotter.PhaseModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/phase_{n_mode}.pkl")
+    n_mode +=1
 
 plt.show()

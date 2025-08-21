@@ -17,8 +17,8 @@ CBAR_EXP = 2
 # Settings the importer
 BUILD_DIR = "plots/"
 FILE_ENDING = ".pdf"
-G_MAX_LOAD = 1.5
-G_MAX_PLOT = 1.5
+G_MAX_LOAD = 2.5
+G_MAX_PLOT = 2.5
 
 __BEGIN__OFFSET__ = 1e-4
 __RANGE__ = 1e-5
@@ -26,7 +26,7 @@ __SECOND_BEGIN__ = 1e-7
 __SECOND_RANGE__ = 1e-6
 __PEAK_PROMINCE__ = 0.05
 
-__INITIAL_IMAG__ = 1e-4j
+__INITIAL_IMAG__ = 1e-5j
 __FIT_COMPLEX_SHIFT__ = 1e-8j
 __CONTINUUM_CUT_SHIFT__ = 1e-5
 
@@ -37,7 +37,7 @@ def derivative_gaussian_bell(x, mu, sigma):
     return -((x - mu) / sigma**2) * gaussian_bell(x, mu, sigma)
 
 def is_phase_peak(peak):
-    return abs(peak) < 2e-4
+    return abs(peak) < 1e-3
 
 def extract_model_settings(ds):
     return f"dos={ds['dos_name']}  omega_D={ds['omega_D']}  g={ds['g']}  U={ds['U']}  E_F={ds['E_F']}"
@@ -47,10 +47,10 @@ class HeatmapPlotter:
                  energy_range=(1e-10, 2.5), scale_energy_by_gaps=False):
         self.data_frame = data_frame_param.sort_values(parameter_name).reset_index(drop=True)
         
-        self.y = np.linspace(energy_range[0], energy_range[1], 5000) # meV
+        self.y = np.linspace(energy_range[0], energy_range[1], 15000) # meV
         self.x = (self.data_frame[parameter_name]).to_numpy()
         self.scale_energy_by_gaps = scale_energy_by_gaps
-        self.resolvents = [cf.ContinuedFraction(pd_row, messages=False, ignore_first=70, ignore_last=150) for index, pd_row in self.data_frame.iterrows()]
+        self.resolvents = [cf.ContinuedFraction(pd_row, messages=False, ignore_first=100, ignore_last=250) for index, pd_row in self.data_frame.iterrows()]
         self.max_gaps   = np.array([2 * gap for gap in self.data_frame["Delta_max"]]) # meV
         self.true_gaps  = np.array([float(t_gap[0]) for t_gap in self.data_frame["continuum_boundaries"]]) # meV
         self.N_data = len(self.max_gaps)
@@ -164,7 +164,7 @@ class HeatmapPlotter:
             __phase_result = [ spa.analyze_peak(__phase__real, __phase__imag, 
                                                 peak_position         = peak_position,
                                                 range                 = __RANGE__ if not is_phase_peak(peak_position) else __RANGE__ * (1 if self.data_frame["g"].iloc[i] > 0.8 else 50),
-                                                begin_offset          = __BEGIN__OFFSET__ if not is_phase_peak(peak_position) else peak_position + __BEGIN__OFFSET__* (1 if self.data_frame["g"].iloc[i] > 0.8 else 50),
+                                                begin_offset          = __BEGIN__OFFSET__ if not is_phase_peak(peak_position) else peak_position + __BEGIN__OFFSET__* 50,
                                                 reversed              = self.__decide_if_to_reverse__(__i, __phase_peak_positions[i], self.true_gaps[i]),
                                                 lower_continuum_edge  = self.true_gaps[i],
                                                 ) 
@@ -179,9 +179,18 @@ class HeatmapPlotter:
                     if self.data_frame["g"].iloc[i] <= 0.5:
                         continue
                     if abs(result.slope.nominal_value + 2) > 0.2:
-                        print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
-                        print(result)
-                        print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, __phase_peak_positions[i], self.true_gaps[i]), "\n")
+                        __phase_result = [ spa.analyze_peak(__phase__real, __phase__imag, 
+                                                peak_position         = peak_position,
+                                                range                 = __RANGE__ * (1 if self.data_frame["g"].iloc[i] > 0.8 else 50),
+                                                begin_offset          = peak_position + 10 * __BEGIN__OFFSET__* (1 if self.data_frame["g"].iloc[i] > 0.8 else 50),
+                                                reversed              = self.__decide_if_to_reverse__(__i, __phase_peak_positions[i], self.true_gaps[i]),
+                                                lower_continuum_edge  = self.true_gaps[i],
+                                                ) 
+                                for __i, peak_position in enumerate(__phase_peak_positions[i]) ]
+                        if abs(result.slope.nominal_value + 2) > 0.2:
+                            print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
+                            print(result)
+                            print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, __phase_peak_positions[i], self.true_gaps[i]), "\n")
                 else:
                     if abs(result.slope.nominal_value + 1) > 0.05: 
                         __phase_result[j] = spa.analyze_peak(__phase__real, __phase__imag, 

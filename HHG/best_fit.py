@@ -19,35 +19,41 @@ E_F = 118
 TAU_OFFDIAG = -1
 
 # Parameter grids
-W_values = [225, 250, 275, 300]
-TAU_DIAG_values = [10, 15, 20]
+W_values = [150, 175, 200, 225, 250, 275, 300, 325, 350]
+TAU_DIAG_values = [10, 15, 20, 25, 30]
 
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
-T_AVE_values = 0.001 * np.array([25, 30, 35, 40, 45, 50])
+T_AVE_values = 0.001 * np.array([25, 35, 50, 35 * FWHM_TO_SIGMA, 50 * FWHM_TO_SIGMA]) 
 
 import os
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(f"{EXP_PATH}HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times_raw = 14 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
+exp_times_raw = 18 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
 exp_signals = np.array([EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[2]])  # A+B, A, B
 
 NORMALIZATION_EXPERIMENT = np.max(np.abs(EXPERIMENTAL_DATA[1]))
 exp_signals /= NORMALIZATION_EXPERIMENT
 
-def gaussian(x, mu=0, sigma=1):
+def gaussian(x, mu, sigma):
     return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
+
+def cauchy(x, mu, gamma):
+    return (1. / np.pi ) * (gamma / ((x - mu)**2 + gamma**2))
 
 def compute_simulation_signal(times, df, T_AVE):
     sigma = T_AVE * df["photon_energy"] / TIME_TO_UNITLESS
     N = int( T_AVE * df["photon_energy"] / (times[1] - times[0]) )
     __data = -df["current_density_time"]
     
-    __kernel = gaussian(times, times[len(times)//2], sigma) #np.ones(N)/N
-    __ret = np.convolve(__data, __kernel, mode='same')
+    __kernel = np.ones(N)/N
+    __kernel = gaussian(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
+    __kernel = cauchy(times, times[len(times)//2], 0.5 * sigma)
+
+    __data = np.convolve(__data, __kernel, mode='same')
+    __data = -np.diff(__data, append=0.0) / (times[1] - times[0])
     
-    #__ret = -np.diff(__ret, append=0.0) / (times[1] - times[0])
-    return __ret
+    return __data#np.convolve(__data, __kernel, mode='same')
 
 summed_diffs = np.zeros((len(W_values), len(TAU_DIAG_values), len(T_AVE_values)))
 for i, W in enumerate(W_values):
@@ -97,7 +103,7 @@ T_AVE = T_AVE_values[prev_min_index[2]]
 print(f"Minimized difference at W={W}, tau_diag={TAU_DIAG}, t_ave={T_AVE}")
 print("Difference is", prev_min_value)
 
-fig, axes = plt.subplots(nrows=3, sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
+fig, axes = plt.subplots(nrows=3, sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0), figsize=(8, 8))
 dfs = [
         load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz",
                  **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
@@ -136,7 +142,7 @@ fig.tight_layout()
 
 
 from scipy.fft import rfft, rfftfreq
-fig_fft, axes_fft = plt.subplots(nrows=3, sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
+fig_fft, axes_fft = plt.subplots(nrows=3, sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0), figsize=(6, 10))
 OMEGA_MAX = 22
 
 LINEAR_AB_EXP = exp_signals[1] + exp_signals[2]

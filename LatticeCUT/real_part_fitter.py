@@ -11,15 +11,15 @@ FIT_PEAK_N = 0
 MODE_TYPE = "phase_SC"
 
 def is_phase_peak(peak):
-    return abs(peak) < 2e-4
+    return abs(peak) < 1e-3
 
 SYSTEM = "sc"#"sc"#"free_electrons3"
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=.6,
+                                         g=2.45,
                                          U=0, 
                                          E_F=0,
-                                         omega_D=0.05))
+                                         omega_D=0.02))
 resolvents = cf.ContinuedFraction(main_df, ignore_first=70, ignore_last=150)
 
 fig, ax = plt.subplots()
@@ -41,7 +41,7 @@ spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, withTermin
 spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, withTerminator=True).imag
 
 if is_phase_peak(spectral_positions[FIT_PEAK_N]):
-    begin_offset = spectral_positions[FIT_PEAK_N] + 1e-3
+    begin_offset = spectral_positions[FIT_PEAK_N] + 5e-3
     range = 0.01
 else:
     begin_offset = 1e-4
@@ -55,7 +55,7 @@ peak_data = spa.analyze_peak(spectral_real, spectral_imag,
                              begin_offset=begin_offset,
                              improve_peak_position=True,
                              plotter=ax,
-                             peak_pos_range=0.01)
+                             peak_pos_range=0.001)
 
 ax2 = ax.twinx().twiny()
 ax2.plot(w_lin.real, spectral_imag(w_lin), color="red")
