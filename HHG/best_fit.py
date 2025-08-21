@@ -27,7 +27,7 @@ TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 T_AVE_values = 0.001 * np.array([25, 30, 35, 40, 45, 50])
 
 import os
-EXP_PATH = "../raw_data_phd_HHG/" if os.name == "nt" else "data/"
+EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(f"{EXP_PATH}HHG/emitted_signals_in_the_time_domain.dat").transpose()
 exp_times_raw = 14 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
 exp_signals = np.array([EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[2]])  # A+B, A, B
