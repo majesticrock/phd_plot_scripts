@@ -41,14 +41,18 @@ def gaussian(x, mu, sigma):
 def cauchy(x, mu, gamma):
     return (1. / np.pi ) * (gamma / ((x - mu)**2 + gamma**2))
 
+def sech_distrubution(x, mu, sigma):
+    return (1. / (2. * sigma)) / np.cosh(0.5 * np.pi * (x - mu) / sigma)
+
 def compute_simulation_signal(times, df, T_AVE):
     sigma = T_AVE * df["photon_energy"] / TIME_TO_UNITLESS
     N = int( T_AVE * df["photon_energy"] / (times[1] - times[0]) )
     __data = -df["current_density_time"]
     
-    __kernel = np.ones(N)/N
+    #__kernel = np.ones(N)/N
     __kernel = gaussian(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
-    __kernel = cauchy(times, times[len(times)//2], 0.5 * sigma)
+    #__kernel = sech_distrubution(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
+    #__kernel = cauchy(times, times[len(times)//2], 0.5 * sigma)
 
     __data = np.convolve(__data, __kernel, mode='same')
     __data = -np.diff(__data, append=0.0) / (times[1] - times[0])

@@ -7,35 +7,36 @@ import spectral_peak_analyzer as spa
 from get_data import *
 from scipy.signal import find_peaks
 
-FIT_PEAK_N = 0
+FIT_PEAK_N = 1
 MODE_TYPE = "phase_SC"
 
 def is_phase_peak(peak):
     return abs(peak) < 1e-3
 
-SYSTEM = "sc"#"sc"#"free_electrons3"
+SYSTEM = "bcc"#"sc"#"free_electrons3"
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=2.45,
+                                         g=2.2,
                                          U=0, 
                                          E_F=0,
                                          omega_D=0.02))
-resolvents = cf.ContinuedFraction(main_df, ignore_first=70, ignore_last=150)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=100, ignore_last=250)
 
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$\ln (\omega / t)$")
 ax.set_ylabel(r"$\ln (\Re [G] (\omega) / t^{-1})]$")
 
-w_lin = np.linspace(0, main_df["continuum_boundaries"][0], 15000, dtype=complex)
+w_lin = np.linspace(0, main_df["continuum_boundaries"][0], 150000, dtype=complex)
 w_lin += 1e-5j
 
 
 spectral = resolvents.spectral_density(w_lin, MODE_TYPE, withTerminator=True)
 
-find_peaks_result = find_peaks(spectral, prominence=0.1)
+find_peaks_result = find_peaks(spectral, prominence=1)
 spectral_indizes = find_peaks_result[0]
 spectral_positions = np.array([w_lin[i].real for i in spectral_indizes])
-print(spectral_positions)
+print("Prominences:", find_peaks_result[1]["prominences"])
+print("Positions:", spectral_positions)
 
 spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, withTerminator=True).real
 spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, withTerminator=True).imag

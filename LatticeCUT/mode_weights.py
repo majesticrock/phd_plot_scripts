@@ -76,7 +76,7 @@ for n_mode in range(N_SETS):
         for mode in modes.modes:
             if mode.energies[-1] < 1e-3:
                 continue
-            ax.plot(mode.x, mode.energies, color=f"C{idx}", ls=lss[ls%len(lss)])
+            ax.plot(mode.x, mode.energies, color=f"C{idx}", ls=lss[ls%len(lss)], linewidth=(3.5 - 0.5 * idx))
             ax.plot(mode.x[0], mode.energies[0], color=f"C{idx}", marker="*", markersize=8, ls=None)
             ax_w.plot(mode.x, mode.weights, color=f"C{idx}", ls=lss[ls%len(lss)])
             ls += 1
