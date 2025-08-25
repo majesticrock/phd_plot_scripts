@@ -15,7 +15,7 @@ from legend import *
 
 from scipy.fft import rfft, rfftfreq
 
-DIR = "icelake_cl1"
+DIR = "cascade_new"
 MODEL = "PiFlux"
 v_F = 1.5e6
 W = 200

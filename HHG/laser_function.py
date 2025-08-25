@@ -40,20 +40,23 @@ def plot_laser(df, electric_field=False):
 if __name__ == '__main__':
     __PLOT_E_FIELD__ = False
     fig, ax = create_frame(__PLOT_E_FIELD__)
-    
-    #main_df = load_panda("HHG", "test/expA_laser/PiFlux", "current_density.json.gz", 
-    #                **hhg_params(T=300, E_F=118, v_F=1.5e5, band_width=400, field_amplitude=1., photon_energy=1, decay_time=100))
-    #add_laser_to_plot(main_df, ax, __PLOT_E_FIELD__)
 
-    main_df = load_panda("HHG", "test/expB_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=5e5, band_width=800, field_amplitude=1., photon_energy=1, tau_diag=100, tau_offdiag=-1, t0=0))
-    add_laser_to_plot(main_df, ax, False, label="Vector potential")
-    add_laser_to_plot(main_df, ax, True, label="Electric field")
+    main_df = load_panda("HHG", "cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
+                    **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
+    #add_laser_to_plot(main_df, ax, False, label="Vector potential")
+    add_laser_to_plot(main_df, ax, True, label="Electric field", normalize=True)
     ax.axhline(0, c="k", ls="--", linewidth=1.5)
     
     N_extra = 16
-    time_scale = 6.67111 * 5.889401182228545 / (6.582119569509065698e-1 * 2 * np.pi)
+    time_scale = 6.67111 * main_df["photon_energy"] / (6.582119569509065698e-1 * 2 * np.pi)
     dt = time_scale / 201 # number of sample points of the electric field
     ax.axvline(N_extra * dt, c="k")
     ax.axvline(time_scale + N_extra * dt, c="k")
+    
+    import os
+    EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
+    LASER = np.loadtxt(f"{EXP_PATH}HHG/pulse_AB.dat").transpose()
+    
+    ax.plot((16 * 0.03318960199004975 + LASER[0]) * main_df["photon_energy"] / (6.582119569509065698e-1 * 2 * np.pi), (LASER[1] + LASER[2]) / np.max(np.abs(LASER[1] + LASER[2])), label="Exp", ls="--")
+    
     plt.show()

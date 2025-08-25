@@ -15,12 +15,14 @@ E_F = 118
 TAU_OFFDIAG = -1
 
 # Parameter grids
-W_values = [100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350]
+W_values = [150, 175, 200, 225, 250, 300]
 TAU_DIAG_values = [10, 15, 20, 25, 30]
 
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 T_AVE_values = 0.001 * np.array([25, 35, 50]) 
+
+OMEGA_MAX = 19
 
 import os
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
@@ -55,6 +57,8 @@ def compute_simulation_signal(times, df, T_AVE):
     
     return __data
 
+from scipy.fft import rfft, rfftfreq
+
 summed_diffs = np.zeros((len(W_values), len(TAU_DIAG_values), len(T_AVE_values)))
 for i, W in enumerate(W_values):
     for j, TAU_DIAG in enumerate(TAU_DIAG_values):
@@ -75,17 +79,24 @@ for i, W in enumerate(W_values):
         
         for exp_signal, df in zip(exp_signals, dfs):
             exp_times = exp_times_raw * df["photon_energy"] / TIME_TO_UNITLESS
-            times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
+            times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi) * (6. / df["photon_energy"])
                 
             for k, T_AVE in enumerate(T_AVE_values):
                 signal = compute_simulation_signal(times, df, T_AVE)
-                
                 if k==0:
                     NORMALIZATION_SIMULATION = np.max(np.abs(signal)) 
                 normalized_simulation = signal / NORMALIZATION_SIMULATION
                 interpolate_simulation = np.interp(exp_times, times, normalized_simulation)
-
-                summed_diffs[i][j][k] += np.linalg.norm(np.abs(exp_signal) - np.abs(interpolate_simulation))
+                mask = rfftfreq(len(exp_signal), exp_times[1] - exp_times[0]) < OMEGA_MAX
+                # FFT comparison
+                fft_sim = np.log10(np.abs(rfft(interpolate_simulation)[mask])**2)
+                fft_exp = np.log10(np.abs(rfft(exp_signal)[mask])**2)
+                # Normalize FFTs for fair comparison
+                fft_sim /= np.max(fft_sim)
+                fft_exp /= np.max(fft_exp)
+                # Compare only up to the minimum length
+                min_len = min(len(fft_sim), len(fft_exp))
+                summed_diffs[i][j][k] += np.linalg.norm(fft_exp[:min_len] - fft_sim[:min_len])
 
 prev_min_index = [0, 0, 0]
 prev_min_value = summed_diffs[0][0][0]
@@ -122,7 +133,7 @@ dfs = [
 for k, (ax, exp_signal, df) in enumerate(zip(axes, exp_signals, dfs)):
     exp_times = exp_times_raw * df["photon_energy"] / TIME_TO_UNITLESS
         
-    times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
+    times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi) * (6. / df["photon_energy"])
     signal = compute_simulation_signal(times, df, T_AVE)
     
     if k==0:
@@ -145,7 +156,6 @@ fig.tight_layout()
 
 from scipy.fft import rfft, rfftfreq
 fig_fft, axes_fft = plt.subplots(nrows=3, sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0), figsize=(6, 10))
-OMEGA_MAX = 22
 
 LINEAR_AB_EXP = exp_signals[1] + exp_signals[2]
 PROPER_AB_EXP = exp_signals[0]
@@ -156,16 +166,20 @@ PROPER_AB_SIM = compute_simulation_signal(times, dfs[0], T_AVE) / NORMALIZATION_
 NONLINEAR_SIM = PROPER_AB_SIM - LINEAR_AB_SIM
 
 for ax, sim, exp in zip(axes_fft, [LINEAR_AB_SIM, PROPER_AB_SIM, NONLINEAR_SIM], [LINEAR_AB_EXP, PROPER_AB_EXP, NONLINEAR_EXP]):
-    fft_sim = np.abs(rfft(sim))
-    freqs_sim = rfftfreq(len(sim), times[1] - times[0])
+    __N = 1
+    __fft_smoothing = np.ones(__N)/__N
     
-    fft_exp = np.abs(rfft(exp))
+    fft_sim = np.convolve(np.abs(rfft(sim)), __fft_smoothing, mode='same')**2
+    fft_exp = np.convolve(np.abs(rfft(exp)), __fft_smoothing, mode='same')**2
+    
+    freqs_sim = rfftfreq(len(sim), times[1] - times[0])
     freqs_exp = rfftfreq(len(exp), exp_times[1] - exp_times[0])
     
     ax.plot(freqs_sim, fft_sim / np.max(fft_sim), label="Sim")
     ax.plot(freqs_exp, fft_exp / np.max(fft_exp), "k--", label="Exp")
     ax.set_yscale("log")
     ax.set_xlim(0, OMEGA_MAX)
+    ax.set_ylim(1e-9, 1)
     
     for i in range(0, OMEGA_MAX, 2):
         ax.axvline(i+1, c="k", ls=":", alpha=0.5)
@@ -175,6 +189,7 @@ axes_fft[-1].set_xlabel(r"$\omega / \omega_\mathrm{L}$")
 axes_fft[0].set_ylabel(r"FFT linear")
 axes_fft[1].set_ylabel(r"FFT proper")
 axes_fft[2].set_ylabel(r"FFT nonlinear")
+
 
 fig_fft.tight_layout()
 

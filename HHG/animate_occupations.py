@@ -8,12 +8,12 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-BAND_WIDTH=300
+BAND_WIDTH=200
 MOD_FLUX = False
 DIR = "test"
 main_df = load_panda("HHG", f"{DIR}/exp_laser/{'ModifiedPiFlux' if MOD_FLUX else 'PiFlux'}", "occupations.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
-                                  field_amplitude=1, photon_energy=1., 
+                                  field_amplitude=.1, photon_energy=1., 
                                   tau_diag=15, tau_offdiag=-1, t0=0))
 
 #DIR = "test"
@@ -108,6 +108,6 @@ def update(frame):
     vertical_line.set_xdata([frame])
 
 ani = FuncAnimation(fig, update, frames=len(main_df["upper_band"]), repeat=True, interval=33)
-#ani.save("occupation.gif", writer="pillow", fps=15)
+ani.save("occupation.gif", writer="pillow", fps=15)
 
-plt.show()
+#plt.show()
