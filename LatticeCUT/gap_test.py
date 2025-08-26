@@ -29,9 +29,7 @@ ax.set_xlabel(r'$\epsilon - \mu$')
 ax.set_ylabel(r'$\Delta$')
 rho_ax.set_ylabel(r'$\rho(\epsilon)$')
 
-particle_holeness = 0
-for i in range(len(main_df['energies'])):
-    particle_holeness += main_df['energies'][i] * main_df['Delta'][i]
+particle_holeness = np.sum(main_df['energies'] * main_df['Delta'])
     
 print(f"Particle Holeness: {particle_holeness:.3f}")
 

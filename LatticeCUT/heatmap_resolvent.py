@@ -18,7 +18,7 @@ for DOS in ["sc", "bcc", "fcc"]:#
     tasks = [
         (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g <= {G_MAX_LOAD}"), "g", legend("g")),
     ]
-    fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(100 if DOS=="fcc" else 70, 250))
+    fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(109 if DOS=="fcc" else 70, 180))
     fig.suptitle(f"{DOS} lattice")
     
     for plotter in plotters:

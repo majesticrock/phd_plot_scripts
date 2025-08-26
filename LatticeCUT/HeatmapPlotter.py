@@ -12,7 +12,7 @@ import spectral_peak_analyzer as spa
 from legend import *
 
 CBAR_MAX = 20
-CBAR_EXP = 2
+CBAR_EXP = 4
 
 # Settings the importer
 BUILD_DIR = "plots/"
@@ -21,14 +21,16 @@ G_MAX_LOAD = 2.5
 G_MAX_PLOT = 2.5
 
 __BEGIN_OFFSET__ = 1e-4
-__RANGE__ = 1e-5
+__RANGE__ = 1e-4
 __SECOND_BEGIN__ = 1e-7
-__SECOND_RANGE__ = 1e-6
+__SECOND_RANGE__ = 1e-7
 __PEAK_PROMINCE__ = 1.
 
 __INITIAL_IMAG__ = 1e-5j
 __FIT_COMPLEX_SHIFT__ = 1e-8j
 __CONTINUUM_CUT_SHIFT__ = 1e-5
+
+__sigma__ = 0.0005
 
 def gaussian_bell(x, mu, sigma):
     return np.exp(-0.5 * ((x - mu) / sigma)**2) / (sigma * np.sqrt(2 * np.pi))
@@ -92,14 +94,6 @@ class HeatmapPlotter:
         upper_err = np.abs(self.data_frame[key].iloc[i] - self.data_frame[key].iloc[upper_err_idx]) if upper_err_idx < len(self.true_gaps) else None
         return [lower_err, upper_err]
         
-        #__OFFSET__ = 2
-        #if key == "true_gap":
-        #    return [self.true_gaps[i]              - self.true_gaps[i - __OFFSET__] if i - __OFFSET__ >= 0                   else None,
-        #            self.true_gaps[i + __OFFSET__] - self.true_gaps[i]              if i + __OFFSET__ <  len(self.true_gaps) else None]
-        #return [self.data_frame[key].iloc[i]              - self.data_frame[key].iloc[i - __OFFSET__] if i - __OFFSET__ >= 0                         else None,
-        #        self.data_frame[key].iloc[i + __OFFSET__] - self.data_frame[key].iloc[i]              if i + __OFFSET__ <  len(self.data_frame["g"]) else None]
-
-    # This function assumes that the quantities provided come in eV
     def __decide_if_to_reverse__(self, peak_idx, peaks, gap):
         if len(peaks) > peak_idx and peaks[peak_idx] - __BEGIN_OFFSET__ - __RANGE__ <= 0:
             return False
@@ -115,38 +109,45 @@ class HeatmapPlotter:
         __result = [ spa.analyze_peak(  _real, _imag, 
                                         peak_position         = peak_position, 
                                         range                 = __RANGE__,
-                                        begin_offset          = __BEGIN_OFFSET__,
+                                        begin_offset          = __BEGIN_OFFSET__ if not is_phase_peak(peak_position) else peak_position + __BEGIN_OFFSET__,
                                         reversed              = self.__decide_if_to_reverse__(__i, _intial_positions, self.true_gaps[i]),
-                                        lower_continuum_edge  = self.true_gaps[i]) 
+                                        lower_continuum_edge  = self.true_gaps[i],
+                                        peak_pos_range        = self.y[20] - self.y[0], )
                                 for __i, peak_position in enumerate(_intial_positions) ]
         
-        for j, result in enumerate(__result):
+        for j in range(len(__result)):
             current_range = __RANGE__
             current_offset = __BEGIN_OFFSET__
             
-            while abs(result.slope.nominal_value + 1) > 0.01 and current_range >= __SECOND_RANGE__:
+            def break_condition():
+                if higgs or not is_phase_peak(__result[j].position):
+                    return abs(__result[j].slope.nominal_value + 1) > 0.01
+                else:
+                    return abs(__result[j].slope.nominal_value + 2) > 0.2
+            
+            while break_condition() and (current_range >= __SECOND_RANGE__):
                 current_offset = __BEGIN_OFFSET__
-                current_range *= 0.1
-                while abs(result.slope.nominal_value + 1) > 0.01 and current_offset >= __SECOND_BEGIN__:
+                while break_condition() and (current_offset >= __SECOND_BEGIN__):
                     # Retry the fit with changed parameters
-                    current_offset *= 0.1
-                    
                     __result[j] = spa.analyze_peak(_real, _imag, 
-                                                peak_position         = result.position, 
-                                                range                 = current_range,
-                                                begin_offset          = current_offset,
+                                                peak_position         = __result[j].position, 
+                                                range                 = current_range if not is_phase_peak(__result[j].position) else 1e2 * current_range,
+                                                begin_offset          = current_offset if not is_phase_peak(__result[j].position) else __result[j].position + 1e2 * current_offset,
                                                 reversed              = self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]),
                                                 lower_continuum_edge  = self.true_gaps[i],
-                                                improve_peak_position = False) 
+                                                improve_peak_position = False)
+                    current_offset *= 0.2
+                current_range *= 0.2
 
-            if not higgs and is_phase_peak(result.position) and abs(result.slope.nominal_value + 2) > 0.2:
-                print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
-                print(result)
-                print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions[i], self.true_gaps[i]), "\n")
-            elif abs(result.slope.nominal_value + 1) > 0.01:
+            if not higgs and is_phase_peak(__result[j].position):
+                if abs(__result[j].slope.nominal_value + 2) > 0.2:
+                    print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
+                    print(__result[j])
+                    print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]), "\n")
+            elif abs(__result[j].slope.nominal_value + 1) > 0.01:
                 print(f"WARNING in {'Higgs' if higgs else 'Phase'}! Expected slope of '-1' does not match fitted slope!")
-                print(result)
-                print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions[i], self.true_gaps[i]), "\n")
+                print(__result[j])
+                print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]), "\n")
         
         return __result
 
@@ -168,8 +169,8 @@ class HeatmapPlotter:
             __higgs__imag = lambda x: res.continued_fraction(x + __FIT_COMPLEX_SHIFT__, "amplitude_SC").imag
             __phase__imag = lambda x: res.continued_fraction(x + __FIT_COMPLEX_SHIFT__, "phase_SC").imag
             
-            __higgs_result = self.try_to_fit(__higgs__real, __higgs__imag, __higgs_peak_positions[1], i, True)
-            __phase_result = self.try_to_fit(__phase__real, __phase__imag, __phase_peak_positions[1], i, False)
+            __higgs_result = self.try_to_fit(__higgs__real, __higgs__imag, __higgs_peak_positions[i], i, True)
+            __phase_result = self.try_to_fit(__phase__real, __phase__imag, __phase_peak_positions[i], i, False)
             
             # There are numerical artifacts in the data that have tiny weights which we want to remove here
             # These vanish with increasing numerical accuracy, so they are certainly not physical
@@ -239,22 +240,22 @@ class HeatmapPlotter:
             self.__remove_data_below_continuum__(spectral_functions_higgs)
             self.__remove_data_below_continuum__(spectral_functions_phase)
 
-            sigma = 0.00005
+            
             ## Note, that the phase peak at omega=0 is the derivative of a delta peak
             ## while the other peaks below the continuum are proper delta peaks
             for i in range(self.N_data):
                 for peak_position, weight in zip(__higgs_peak_positions[i], __higgs_peak_weights[i]):
                     if is_phase_peak(peak_position):
-                        summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, 4 * sigma)
+                        summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
                     else:
-                        summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, sigma)
+                        summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
                     mask = summand > 1e-4
                     spectral_functions_higgs[mask, i] += summand[mask]
                 for peak_position, weight in zip(__phase_peak_positions[i], __phase_peak_weights[i]):
                     if is_phase_peak(peak_position):
-                        summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, 4 * sigma)
+                        summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
                     else:
-                        summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, sigma)
+                        summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
                     mask = summand > 1e-4
                     spectral_functions_phase[mask, i] += summand[mask]
         # endif not self.scale_energy_by_gaps
@@ -290,7 +291,7 @@ class HeatmapPlotter:
     
 def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='inferno', cbar_max=CBAR_MAX, energy_range=None, fig=None, axes=None, cf_ignore=(70, 250)):
     if energy_range is None:
-        energy_range = (0., 0.5) if not scale_energy_by_gaps else (0., 1.95)
+        energy_range = (0., 0.3) if not scale_energy_by_gaps else (0., 1.95)
     if fig is None:
         assert(axes is None)
         fig, axes = plt.subplots(nrows=2, ncols=len(tasks), figsize=(12.8 if len(tasks) > 2 else 6.4, 4.8), sharex=True, sharey=True)

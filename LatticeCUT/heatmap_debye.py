@@ -2,7 +2,6 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 import HeatmapPlotter as hp
-from HeatmapPlotter import BUILD_DIR, FILE_ENDING, G_MAX_LOAD, G_MAX_PLOT
 from legend import *
 import matplotlib.pyplot as plt
 
@@ -17,7 +16,7 @@ for DOS in ["sc", "bcc", "fcc"]:#
         (all_data.query(f"E_F == {E_F} & g == 1.5 & omega_D < 0.06"), "omega_D", legend(r"\omega_\mathrm{D}")),
     ]
 
-    fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(100 if DOS=="fcc" else 70, 250))
+    fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(100 if DOS=="fcc" else 70, 250), scale_energy_by_gaps=True)
     fig.suptitle(f"{DOS} lattice")
     
     #for plotter in plotters:

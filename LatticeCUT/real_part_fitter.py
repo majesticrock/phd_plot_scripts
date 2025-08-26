@@ -13,26 +13,26 @@ MODE_TYPE = "phase_SC"
 def is_phase_peak(peak):
     return abs(peak) < 1e-3
 
-SYSTEM = "bcc"#"sc"#"free_electrons3"
+SYSTEM = "sc"
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=2.2,
+                                         g=2.5, 
                                          U=0, 
                                          E_F=0,
                                          omega_D=0.02))
-resolvents = cf.ContinuedFraction(main_df, ignore_first=100, ignore_last=250)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=50, ignore_last=250)
 
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$\ln (\omega / t)$")
 ax.set_ylabel(r"$\ln (\Re [G] (\omega) / t^{-1})]$")
 
-w_lin = np.linspace(0, main_df["continuum_boundaries"][0], 150000, dtype=complex)
+w_lin = np.linspace(0, main_df["continuum_boundaries"][0], 15000, dtype=complex)
 w_lin += 1e-5j
 
 
 spectral = resolvents.spectral_density(w_lin, MODE_TYPE, withTerminator=True)
 
-find_peaks_result = find_peaks(spectral, prominence=1)
+find_peaks_result = find_peaks(spectral, prominence=0.5)
 spectral_indizes = find_peaks_result[0]
 spectral_positions = np.array([w_lin[i].real for i in spectral_indizes])
 print("Prominences:", find_peaks_result[1]["prominences"])
@@ -45,7 +45,7 @@ if is_phase_peak(spectral_positions[FIT_PEAK_N]):
     begin_offset = spectral_positions[FIT_PEAK_N] + 5e-3
     range = 0.01
 else:
-    begin_offset = 1e-4
+    begin_offset = 1e-6
     range = 1e-5
 
 peak_data = spa.analyze_peak(spectral_real, spectral_imag, 
