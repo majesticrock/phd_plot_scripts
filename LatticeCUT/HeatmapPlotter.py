@@ -10,9 +10,10 @@ __ap.append()
 import continued_fraction_pandas as cf
 import spectral_peak_analyzer as spa
 from legend import *
+from matplotlib import ticker
 
 CBAR_MAX = 20
-CBAR_EXP = 4
+CBAR_EXP = 2
 
 # Settings the importer
 BUILD_DIR = "plots/"
@@ -49,7 +50,7 @@ class HeatmapPlotter:
                  energy_range=(1e-10, 2.5), scale_energy_by_gaps=False, cf_ignore=(70, 250)):
         self.data_frame = data_frame_param.sort_values(parameter_name).reset_index(drop=True)
         
-        self.y = np.linspace(energy_range[0], energy_range[1], 15000) # meV
+        self.y = np.linspace(energy_range[0], energy_range[1], 25000) # meV
         self.x = (self.data_frame[parameter_name]).to_numpy()
         self.scale_energy_by_gaps = scale_energy_by_gaps
         self.resolvents = [cf.ContinuedFraction(pd_row, messages=False, ignore_first=cf_ignore[0], ignore_last=cf_ignore[1]) for index, pd_row in self.data_frame.iterrows()]
@@ -200,73 +201,73 @@ class HeatmapPlotter:
         spectral_functions_higgs = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, "amplitude_SC") for __i, res in enumerate(self.resolvents)]).transpose()
         spectral_functions_phase = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, "phase_SC")     for __i, res in enumerate(self.resolvents)]).transpose()
 
-        if not self.scale_energy_by_gaps:
-            (__higgs_peak_positions, __higgs_peak_weights, __higgs_peak_errors,
+        (__higgs_peak_positions, __higgs_peak_weights, __higgs_peak_errors,
                 __phase_peak_positions, __phase_peak_weights, __phase_peak_errors) = self.compute_peaks(spectral_functions_higgs, spectral_functions_phase) 
 
-            self.HiggsModes = pd.DataFrame([ {
-                    "resolvent_type": "Higgs",
-                    "energies": __higgs_peak_positions[i],
-                    "weights": __higgs_peak_weights[i],
-                    "weight_errors": __higgs_peak_errors[i],
-                    "Delta_max": self.data_frame["Delta_max"].iloc[i],
-                    "true_gap": self.true_gaps[i],
-                    "g": self.data_frame["g"].iloc[i],
-                    "error_g": self.__get_error__("g", i),
-                    "error_Delta_max": self.__get_error__("Delta_max", i),
-                    "error_true_gap": self.__get_error__("true_gap", i),
-                    "omega_D": self.data_frame["omega_D"].iloc[i],
-                    "E_F": self.data_frame["E_F"].iloc[i],
-                    "U": self.data_frame["U"].iloc[i],
-                    "dos_name" : self.data_frame["dos_name"]
-                } for i in range(self.N_data) ])
-            self.PhaseModes = pd.DataFrame([ {
-                    "resolvent_type": "Phase",
-                    "energies": __phase_peak_positions[i],
-                    "weights": __phase_peak_weights[i],
-                    "weight_errors": __phase_peak_errors[i],
-                    "Delta_max": self.data_frame["Delta_max"].iloc[i],
-                    "true_gap": self.true_gaps[i],
-                    "g": self.data_frame["g"].iloc[i],
-                    "error_g": self.__get_error__("g", i),
-                    "error_Delta_max": self.__get_error__("Delta_max", i),
-                    "error_true_gap": self.__get_error__("true_gap", i),
-                    "omega_D": self.data_frame["omega_D"].iloc[i],
-                    "E_F": self.data_frame["E_F"].iloc[i],
-                    "U": self.data_frame["U"].iloc[i],
-                    "dos_name" : self.data_frame["dos_name"]
-                } for i in range(self.N_data)])
+        self.HiggsModes = pd.DataFrame([ {
+                "resolvent_type": "Higgs",
+                "energies": __higgs_peak_positions[i],
+                "weights": __higgs_peak_weights[i],
+                "weight_errors": __higgs_peak_errors[i],
+                "Delta_max": self.data_frame["Delta_max"].iloc[i],
+                "true_gap": self.true_gaps[i],
+                "g": self.data_frame["g"].iloc[i],
+                "error_g": self.__get_error__("g", i),
+                "error_Delta_max": self.__get_error__("Delta_max", i),
+                "error_true_gap": self.__get_error__("true_gap", i),
+                "omega_D": self.data_frame["omega_D"].iloc[i],
+                "E_F": self.data_frame["E_F"].iloc[i],
+                "U": self.data_frame["U"].iloc[i],
+                "dos_name" : self.data_frame["dos_name"]
+            } for i in range(self.N_data) ])
+        self.PhaseModes = pd.DataFrame([ {
+                "resolvent_type": "Phase",
+                "energies": __phase_peak_positions[i],
+                "weights": __phase_peak_weights[i],
+                "weight_errors": __phase_peak_errors[i],
+                "Delta_max": self.data_frame["Delta_max"].iloc[i],
+                "true_gap": self.true_gaps[i],
+                "g": self.data_frame["g"].iloc[i],
+                "error_g": self.__get_error__("g", i),
+                "error_Delta_max": self.__get_error__("Delta_max", i),
+                "error_true_gap": self.__get_error__("true_gap", i),
+                "omega_D": self.data_frame["omega_D"].iloc[i],
+                "E_F": self.data_frame["E_F"].iloc[i],
+                "U": self.data_frame["U"].iloc[i],
+                "dos_name" : self.data_frame["dos_name"]
+            } for i in range(self.N_data)])
 
-            self.__remove_data_below_continuum__(spectral_functions_higgs)
-            self.__remove_data_below_continuum__(spectral_functions_phase)
+        self.__remove_data_below_continuum__(spectral_functions_higgs)
+        self.__remove_data_below_continuum__(spectral_functions_phase)
 
-            
-            ## Note, that the phase peak at omega=0 is the derivative of a delta peak
-            ## while the other peaks below the continuum are proper delta peaks
-            for i in range(self.N_data):
-                for peak_position, weight in zip(__higgs_peak_positions[i], __higgs_peak_weights[i]):
-                    if is_phase_peak(peak_position):
-                        summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
-                    else:
-                        summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
-                    mask = summand > 1e-4
-                    spectral_functions_higgs[mask, i] += summand[mask]
-                for peak_position, weight in zip(__phase_peak_positions[i], __phase_peak_weights[i]):
-                    if is_phase_peak(peak_position):
-                        summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
-                    else:
-                        summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
-                    mask = summand > 1e-4
-                    spectral_functions_phase[mask, i] += summand[mask]
-        # endif not self.scale_energy_by_gaps
+        ## Note, that the phase peak at omega=0 is the derivative of a delta peak
+        ## while the other peaks below the continuum are proper delta peaks
+        for i in range(self.N_data):
+            for peak_position, weight in zip(__higgs_peak_positions[i], __higgs_peak_weights[i]):
+                if is_phase_peak(peak_position):
+                    summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
+                else:
+                    summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
+                mask = summand > 1e-6
+                spectral_functions_higgs[mask, i] += summand[mask]
+            for peak_position, weight in zip(__phase_peak_positions[i], __phase_peak_weights[i]):
+                if is_phase_peak(peak_position):
+                    summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
+                else:
+                    summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
+                mask = summand > 1e-6
+                spectral_functions_phase[mask, i] += summand[mask]
 
-        levels = np.linspace(0, (1.01 * cbar_max)**(1./CBAR_EXP), 101, endpoint=True)**CBAR_EXP
-        #levels = 201#np.linspace(0, 1.01 * cbar_max, 201, endpoint=True)
-
-        cnorm = mcolors.PowerNorm(gamma=1/CBAR_EXP, vmin=0, vmax=1.01 * cbar_max)
+        #levels = np.linspace(0, (1.01 * cbar_max)**(1./CBAR_EXP), 101, endpoint=True)**CBAR_EXP
+        #cnorm = mcolors.PowerNorm(vmin=0, vmax=1.01 * cbar_max, gamma=1/CBAR_EXP)
         
-        contour_higgs = axes[0].contourf(self.x, self.y, spectral_functions_higgs, cmap=cmap, levels=levels, norm=cnorm, extend='max', zorder=-20)
-        contour_phase = axes[1].contourf(self.x, self.y, spectral_functions_phase, cmap=cmap, levels=levels, norm=cnorm, extend='max', zorder=-20)
+        levels = np.power(10, np.linspace(-2, 2, 101, endpoint=True))
+ 
+        spectral_functions_higgs = np.where(spectral_functions_higgs <= 1e-2, 1e-2, spectral_functions_higgs)
+        spectral_functions_phase = np.where(spectral_functions_phase <= 1e-2, 1e-2, spectral_functions_phase)
+        
+        contour_higgs = axes[0].contourf(self.x, self.y, spectral_functions_higgs, cmap=cmap, locator=ticker.LogLocator(), levels=levels, extend='both', zorder=-20)
+        contour_phase = axes[1].contourf(self.x, self.y, spectral_functions_phase, cmap=cmap, locator=ticker.LogLocator(), levels=levels, extend='both', zorder=-20)
         contour_higgs.set_edgecolor('face')
         contour_phase.set_edgecolor('face')
         
@@ -291,7 +292,7 @@ class HeatmapPlotter:
     
 def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='inferno', cbar_max=CBAR_MAX, energy_range=None, fig=None, axes=None, cf_ignore=(70, 250)):
     if energy_range is None:
-        energy_range = (0., 0.3) if not scale_energy_by_gaps else (0., 1.95)
+        energy_range = (0., 0.29) if not scale_energy_by_gaps else (0., 1.95)
     if fig is None:
         assert(axes is None)
         fig, axes = plt.subplots(nrows=2, ncols=len(tasks), figsize=(12.8 if len(tasks) > 2 else 6.4, 4.8), sharex=True, sharey=True)
@@ -338,5 +339,8 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='infern
 
         cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), orientation='vertical', fraction=0.1, pad=0.025, extend='max', ticks=ticks)
     
+    cbar.locator = ticker.LogLocator(10)
+    cbar.set_ticks(cbar.locator.tick_values(1e-1, 1e1))
+    cbar.minorticks_off()
     cbar.set_label(legend(r'\mathcal{A}(\omega)'))
     return fig, axes, plotters, cbar

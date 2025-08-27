@@ -7,10 +7,10 @@ import os
 
 figs = []
 axes = []
-systems = ["bcc", "fcc", "hc", "sc"]
+systems = ["bcc"]#, "fcc", "hc", "sc"
 
-Gs = [0.5, 1, 2]
-Ef = 0.5
+Gs = [1.0, 1.2, 1.3, 1.4, 1.5, 1.6]
+Ef = 0.
 
 for system in systems: 
     fig, ax = plt.subplots(figsize=(6.4, 4.8))
@@ -19,13 +19,12 @@ for system in systems:
     
     for g in Gs:
         main_df = load_panda("lattice_cut", f"./{system}", "gap.json.gz",
-                            **lattice_cut_params(N=2000, 
+                            **lattice_cut_params(N=16000, 
                                                  g=g, 
                                                  U=0, 
                                                  E_F=Ef,
-                                                 omega_D=0.05))
-        N = main_df["N"]
-        energy_space = main_df["Delta_epsilon"] * (np.linspace(0, N, N)) + main_df["min_energy"]
+                                                 omega_D=0.02))
+        energy_space = main_df["energies"]
         ax.plot(energy_space, np.sqrt((energy_space - main_df["E_F"])**2 + main_df["Delta"]**2), label=f"$g={g}$")
 
 
@@ -34,6 +33,6 @@ for system in systems:
     ax.set_title(system)
     ax.legend(loc="upper right")
     
-    fig.savefig(f"phd_plot_scripts/LatticeCUT/build/{os.path.basename(__file__).split('.')[0]}_{system}.svg")
+    #fig.savefig(f"phd_plot_scripts/LatticeCUT/build/{os.path.basename(__file__).split('.')[0]}_{system}.svg")
 
 plt.show()

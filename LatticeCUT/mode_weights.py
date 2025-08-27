@@ -46,10 +46,10 @@ for n_mode in range(N_SETS):
             #fcc, phase modes
             if len(modes.modes) > 2:
                 pickle.dump(modes.modes[2], open("phd_plot_scripts/LatticeCUT/modes/phase_fcc_first_secondary.pkl", "wb"))
-            if len(modes.modes) > 4:
-                pickle.dump(modes.modes[4], open("phd_plot_scripts/LatticeCUT/modes/phase_fcc_second_secondary.pkl", "wb"))
-            if len(modes.modes) > 6:
-                pickle.dump(modes.modes[6], open("phd_plot_scripts/LatticeCUT/modes/phase_fcc_third_secondary.pkl", "wb"))
+            if len(modes.modes) > 3:
+                pickle.dump(modes.modes[3], open("phd_plot_scripts/LatticeCUT/modes/phase_fcc_second_secondary.pkl", "wb"))
+            if len(modes.modes) > 5:
+                pickle.dump(modes.modes[5], open("phd_plot_scripts/LatticeCUT/modes/phase_fcc_third_secondary.pkl", "wb"))
             
         ls = 0
         for mode in modes.modes:
