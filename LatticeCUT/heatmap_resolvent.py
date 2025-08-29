@@ -11,19 +11,23 @@ OMEGA_D=0.02
 E_F=0.0
 
 n_mode = 0
+all_data = []
 
 for DOS in ["sc", "bcc", "fcc"]:#
-    print("Next up:", DOS)
-    all_data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz")
-    tasks = [
-        (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g <= {G_MAX_LOAD}"), "g", legend("g")),
-    ]
-    fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(109 if DOS=="fcc" else 70, 180))
-    fig.suptitle(f"{DOS} lattice")
-    
-    for plotter in plotters:
-        plotter.HiggsModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/higgs_{n_mode}.pkl")
-        plotter.PhaseModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/phase_{n_mode}.pkl")
-    n_mode +=1
+    print("Loading:", DOS)
+    all_data.append(load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz"))
 
+tasks = [
+    (data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g <= {G_MAX_LOAD}"), "g", legend("g"))
+        for data in all_data
+]
+
+fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=[(70, 180), (70, 180), (109, 180)])
+    
+for plotter in plotters:
+    plotter.HiggsModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/higgs_{n_mode}.pkl")
+    plotter.PhaseModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/phase_{n_mode}.pkl")
+n_mode +=1
+
+plt.savefig(f"build/{os.path.basename(__file__).split('.')[0]}.pdf", dpi=150)
 plt.show()

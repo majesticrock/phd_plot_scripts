@@ -12,6 +12,8 @@ import spectral_peak_analyzer as spa
 from legend import *
 from matplotlib import ticker
 
+from create_figure import *
+
 CBAR_MAX = 20
 CBAR_EXP = 2
 
@@ -289,13 +291,19 @@ class HeatmapPlotter:
         axes[1].set_xlabel(self.xlabel)
 
         return contour_higgs
-    
+
+def __get_cf_ignore__(cf_ignore, i):
+    if isinstance(cf_ignore, list):
+        return cf_ignore[i]
+    return cf_ignore
+
 def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='inferno', cbar_max=CBAR_MAX, energy_range=None, fig=None, axes=None, cf_ignore=(70, 250)):
     if energy_range is None:
         energy_range = (0., 0.29) if not scale_energy_by_gaps else (0., 1.95)
     if fig is None:
         assert(axes is None)
-        fig, axes = plt.subplots(nrows=2, ncols=len(tasks), figsize=(12.8 if len(tasks) > 2 else 6.4, 4.8), sharex=True, sharey=True)
+        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True}
+        fig, axes = create_large_figure(**__figkwargs) if len(tasks) > 2 else create_normal_figure(**__figkwargs)
         fig.subplots_adjust(wspace=0.05, hspace=0.05)
         
     ticks = [0]
@@ -321,7 +329,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='infern
 
         for i, (data_query, x_column, xlabel) in enumerate(tasks):
             plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
-                                           energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, cf_ignore=cf_ignore))
+                                           energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, cf_ignore=__get_cf_ignore__(cf_ignore, i)))
             contour_for_colorbar = plotters[-1].plot(axes[:, i], labels=not bool(i), cmap=cmap, cbar_max=cbar_max)
             
         cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), orientation='vertical', fraction=0.1, pad=0.025, extend='max', ticks=ticks)
@@ -334,7 +342,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='infern
         
         for i, (data_query, x_column, xlabel) in enumerate(tasks):
             plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
-                                           energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, cf_ignore=cf_ignore))
+                                           energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, cf_ignore=__get_cf_ignore__(cf_ignore, i)))
             contour_for_colorbar = plotters[-1].plot(axes[:], labels=not bool(i), cmap=cmap, cbar_max=cbar_max)
 
         cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), orientation='vertical', fraction=0.1, pad=0.025, extend='max', ticks=ticks)
