@@ -35,13 +35,10 @@ exp_signals /= NORMALIZATION_EXPERIMENT
 
 def gaussian(x, mu, sigma):
     return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
-
 def cauchy(x, mu, gamma):
     return (1. / np.pi ) * (gamma / ((x - mu)**2 + gamma**2))
-
 def sech_distrubution(x, mu, sigma):
     return (1. / (2. * sigma)) / np.cosh(0.5 * np.pi * (x - mu) / sigma)
-
 def laplace(x, mu, gamma):
     return 0.5 / gamma * np.exp(- np.abs(x-mu) / gamma)
 

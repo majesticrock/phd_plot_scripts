@@ -22,7 +22,7 @@ W = 200
 T = 300
 E_F = 118
 TAU_OFFDIAG=-1
-TAU_DIAG=10
+TAU_DIAG=15
 
 gamma = 50e-3
 
@@ -58,7 +58,7 @@ main_df = load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz
                                   field_amplitude=1., photon_energy=1., 
                                   tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
 
-exp_laser_t_max = 15.3335961194029835 if not new_t else 15.3335961194029835 * 1.5 / 2.
+exp_laser_t_max =  15.3335961194029835 * 1.5 / 2.#15.3335961194029835 if not new_t else
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) * exp_laser_t_max / df_A["t_end"]
 
 def gaussian(x, mu):

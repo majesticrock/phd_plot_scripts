@@ -9,20 +9,21 @@ from legend import *
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 
-BAND_WIDTH=200
+BAND_WIDTH=300
 T_AVE=0.05
+TAU_DIAG = 10
 MAX_FREQ = 20
 
-DIR = "local"
+DIR = "cascade_split"
 main_df = load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "split_current.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
                                   field_amplitude=1, photon_energy=1., 
-                                  tau_diag=15, tau_offdiag=-1, t0=0))
+                                  tau_diag=TAU_DIAG, tau_offdiag=-1, t0=0))
 
 full_df = load_panda("HHG", f"cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
                                   field_amplitude=1, photon_energy=1., 
-                                  tau_diag=15, tau_offdiag=-1, t0=0))
+                                  tau_diag=TAU_DIAG, tau_offdiag=-1, t0=0))
 full_N = int(full_df["N"] + 1)
 full_times = np.linspace(full_df["t_begin"], full_df["t_end"], full_N) / (2 * np.pi)
 
@@ -39,11 +40,11 @@ def cauchy(x, mu, gamma):
 sigma =  T_AVE * main_df["photon_energy"] / TIME_TO_UNITLESS
 kernel = cauchy(times, times[N_times//2], sigma)
 
-full_data_time = np.convolve(full_df["current_density_time"], cauchy(full_times, full_times[full_N//2], sigma), mode='same')
+full_data_time = np.gradient(np.convolve(full_df["current_density_time"], cauchy(full_times, full_times[full_N//2], sigma), mode='same'))
 full_data_time /= np.max(full_data_time)
 
-dirac_data_time = np.convolve(main_df["dirac_current"], kernel, mode='same')
-non_dirac_data_time = np.convolve(main_df["non_dirac_current"] , kernel, mode='same')
+dirac_data_time     = np.gradient(np.convolve(main_df["dirac_current"], kernel, mode='same'))
+non_dirac_data_time = np.gradient(np.convolve(main_df["non_dirac_current"] , kernel, mode='same'))
 
 norm = np.max(dirac_data_time) + np.max(non_dirac_data_time)
 dirac_data_time /= norm
@@ -61,10 +62,10 @@ axes[1].set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
 n = N_times * 4
 
 freqs_scipy = rfftfreq(n, dt)
-dirac_data      = np.abs(rfft(np.gradient(dirac_data_time    ), n))**2
-non_dirac_data  = np.abs(rfft(np.gradient(non_dirac_data_time), n))**2
+dirac_data      = np.abs(rfft((dirac_data_time    ), n))**2
+non_dirac_data  = np.abs(rfft((non_dirac_data_time), n))**2
 
-full_data = np.abs(rfft(np.gradient(full_data_time), 2 * full_N))**2
+full_data = np.abs(rfft((full_data_time), 2 * full_N))**2
 full_data /= np.max(full_data)
 
 norm = np.max(dirac_data) + np.max(non_dirac_data)
@@ -82,7 +83,7 @@ axes[1].plot(freqs_scipy, non_dirac_data, ls="--")
 axes[1].set_yscale("log")
 axes[1].set_xlim(0, MAX_FREQ + 0.5)
 
-axes[0].set_ylabel("$j(t)$ (arb. units)")
+axes[0].set_ylabel("$\partial_t j(t)$ (arb. units)")
 axes[1].set_ylabel("$|\\mathcal{F} [\\partial_t j] (\\omega)|^2$ (arb. units)")
 
 fig.tight_layout()

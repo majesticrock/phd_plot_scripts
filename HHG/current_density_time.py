@@ -15,7 +15,7 @@ def sech_distrubution(x, mu, sigma):
     
 def create_frame(nrows=1, ylabel_list=None, **kwargs):
     fig, ax = plt.subplots(nrows=nrows, sharex=True, **kwargs)
-    if (nrows == 1):
+    if (nrows == 1 and kwargs["ncols"]==1):
         if ylabel_list is None:
             ax.set_xlabel(legend(r"t / T_\mathrm{L}"))
         else:
@@ -28,7 +28,7 @@ def create_frame(nrows=1, ylabel_list=None, **kwargs):
                 a.set_ylabel(legend(r"\partial_t j(t)", "normalized"))
             else:
                 a.set_ylabel(ylabel_list[i])
-    fig.tight_layout()
+    #fig.tight_layout()
     return fig, ax
 
 def add_current_density_to_plot(df, ax, label=None, sigma=None, normalize=True, substract=None, shift=0, derivative=True, t_average=50, **kwargs):

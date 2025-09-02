@@ -19,20 +19,30 @@ FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # === Choose sweep parameter here ===
 sweep_param = "T_AVE"
-sweep_values = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130]
+sweep_values = [50]
 
 # Default parameters in one place
 PARAMS = {
     "DIR": "cascade_prec",
     "MODEL": "PiFlux",
     "v_F": 1.5e6,
-    "W": 100,
+    "W": 200,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 10,
-    "T_AVE":  30 * FWHM_TO_SIGMA
+    "TAU_DIAG": 15,
+    "T_AVE":  50
 }
+
+
+def gaussian(x, mu, gamma):
+    return (1 / (gamma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * gamma**2))
+def cauchy(x, mu, gamma):
+    return (1. / np.pi ) * (gamma / ((x - mu)**2 + gamma**2))
+def laplace(x, mu, gamma):
+    return np.log(2.) / gamma * np.exp(- 2*np.log(2) / gamma * np.abs(x-mu))
+def sech_distrubution(x, mu, gamma):
+    return (1. / (2. * gamma)) / np.cosh(0.5 * np.pi * (x - mu) / gamma)
 
 def run_and_plot(axes, axes_fft, params, color):
     """Run one simulation with given params and plot results with a given color."""
@@ -55,14 +65,11 @@ def run_and_plot(axes, axes_fft, params, color):
     times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
     sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
 
-    def gaussian(x, mu, sigma):
-        return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
+    __kernel = cauchy(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
 
-    __kernel = gaussian(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
-
-    signal_A  = -np.diff(np.convolve(df_A["current_density_time"],    __kernel, mode='same'), append=0.0) / (times[1] - times[0])
-    signal_B  = -np.diff(np.convolve(df_B["current_density_time"],    __kernel, mode='same'), append=0.0) / (times[1] - times[0])
-    signal_AB = -np.diff(np.convolve(main_df["current_density_time"], __kernel, mode='same'), append=0.0) / (times[1] - times[0])
+    signal_A  = -np.gradient(np.convolve(df_A["current_density_time"],    __kernel, mode='same'))
+    signal_B  = -np.gradient(np.convolve(df_B["current_density_time"],    __kernel, mode='same'))
+    signal_AB = -np.gradient(np.convolve(main_df["current_density_time"], __kernel, mode='same'))
 
     inter_A = interp1d(times, signal_A, fill_value=0.0, bounds_error=False)
     inter_B = interp1d(times, signal_B, fill_value=0.0, bounds_error=False)
