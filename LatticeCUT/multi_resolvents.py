@@ -9,10 +9,10 @@ import os
 
 figs = []
 axes = []
-systems = ["bcc", "fcc", "hc", "sc"]
+systems = ["bcc", "fcc", "sc"]
 
 Gs = [0.5, 1, 2]
-Ef = 0.5
+Ef = -0.5
 
 for system in systems: 
     fig, ax = plt.subplots(ncols=3, sharey=True, figsize=(12.8, 4.8))
@@ -21,12 +21,12 @@ for system in systems:
     axes.append(ax)
     
     for i, g in enumerate(Gs):
-        main_df = load_panda("lattice_cut", f"./{system}", "resolvents.json.gz",
+        main_df = load_panda("lattice_cut", f"test/{system}", "resolvents.json.gz",
                             **lattice_cut_params(N=2000, 
                                                  g=g, 
                                                  U=0, 
                                                  E_F=Ef,
-                                                 omega_D=0.05))
+                                                 omega_D=0.02))
         resolvents = cf.ContinuedFraction(main_df, ignore_first=5, ignore_last=60)
         
         w_lin = np.linspace(-0.005 * main_df["continuum_boundaries"][1], 0.45 * main_df["continuum_boundaries"][1], 15000, dtype=complex)
@@ -44,6 +44,6 @@ for system in systems:
     ax[1].set_title(system)
     ax[0].set_ylabel(r"$\mathcal{A} (\omega)$")
     
-    fig.savefig(f"phd_plot_scripts/LatticeCUT/build/{os.path.basename(__file__).split('.')[0]}_{system}.svg")
+    #fig.savefig(f"phd_plot_scripts/LatticeCUT/build/{os.path.basename(__file__).split('.')[0]}_{system}.svg")
     
 plt.show()

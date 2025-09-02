@@ -7,7 +7,7 @@ import os
 
 figs = []
 axes = []
-systems = ["bcc"]#, "fcc", "hc", "sc"
+systems = ["sc", "bcc", "fcc"]#, "fcc", "hc", "sc"
 
 Gs = [1.0, 1.2, 1.3, 1.4, 1.5, 1.6]
 Ef = 0.
@@ -25,11 +25,12 @@ for system in systems:
                                                  E_F=Ef,
                                                  omega_D=0.02))
         energy_space = main_df["energies"]
-        ax.plot(energy_space, np.sqrt((energy_space - main_df["E_F"])**2 + main_df["Delta"]**2), label=f"$g={g}$")
+        print(energy_space)
+        ax.plot(energy_space, np.sqrt((energy_space - main_df["E_F"])**2 + main_df["Delta"]**2) - np.max(main_df["Delta"]), label=f"$g={g}$")
 
 
-    ax.set_xlabel(r"$\epsilon$")
-    ax.set_ylabel(r"$\sqrt{(\epsilon-E_\mathrm{F})^2 + \Delta^2}$")
+    ax.set_xlabel(r"$\varepsilon$")
+    ax.set_ylabel(r"$E(\varepsilon) - \Delta_\mathrm{max}$")
     ax.set_title(system)
     ax.legend(loc="upper right")
     

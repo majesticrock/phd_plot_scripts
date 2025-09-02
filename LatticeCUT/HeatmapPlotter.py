@@ -302,7 +302,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='infern
         energy_range = (0., 0.29) if not scale_energy_by_gaps else (0., 1.95)
     if fig is None:
         assert(axes is None)
-        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True}
+        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.66}
         fig, axes = create_large_figure(**__figkwargs) if len(tasks) > 2 else create_normal_figure(**__figkwargs)
         fig.subplots_adjust(wspace=0.05, hspace=0.05)
         

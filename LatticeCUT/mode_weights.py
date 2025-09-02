@@ -10,7 +10,7 @@ import string
 from ModeCollector import Mode, ModeCollector
 import pickle
 
-XTYPE= "g"
+XTYPE= "Delta_max"
 X_LABEL = legend(r"\Delta_\mathrm{max}", "meV") if XTYPE == "Delta_max" else legend("g")
 N_MODES = 5
 N_SETS = 3
