@@ -14,7 +14,7 @@ from scipy.fft import rfft, rfftfreq
 
 new_t = False
 
-MAX_FREQ = 20
+MAX_FREQ = 40
 DIR = "cascade_new" if new_t else "cascade_prec"
 MODEL = "PiFlux"
 v_F = 1.5e6
@@ -22,9 +22,8 @@ W = 200
 T = 300
 E_F = 118
 TAU_OFFDIAG=-1
-TAU_DIAG=15
+TAU_DIAG=10
 
-sigma = 50e-3
 gamma = 50e-3
 
 FFT_CUTS = [1.7, 6.5]
@@ -63,11 +62,13 @@ exp_laser_t_max = 15.3335961194029835 if not new_t else 15.3335961194029835 * 1.
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) * exp_laser_t_max / df_A["t_end"]
 
 def gaussian(x, mu):
-    return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
+    return (1 / (gamma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * gamma**2))
 def cauchy(x, mu):
     return (1. / np.pi ) * (gamma / ((x - mu)**2 + gamma**2))
+def laplace(x, mu):
+    return np.log(2.) / gamma * np.exp(- 2*np.log(2) / gamma * np.abs(x-mu))
 def sech_distrubution(x, mu):
-    return (1. / (2. * sigma)) / np.cosh(0.5 * np.pi * (x - mu) / sigma)
+    return (1. / (2. * gamma)) / np.cosh(0.5 * np.pi * (x - mu) / gamma)
 
 N_ave = int(gamma  / (times[1] - times[0]))
 __theta_kernel = np.ones(N_ave) / N_ave
@@ -118,7 +119,7 @@ axes_fft[2].plot(freqs_scipy, fftplot / np.max(fftplot))
 
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0])
+exp_times = (18 * 0.03318960199004975 + EXPERIMENTAL_DATA[0])
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 
 n_exp = len(exp_times)
@@ -126,18 +127,18 @@ exp_freqs = rfftfreq(n_exp, exp_times[1] - exp_times[0])
 exp_fft_mask = (exp_times >= FFT_CUTS[0]) & (exp_times <= FFT_CUTS[1])
 
 LASER_DATA = np.loadtxt(EXP_PATH + "HHG/pulse_AB.dat").transpose()
-laser_times = 15 * 0.03318960199004975 + LASER_DATA[0]
+laser_times = 18 * 0.03318960199004975 + LASER_DATA[0]
 laser_plot = -(LASER_DATA[1] + LASER_DATA[2])
 laser_deriv = -np.gradient(laser_plot)
 
 for i in range(3):
     axes[i].plot(exp_times, -exp_signals[i] / np.max(exp_signals[i]), label="Experimental data")
-    axes[i].plot(laser_times, laser_plot / np.max(laser_plot), "k:", label="$-E(t)$")
-    axes[i].plot(laser_times, laser_deriv / np.max(laser_deriv), "k--", label="$\\partial_t E(t)$")
+    #axes[i].plot(laser_times, laser_plot / np.max(laser_plot), "k:", label="$-E(t)$")
+    #axes[i].plot(laser_times, laser_deriv / np.max(laser_deriv), "k--", label="$\\partial_t E(t)$")
     
     exp_fft = np.abs(rfft(exp_signals[i][exp_fft_mask], n_exp))**2
     axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experimental data")
-    axes_fft[i].set_ylim(1e-9, 1)
+    axes_fft[i].set_ylim(1e-9, 5)
     for j in range(0, MAX_FREQ, 2):
         axes_fft[i].axvline(main_df["photon_energy"] / (2*np.pi*0.6582119569509065) * (j+1), c="k", ls=":", alpha=0.5)
 

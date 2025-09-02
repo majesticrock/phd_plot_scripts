@@ -11,7 +11,7 @@ fig, ax = plt.subplots()
 weights = 1e4 * np.array(mode.weights)
 errors  = 1e4 * np.array(mode.weight_errors) 
 
-ax.plot(mode.x, weights, "o-", label="first bleeding mode")
+ax.plot(mode.x, weights, "o-", label="first shimmering mode")
 
 ph_ness = np.zeros(len(mode.x))
 for i, g in enumerate(mode.x):
@@ -34,7 +34,7 @@ for __n, marker in zip(["second", "third"], ["^", "v"]):
     
     weights = 1e4 * np.array(mode.weights)
     errors  = 1e4 * np.array(mode.weight_errors) 
-    ax.plot(mode.x, weights, f"{marker}-", label=f"{__n} bleeding mode")
+    ax.plot(mode.x, weights, f"{marker}-", label=f"{__n} shimmering mode")
 
 
 ax.set_ylabel("Weight $\\times 10^4$", color="C0")
