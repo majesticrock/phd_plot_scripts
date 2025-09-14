@@ -26,11 +26,11 @@ PARAMS = {
     "DIR": "cascade_prec",
     "MODEL": "PiFlux",
     "v_F": 1.5e6,
-    "W": 200,
+    "W": 300,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 15,
+    "TAU_DIAG": 10,
     "T_AVE":  50
 }
 
@@ -43,6 +43,8 @@ def laplace(x, mu, gamma):
     return np.log(2.) / gamma * np.exp(- 2*np.log(2) / gamma * np.abs(x-mu))
 def sech_distrubution(x, mu, gamma):
     return (1. / (2. * gamma)) / np.cosh(0.5 * np.pi * (x - mu) / gamma)
+def cos_dist(N):
+    return (1. - np.cos(np.pi * np.linspace(0., 2., N, endpoint=True))) / 2
 
 def run_and_plot(axes, axes_fft, params, color):
     """Run one simulation with given params and plot results with a given color."""
@@ -65,12 +67,14 @@ def run_and_plot(axes, axes_fft, params, color):
     times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
     sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
 
-    __kernel = cauchy(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
+    #__kernel = cauchy(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
+    __kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
+    print(len(times), len(__kernel))
 
     signal_A  = -np.gradient(np.convolve(df_A["current_density_time"],    __kernel, mode='same'))
     signal_B  = -np.gradient(np.convolve(df_B["current_density_time"],    __kernel, mode='same'))
     signal_AB = -np.gradient(np.convolve(main_df["current_density_time"], __kernel, mode='same'))
-
+    
     inter_A = interp1d(times, signal_A, fill_value=0.0, bounds_error=False)
     inter_B = interp1d(times, signal_B, fill_value=0.0, bounds_error=False)
 
@@ -90,6 +94,8 @@ def run_and_plot(axes, axes_fft, params, color):
     axes[0].plot(times, plot_data_combined / np.max(plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
     axes[1].plot(times, signal_AB / np.max(signal_AB), color=color, label=f"{sweep_param}={params[sweep_param]}")
     axes[2].plot(times, (signal_AB - plot_data_combined) / np.max(signal_AB - plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
+
+    #axes[0].plot(times[:len(__kernel)], __kernel, color="red", label="Kernel")
 
     # --- Frequency-domain plots ---
     n = len(times) * 4

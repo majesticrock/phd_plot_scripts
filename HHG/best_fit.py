@@ -43,6 +43,9 @@ def sech_distrubution(x, mu, sigma):
 def laplace(x, mu, gamma):
     return 0.5 / gamma * np.exp(- np.abs(x-mu) / gamma)
 
+def cos_dist(N):
+    return (1. - np.cos(np.pi * np.linspace(0., 2., N, endpoint=True))) / 2.
+    
 def compute_simulation_signal(times, df, T_AVE):
     sigma = T_AVE * df["photon_energy"] / TIME_TO_UNITLESS
     N = int( T_AVE * df["photon_energy"] / (times[1] - times[0]) )
@@ -53,6 +56,7 @@ def compute_simulation_signal(times, df, T_AVE):
     #__kernel = sech_distrubution(times, times[len(times)//2], sigma)
     #__kernel = cauchy(times, times[len(times)//2], sigma)
     __kernel = laplace(times, times[len(times)//2], sigma)
+    __kernel = cos_dist(N)
 
     __data = np.convolve(__data, __kernel, mode='same')
     __data = -np.gradient(__data, times[1] - times[0])
