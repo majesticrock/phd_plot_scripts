@@ -7,20 +7,20 @@ import spectral_peak_analyzer as spa
 from get_data import *
 from scipy.signal import find_peaks
 
-FIT_PEAK_N = 1
-MODE_TYPE = "phase_SC"
+FIT_PEAK_N = 2
+MODE_TYPE = "amplitude_SC"
 
 def is_phase_peak(peak):
     return abs(peak) < 1e-3
 
-SYSTEM = "sc"
+SYSTEM = "bcc"
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=2.5, 
+                                         g=1.72, 
                                          U=0, 
-                                         E_F=0,
+                                         E_F=-0.5,
                                          omega_D=0.02))
-resolvents = cf.ContinuedFraction(main_df, ignore_first=50, ignore_last=250)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=236, ignore_last=250)
 
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$\ln (\omega / t)$")
@@ -45,8 +45,8 @@ if is_phase_peak(spectral_positions[FIT_PEAK_N]):
     begin_offset = spectral_positions[FIT_PEAK_N] + 5e-3
     range = 0.01
 else:
-    begin_offset = 1e-6
-    range = 1e-5
+    begin_offset = 1e-9
+    range = 1e-8
 
 peak_data = spa.analyze_peak(spectral_real, spectral_imag, 
                              peak_position=spectral_positions[FIT_PEAK_N], 

@@ -3,10 +3,9 @@ import numpy as np
 import __path_appender as __ap
 __ap.append()
 from get_data import *
-import brillouin
 
 N = 200
-K_Z = 0.
+K_Z = 0.7
 SYSTEM = 'bcc'
 main_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
                     **lattice_cut_params(N=16000, 
@@ -35,17 +34,5 @@ cbar = fig.colorbar(cont, ax=ax)
 cbar.set_label("$\\Delta (k)$")
 ax.set_xlabel("$k_x / \\pi$")
 ax.set_ylabel("$k_y / \\pi$")
-
-poly = brillouin.bz_slice(SYSTEM, kz=K_Z)
-poly = np.vstack([poly, poly[0]])  # close loop
-ax.plot(poly[:,0]/np.pi, poly[:,1]/np.pi, 'r-', lw=2)
-
-#fig2, ax2 = plt.subplots()
-#Z2 = dispersion(X, Y, K_Z)
-#cont2 = ax2.contourf(X, Y, Z2, cmap="viridis", levels=41)
-#cbar2 = fig2.colorbar(cont2, ax=ax2)
-#cbar2.set_label("$\\varepsilon (k)$")
-#ax2.set_xlabel("$k_x / \\pi$")
-#ax2.set_ylabel("$k_y / \\pi$")
 
 plt.show()
