@@ -7,15 +7,16 @@ from get_data import *
 fig, ax = plt.subplots()
 
 SYSTEM = 'bcc'
-main_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
-                    **lattice_cut_params(N=16000, 
-                                         g=2, 
+main_df = load_panda('lattice_cut', f'test/{SYSTEM}', 'gap.json.gz',
+                    **lattice_cut_params(N=4000, 
+                                         g=1.87, 
                                          U=0, 
                                          E_F=-0.5,
                                          omega_D=0.02))
 
 energy_space = main_df['energies']
 ax.plot(energy_space, main_df['Delta'], 'k-')
+print(np.min(main_df["Delta"]))
 if 'inner_min' in main_df.index:
     ax.axvline(main_df['inner_min'], ls=':', c='k', alpha=0.4)
     ax.axvline(main_df['inner_max'], ls=':', c='k', alpha=0.4)

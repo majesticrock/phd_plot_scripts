@@ -5,9 +5,9 @@ __ap.append()
 
 from get_data import *
 SYSTEM = "bcc"
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=20000, 
-                                         g=1.85, 
+main_df = load_panda("lattice_cut", f"test2/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=2000, 
+                                         g=2, 
                                          U=0, 
                                          E_F=-0.5,
                                          omega_D=0.02))

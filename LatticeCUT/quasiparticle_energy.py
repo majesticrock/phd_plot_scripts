@@ -9,7 +9,7 @@ figs = []
 axes = []
 systems = ["sc", "bcc", "fcc"]#, "fcc", "hc", "sc"
 
-Gs = [1.0, 1.2, 1.3, 1.4, 1.5, 1.6]
+Gs = [1.35, 1.4, 1.45]#[1.0, 1.2, 1.3, 1.4, 1.5, 1.6]
 Ef = 0.
 
 for system in systems: 

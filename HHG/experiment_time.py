@@ -19,9 +19,9 @@ from scipy.fft import rfft, rfftfreq
 DIR = "cascade_prec"
 MODEL = "PiFlux"
 v_F = 1.5e6
-W = 300
-TAU_DIAG = 10
-MAX_FREQ = 20
+W = 200
+TAU_DIAG = 15
+MAX_FREQ = 10
 
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 T_AVE = 50e-3
@@ -116,13 +116,13 @@ for i, t0 in enumerate(t0_values):
     freqs_scipy = rfftfreq(n, dt)
     
     fftplot = np.abs(rfft(signal_linear, n))**2
-    axes_fft[0].plot(freqs_scipy, 10**(-2*i) * fftplot , label=f"$t_0 = {t0}$ ps", color=color)
+    axes_fft[0].plot(freqs_scipy, 10**(2*i) * fftplot , label=f"$t_0 = {t0}$ ps", color=color)
     
     fftplot = np.abs(rfft(signal_simulation, n))**2
-    axes_fft[1].plot(freqs_scipy, 10**(-2*i) * fftplot, color=color)
+    axes_fft[1].plot(freqs_scipy, 10**(2*i) * fftplot, color=color)
     
     fftplot = np.abs(rfft(signal_non_linear, n))**2
-    axes_fft[2].plot(freqs_scipy, 10**(-2*i) * fftplot, color=color)
+    axes_fft[2].plot(freqs_scipy, 10**(2*i) * fftplot, color=color)
 
     cdf.add_verticals(freqs_scipy, axes_fft[0], max_freq=MAX_FREQ)
     cdf.add_verticals(freqs_scipy, axes_fft[1], max_freq=MAX_FREQ)
@@ -138,7 +138,7 @@ fft_cbar = fig_fft.colorbar(sm, ax=axes_fft, fraction=0.046, pad=0.04)
 fft_cbar.set_label(r"$t_0$ (ps)")
 
 for ax in axes_fft:
-    ax.set_ylim(1e-18, 1e9)
+    ax.set_ylim(1, 1e25)
     ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
 
 plt.show()
