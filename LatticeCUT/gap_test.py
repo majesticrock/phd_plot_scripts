@@ -6,17 +6,17 @@ from get_data import *
 
 fig, ax = plt.subplots()
 
-SYSTEM = 'bcc'
-main_df = load_panda('lattice_cut', f'test/{SYSTEM}', 'gap.json.gz',
-                    **lattice_cut_params(N=4000, 
-                                         g=1.87, 
+SYSTEM = 'double_peak50'
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "gap.json.gz",
+                    **lattice_cut_params(N=2000, 
+                                         g=2,
                                          U=0, 
-                                         E_F=-0.5,
+                                         E_F=0,
                                          omega_D=0.02))
 
 energy_space = main_df['energies']
 ax.plot(energy_space, main_df['Delta'], 'k-')
-print(np.min(main_df["Delta"]))
+
 if 'inner_min' in main_df.index:
     ax.axvline(main_df['inner_min'], ls=':', c='k', alpha=0.4)
     ax.axvline(main_df['inner_max'], ls=':', c='k', alpha=0.4)
@@ -25,6 +25,8 @@ rho_ax = ax.twinx()
 rho_ax.plot(energy_space, main_df['dos'], c='red', ls='--')
 rho_ax.tick_params(axis='y', colors='red')
 rho_ax.yaxis.label.set_color('red')
+
+print(np.sum(main_df['dos'][((energy_space - 0.5) > -0.01) & ((energy_space - 0.5) < 0.01)]) * (energy_space[1] - energy_space[0]))
 
 ax.set_xlabel(r'$\epsilon - \mu$')
 ax.set_ylabel(r'$\Delta$')

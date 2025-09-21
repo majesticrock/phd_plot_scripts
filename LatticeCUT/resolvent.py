@@ -6,18 +6,18 @@ from create_zoom import *
 from get_data import *
 from scipy.signal import find_peaks
 
-SYSTEM = "bcc"
+SYSTEM = 'double_peak50'
 main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=2000, 
                                          g=2, 
                                          U=0, 
-                                         E_F=-0.5,
+                                         E_F=0,
                                          omega_D=0.02))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(main_df, ignore_first=200, ignore_last=250)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=70, ignore_last=250)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()

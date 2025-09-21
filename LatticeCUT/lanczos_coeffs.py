@@ -4,12 +4,12 @@ import __path_appender as __ap
 __ap.append()
 
 from get_data import *
-SYSTEM = "bcc"
-main_df = load_panda("lattice_cut", f"test2/{SYSTEM}", "resolvents.json.gz",
+SYSTEM = 'double_peak50'
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=2000, 
                                          g=2, 
                                          U=0, 
-                                         E_F=-0.5,
+                                         E_F=0,
                                          omega_D=0.02))
 
 a_inf = (main_df["continuum_boundaries"][0]**2 + main_df["continuum_boundaries"][1]**2) * 0.5
