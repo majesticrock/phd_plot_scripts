@@ -8,58 +8,75 @@ from matplotlib.animation import FuncAnimation
 
 # Parameters
 N = 200
-SYSTEM = 'sc'
-frames = 100  # number of animation frames
+frames = 400
 
-# Load data
-main_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
-                    **lattice_cut_params(N=16000,
-                                         g=2.,
-                                         U=0,
-                                         E_F=-0.5,
-                                         omega_D=0.02))
+X, Y = np.meshgrid(np.linspace(-2, 2, N), np.linspace(-2, 2, N))
+levels = np.linspace(0, 1, 21, endpoint=True)
 
-def dispersion(x, y, z):
-    if SYSTEM == 'sc':
+def dispersion(x, y, z, system):
+    if system == 'sc':
         return (np.cos(np.pi * x) + np.cos(np.pi * y) + np.cos(np.pi * z)) / 3.
-    elif SYSTEM == 'bcc':
+    elif system == 'bcc':
         return (np.cos(0.5 * np.pi * x) *
                 np.cos(0.5 * np.pi * y) *
                 np.cos(0.5 * np.pi * z))
-    elif SYSTEM == 'fcc':
+    elif system == 'fcc':
         return 0.5 - 0.5 * (
             np.cos(0.5 * np.pi * x) * np.cos(0.5 * np.pi * y) +
             np.cos(0.5 * np.pi * z) * np.cos(0.5 * np.pi * y) +
             np.cos(0.5 * np.pi * x) * np.cos(0.5 * np.pi * z))
 
-# Interpolator for gaps
-gaps = interp1d(main_df['energies'], main_df['Delta'], assume_sorted=True,
-                fill_value='extrapolate', bounds_error=False)
+EFs = [0, -0.5]
+SYSTEMS = ["sc", "bcc", "fcc"]
+dfs = [ [ load_panda('lattice_cut', f'./{system}', 'gap.json.gz',
+                        **lattice_cut_params(N=16000,
+                                             g=2.,
+                                             U=0,
+                                             E_F=Ef,
+                                             omega_D=0.02)) for system in SYSTEMS ] for Ef in EFs ]
+all_gaps = np.array([ [interp1d(df['energies'], df['Delta'] / np.max(df['Delta']), assume_sorted=True, fill_value='extrapolate', bounds_error=False) for df in _dfs ] for _dfs in dfs ])
 
-levels = np.linspace(0, np.max(main_df["Delta"]), 41, endpoint=True)
+def set_axes_labels(axes):
+    axes[-1][0].set_xlabel("$k_x / \\pi$")
+    axes[-1][1].set_xlabel("$k_x / \\pi$")
+    axes[-1][2].set_xlabel("$k_x / \\pi$")
 
-# Grid
-X, Y = np.meshgrid(np.linspace(-2, 2, N), np.linspace(-2, 2, N))
+    axes[0][0].set_ylabel("$k_y / \\pi$")
+    axes[1][0].set_ylabel("$k_y / \\pi$")
 
-# Set up plot
-fig, ax = plt.subplots()
-initial_Z = gaps(dispersion(X, Y, -1))
-cont = ax.contourf(X, Y, initial_Z, cmap="viridis", levels=levels)
-cbar = fig.colorbar(cont, ax=ax)
-cbar.set_label("$\\Delta (k)$")
-ax.set_xlabel("$k_x / \\pi$")
-ax.set_ylabel("$k_y / \\pi$")
+fig, axes = plt.subplots(nrows=len(EFs), ncols=len(SYSTEMS), figsize=(12, 6), sharex=True, sharey=True)
+fig.subplots_adjust(wspace=0.1, hspace=0.1)
+
+kz_values = np.linspace(-2, 2, frames, endpoint=False)
+disp_arrays = np.array([
+    [dispersion(X, Y, kz, system) for system in SYSTEMS]
+    for kz in kz_values
+])
+
+imshows = []
+for system, axs in enumerate(axes.transpose()):
+    disp = disp_arrays[0][system]
+    for Ef, ax in enumerate(axs):
+        Z = (all_gaps[Ef][system])(disp)
+        im = ax.imshow(Z, origin='lower', extent=[-2, 2, -2, 2], vmin=0, vmax=1, cmap="magma", aspect='auto')
+        imshows.append(im)
+
+cbar = fig.colorbar(imshows[0], ax=axes.ravel().tolist())
+cbar.set_label("$\\Delta (k) / \\Delta_\\mathrm{max}$")
+set_axes_labels(axes)
+axes[0][1].set_title(f"$k_z/\\pi = {kz_values[0]:.2f}$")
 
 def update(frame):
-    ax.clear()
-    k_z = -2 + 4 * frame / frames  # sweep k_z from -1 to 1
-    Z = gaps(dispersion(X, Y, k_z))
-    cont = ax.contourf(X, Y, Z, cmap="viridis", levels=levels)
-    ax.set_xlabel("$k_x / \\pi$")
-    ax.set_ylabel("$k_y / \\pi$")
-    ax.set_title(f"$k_z/\\pi = {k_z:.2f}$")
-    return cont.collections
+    kz = kz_values[frame]
+    for system, axs in enumerate(axes.transpose()):
+        disp = disp_arrays[frame][system]
+        for Ef, ax in enumerate(axs):
+            Z = (all_gaps[Ef][system])(disp)
+            imshows[system*len(EFs)+Ef].set_data(Z)
+    axes[0][1].set_title(f"$k_z/\\pi = {kz:.2f}$")
+    return imshows
 
-ani = FuncAnimation(fig, update, frames=frames, blit=False, interval=100)
+ani = FuncAnimation(fig, update, frames=frames, blit=False, interval=66, repeat=True)
 
-plt.show()
+ani.save("topology_animation.mp4", writer="ffmpeg", dpi=150)
+#plt.show()
