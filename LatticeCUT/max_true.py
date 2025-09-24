@@ -4,8 +4,6 @@ import __path_appender as __ap
 from matplotlib.gridspec import GridSpec
 __ap.append()
 from get_data import *
-import os
-from create_figure import *
 import string
 
 systems = ["sc", "bcc", "fcc"]
@@ -13,7 +11,7 @@ systems = ["sc", "bcc", "fcc"]
 Gs = [1.0, 1.2, 1.4, 1.6]
 Ef = 0.
 
-fig = create_figure(0.7, 0.8, generator=plt.figure)
+fig = plt.figure()
 gs = GridSpec(2, 3, hspace=0.4, wspace=0.15, height_ratios=[1.2, 1])
 axes_energy = [ fig.add_subplot(gs[0, i]) for i in range(3) ]
 ax_gap = fig.add_subplot(gs[1, :])
@@ -22,6 +20,9 @@ axes_energy[1].set_xlabel(r"$\varepsilon \times 10^2$", labelpad=0.5)
 axes_energy[0].set_ylabel(r"$(E(\varepsilon) - \Delta_\mathrm{max}) \times 10^2$")
 axes_energy[1].set_yticklabels([])
 axes_energy[2].set_yticklabels([])
+
+def quasi_particle_dispersion(energy, E_F, Delta):
+    return np.sqrt((energy - E_F)**2 + Delta**2)
 
 import colorsys
 import matplotlib.colors as mcolors
@@ -49,7 +50,7 @@ for i, ax, system in zip([0, 1, 2], axes_energy, systems):
                                                  omega_D=0.02))
         energy_space = main_df["energies"]
         mask = (energy_space < 0.08) & (energy_space > -0.08)
-        ax.plot(1e2 * energy_space[mask], 1e2 * (np.sqrt((energy_space - main_df["E_F"])**2 + main_df["Delta"]**2)[mask] - np.max(main_df["Delta"])), 
+        ax.plot(1e2 * (energy_space[mask] - Ef), 1e2 * (quasi_particle_dispersion(energy_space[mask], Ef, main_df["Delta"][mask]) - np.max(main_df["Delta"])), 
                 label=f"${g}$", color=color)
 
     ax.annotate(
@@ -98,19 +99,23 @@ labels = [
     r"(c)"
 ]
 datas = [
-    load_all("lattice_cut/sc/N=16000",  "resolvents.json.gz"),
-    load_all("lattice_cut/bcc/N=16000", "resolvents.json.gz"),
-    load_all("lattice_cut/fcc/N=16000", "resolvents.json.gz")
+    load_all("lattice_cut/sc/N=16000",  "gap.json.gz"),
+    load_all("lattice_cut/bcc/N=16000", "gap.json.gz"),
+    load_all("lattice_cut/fcc/N=16000", "gap.json.gz")
 ]
 
 for i, (data, label) in enumerate(zip(datas, labels)):
-    query = data.query(f"omega_D == 0.02 & g >= 0.2 & g <= 2.5 & Delta_max > 0", engine="python").sort_values("g")
-    y_data = np.array([0.5 * boundaries[0] for boundaries in query["continuum_boundaries"]])
-    ax_gap.plot(query["g"], (1 - y_data / query["Delta_max"]), label=label, color=f"C{i}")
+    query = data.query(f"omega_D == 0.02 & g >= 0.2 & g <= 2.5 & Delta_max > 0 & E_F == {Ef}", engine="python").sort_values("g")
+    #y_data = np.array([0.5 * boundaries[0] for boundaries in query["continuum_boundaries"]])
+    argmax_deltas = np.array( [ np.argmax(delta) for  delta in query["Delta"] ] )
+    y_data = np.array( [ delta[arg] * (delta[arg - 1] - 2 * delta[arg] + delta[arg + 1]) / ((energies[arg + 1] - energies[arg])**2) for arg, delta, energies in zip(argmax_deltas, query["Delta"], query["energies"]) ] )
+
+    ax_gap.plot(query["g"], 1 + y_data, label=label, color=f"C{i}")
+    ax_gap.axhline(0, color="black", linestyle=":")
 
 ax_gap.legend()
 ax_gap.set_xlabel("$g$")
-ax_gap.set_ylabel(r"$1 - \Delta_\mathrm{true} / \Delta_\mathrm{max}$")
+ax_gap.set_ylabel(r"$1 + \Delta(\varepsilon_{\Delta}) \Delta'' (\varepsilon_{\Delta})$")
 ax_gap.text(2.25, 0.2, "(d)")
 
 fig.align_ylabels([axes_energy[0], ax_gap])
