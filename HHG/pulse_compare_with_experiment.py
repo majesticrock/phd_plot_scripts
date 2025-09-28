@@ -23,7 +23,7 @@ TAU_DIAG_values = [10, 15, 20]
 T_AVE_values = [0.025, 0.035, 0.05]
 
 import os
-EXP_PATH = "../raw_data_phd_HHG/" if os.name == "nt" else "data/"
+EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(f"{EXP_PATH}HHG/emitted_signals_in_the_time_domain.dat").transpose()
 exp_times_raw = 16 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
 exp_signals = np.array([EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[2], EXPERIMENTAL_DATA[1]])  # A, B, A+B

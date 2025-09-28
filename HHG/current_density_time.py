@@ -13,9 +13,9 @@ def cauchy(x, mu, gamma):
 def sech_distrubution(x, mu, sigma):
     return (1. / (2. * sigma)) / np.cosh(0.5 * np.pi * (x - mu) / sigma)
     
-def create_frame(nrows=1, ylabel_list=None, **kwargs):
+def create_frame(nrows=1, ncols=1, ylabel_list=None, **kwargs):
     fig, ax = plt.subplots(nrows=nrows, sharex=True, **kwargs)
-    if (nrows == 1 and kwargs["ncols"]==1):
+    if (nrows == 1 and ncols==1):
         if ylabel_list is None:
             ax.set_xlabel(legend(r"t / T_\mathrm{L}"))
         else:
