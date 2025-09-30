@@ -5,17 +5,17 @@ __ap.append()
 from get_data import *
 
 SYSTEM = 'single_peak30'
-main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz",
-                    **lattice_cut_params(N=8000, 
-                                         g=0.2,
-                                         U=0., 
-                                         E_F=-0.5,
-                                         omega_D=0.02))
+params = lattice_cut_params(N=8000, 
+                            g=1.2,
+                            U=0., 
+                            E_F=-0.5,
+                            omega_D=0.02)
+main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
 
 fig, ax = plt.subplots()
 
 Ts = main_df['temperatures']
-max_gaps = np.array([ np.max(np.abs(gaps)) for gaps in main_df['finite_gaps'] ])
+max_gaps = np.array([ gaps for gaps in main_df['max_gaps'] ])
 ax.plot(Ts, max_gaps, label="Data")
 
 from scipy.optimize import curve_fit
