@@ -26,11 +26,11 @@ PARAMS = {
     "DIR": "cascade_prec",
     "MODEL": "PiFlux",
     "v_F": 1.5e6,
-    "W": 300,
+    "W": 150,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 10,
+    "TAU_DIAG": 30,
     "T_AVE":  50
 }
 
@@ -67,9 +67,8 @@ def run_and_plot(axes, axes_fft, params, color):
     times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
     sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
 
-    #__kernel = cauchy(times, times[len(times)//2], sigma / FWHM_TO_SIGMA)
-    __kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
-    print(len(times), len(__kernel))
+    __kernel = cauchy(times, times[len(times)//2], sigma )
+    #__kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
 
     signal_A  = -np.gradient(np.convolve(df_A["current_density_time"],    __kernel, mode='same'))
     signal_B  = -np.gradient(np.convolve(df_B["current_density_time"],    __kernel, mode='same'))
@@ -149,10 +148,14 @@ for val in sweep_values:
     color = cmap(norm(val))
     main_df = run_and_plot(axes, axes_fft, params, color)
 
+times = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
+laser = np.gradient(main_df["laser_function"])
+axes[0].plot(times, laser / np.max(laser), c="red", ls="--")
+
 # --- Experimental data ---
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times = (16 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / (2*np.pi * 0.6582119569509065)
+exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / (2*np.pi * 0.6582119569509065)
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 
 n_exp = len(exp_times)
