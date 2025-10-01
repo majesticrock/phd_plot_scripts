@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 def fit_func(T, A, Tc):
     return A * np.sqrt(Tc - T)
 
-SYSTEM = 'single_peak30'
+SYSTEM = 'bcc'
 main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N=8000/", "T_C.json.gz", condition="U=0.0").sort_values('g')
 
 fig, (ax, ax_low) = plt.subplots(nrows=2, sharex=True)
@@ -24,7 +24,7 @@ for i, (Ts, deltas) in enumerate(zip(main_df["temperatures"], max_gaps)):
     TC_errors[i] = np.sqrt(pcov[1][1])
 
 ax.plot(main_df['g'], TCs, color="blue")
-ax.fill_between(main_df['g'], TCs - TC_errors, TCs + TC_errors, color="blue", alpha=0.5)
+#ax.fill_between(main_df['g'], TCs - TC_errors, TCs + TC_errors, color="blue", alpha=0.5)
 
 ax2 = ax.twinx()
 gaps_at_zero = np.array([delta[0] for delta in max_gaps])
