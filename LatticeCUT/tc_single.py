@@ -4,10 +4,10 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'single_peak30'
+SYSTEM = 'bcc'
 params = lattice_cut_params(N=8000, 
                             g=1.2,
-                            U=0., 
+                            U=0.1, 
                             E_F=-0.5,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)

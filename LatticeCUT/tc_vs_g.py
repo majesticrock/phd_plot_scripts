@@ -9,13 +9,16 @@ def fit_func(T, A, Tc):
     return A * np.sqrt(Tc - T)
 
 SYSTEM = 'bcc'
-main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N=8000/", "T_C.json.gz", condition="U=0.0").sort_values('g')
+main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N=8000/", "T_C.json.gz", condition=["U=0.1", "E_F=-0.5"]).sort_values('g')
+mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 5)
+main_df = main_df[mask].reset_index(drop=True)
 
 fig, (ax, ax_low) = plt.subplots(nrows=2, sharex=True)
 
+interactions = main_df["g"].to_numpy(dtype=np.float64)
 max_gaps = main_df["max_gaps"]
-TCs = np.zeros_like(main_df["g"].to_numpy())
-TC_errors = np.zeros_like(main_df["g"].to_numpy())
+TCs = np.zeros_like(interactions)
+TC_errors = np.zeros_like(interactions)
 
 for i, (Ts, deltas) in enumerate(zip(main_df["temperatures"], max_gaps)):
     cut = len(Ts) // 2
@@ -23,12 +26,12 @@ for i, (Ts, deltas) in enumerate(zip(main_df["temperatures"], max_gaps)):
     TCs[i] = popt[1]
     TC_errors[i] = np.sqrt(pcov[1][1])
 
-ax.plot(main_df['g'], TCs, color="blue")
-#ax.fill_between(main_df['g'], TCs - TC_errors, TCs + TC_errors, color="blue", alpha=0.5)
+ax.plot(interactions, TCs, color="blue")
+ax.fill_between(interactions, TCs - TC_errors, TCs + TC_errors, color="blue", alpha=0.5)
 
 ax2 = ax.twinx()
 gaps_at_zero = np.array([delta[0] for delta in max_gaps])
-ax2.plot(main_df['g'], gaps_at_zero, color='red')
+ax2.plot(interactions, gaps_at_zero, color='red')
 
 
 ax.set_ylabel(r'$T_C$', color='blue')
@@ -42,7 +45,7 @@ ax2.tick_params(axis='y', colors='red')
 ax.set_ylim(0, ax.get_ylim()[1])
 ax2.set_ylim(0, ax2.get_ylim()[1])
 
-ax_low.plot(main_df['g'], gaps_at_zero / TCs, label="Data")
+ax_low.plot(interactions, gaps_at_zero / TCs, label="Data")
 ax_low.axhline(1.764, color="k", ls="--", label="BCS")
 
 ax_low.legend()
