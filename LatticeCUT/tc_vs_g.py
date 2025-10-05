@@ -26,7 +26,7 @@ for i, (Ts, deltas) in enumerate(zip(main_df["temperatures"], max_gaps)):
     TCs[i] = popt[1]
     TC_errors[i] = np.sqrt(pcov[1][1])
 
-ax.plot(interactions, TCs, color="blue")
+ax.plot(interactions, TCs, color="blue", marker='x')
 ax.fill_between(interactions, TCs - TC_errors, TCs + TC_errors, color="blue", alpha=0.5)
 
 ax2 = ax.twinx()

@@ -12,7 +12,7 @@ DOS="bcc"
 
 n_mode = 0
 
-data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz")
+data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz", condition="U=0.1")
 
 tasks = [
     (data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g <= {G_MAX_LOAD}"), "g", legend("g"))
