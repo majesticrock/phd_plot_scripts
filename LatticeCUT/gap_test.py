@@ -6,10 +6,10 @@ from get_data import *
 
 fig, ax = plt.subplots()
 
-SYSTEM = 'single_peak30'
+SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "gap.json.gz",
                     **lattice_cut_params(N=2000, 
-                                         g=1.,
+                                         g=2.4,
                                          U=0.1, 
                                          E_F=-0.5,
                                          omega_D=0.02))

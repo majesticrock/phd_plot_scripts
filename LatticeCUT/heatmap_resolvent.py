@@ -12,10 +12,10 @@ E_F=-0.5
 DOS="bcc"
 n_mode = 0
 
-all_data = load_all(f"lattice_cut/{DOS}/N={N}", "resolvents.json.gz", condition="U=0.1")
+all_data = load_all(f"lattice_cut/./{DOS}/N={N}", "resolvents.json.gz", condition="U=0.1")
 
 tasks = [
-    (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g <= {G_MAX_LOAD}"), "g", legend("g"))
+    (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D}"), "g", legend("g"))
 ]
 
 fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(220, 250))
