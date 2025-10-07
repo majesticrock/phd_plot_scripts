@@ -4,11 +4,11 @@ import __path_appender as __ap
 __ap.append()
 
 from get_data import *
-SYSTEM = 'double_peak50'
-main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=2000, 
-                                         g=2, 
-                                         U=0, 
+SYSTEM = 'bcc'
+main_df = load_panda("lattice_cut", f"confined/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=1.8, 
+                                         U=0.1, 
                                          E_F=0,
                                          omega_D=0.02))
 

@@ -30,7 +30,7 @@ PARAMS = {
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 30,
+    "TAU_DIAG": 10,
     "T_AVE":  50
 }
 
@@ -70,9 +70,9 @@ def run_and_plot(axes, axes_fft, params, color):
     __kernel = cauchy(times, times[len(times)//2], sigma )
     #__kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
 
-    signal_A  = -np.gradient(np.convolve(df_A["current_density_time"],    __kernel, mode='same'))
-    signal_B  = -np.gradient(np.convolve(df_B["current_density_time"],    __kernel, mode='same'))
-    signal_AB = -np.gradient(np.convolve(main_df["current_density_time"], __kernel, mode='same'))
+    signal_A  = (np.convolve(df_A["current_density_time"],    __kernel, mode='same'))
+    signal_B  = (np.convolve(df_B["current_density_time"],    __kernel, mode='same'))
+    signal_AB = (np.convolve(main_df["current_density_time"], __kernel, mode='same'))
     
     inter_A = interp1d(times, signal_A, fill_value=0.0, bounds_error=False)
     inter_B = interp1d(times, signal_B, fill_value=0.0, bounds_error=False)
