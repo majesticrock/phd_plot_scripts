@@ -57,7 +57,7 @@ dos_df  = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
 from matplotlib import cm
 g_values = main_df['g'].to_numpy()
 norm = plt.Normalize(vmin=np.min(g_values), vmax=np.max(g_values))
-cmap = cm.viridis
+cmap = cm.gist_rainbow
 
 for (i, row), (_, row_tc) in zip(main_df.iterrows(), tc_df.iterrows()):
     Ts = row_tc["temperatures"]
@@ -73,13 +73,20 @@ for (i, row), (_, row_tc) in zip(main_df.iterrows(), tc_df.iterrows()):
     heat_capacities = compute_heat_capacity(internal_energies, Ts)
     ax.plot(Ts / T_C, heat_capacities, color=cmap(norm(row['g'])), label=f"g={row['g']:.2f}")
 
-    Ts = np.linspace(T_C, 1.5 * T_C, 20)
-    deltas = np.zeros((len(Ts), N))
+    Ts_ns = np.linspace(T_C, 1.5 * T_C, 20)
+    deltas_ns = np.zeros((len(Ts_ns), N))
     internal_energies_ns = np.array([
-                              compute_internal_energy(np.linspace(-1, 1, N), delta, dos_df["dos"], np.where(T > 0, 1. / T, 1e6), E_F) for delta, T in zip(deltas, Ts)
+                              compute_internal_energy(np.linspace(-1, 1, N), delta, dos_df["dos"], np.where(T > 0, 1. / T, 1e6), E_F) for delta, T in zip(deltas_ns, Ts_ns)
                               ])
-    heat_capacities_ns = compute_heat_capacity(internal_energies, Ts)
-    ax.plot(Ts / T_C, heat_capacities, color=cmap(norm(row['g'])), ls="--")
+
+    heat_capacities_ns = compute_heat_capacity(internal_energies_ns, Ts_ns)
+    ax.plot(
+        [Ts[-1] / T_C, Ts_ns[0] / T_C],
+        [heat_capacities[-1], heat_capacities_ns[0]],
+        color=cmap(norm(row['g'])),
+        ls="--"
+    )
+    ax.plot(Ts_ns / T_C, heat_capacities_ns, color=cmap(norm(row['g'])), ls="--")
     
 sm = cm.ScalarMappable(cmap=cmap, norm=norm)
 sm.set_array([])
