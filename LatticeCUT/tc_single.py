@@ -5,9 +5,9 @@ __ap.append()
 from get_data import *
 
 SYSTEM = 'bcc'
-params = lattice_cut_params(N=8000, 
-                            g=2.1,
-                            U=0.1, 
+params = lattice_cut_params(N=10000, 
+                            g=1.85,
+                            U=0, 
                             E_F=-0.5,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
@@ -26,7 +26,7 @@ popt, pcov = curve_fit(fit_func, Ts[-cut:], max_gaps[-cut:], bounds=( [-np.inf, 
 print(f"A ={popt[0]} +/- {np.sqrt(pcov[0][0])}")
 print(f"Tc={popt[1]} +/- {np.sqrt(pcov[1][1])}")
 
-t_lin = np.linspace(Ts[len(Ts) // 5], popt[1], 500)
+t_lin = np.linspace(Ts[len(Ts) // 5], popt[1], 1000)
 ax.plot(t_lin, fit_func(t_lin, *popt), ls="--", label="Fit")
 
 ax.legend()

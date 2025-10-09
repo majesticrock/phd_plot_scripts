@@ -6,9 +6,9 @@ __ap.append()
 from get_data import *
 
 SYSTEM = 'bcc'
-N=8000
+N=10000
 params = lattice_cut_params(N=N, 
-                            g=1.6,
+                            g=2.35,
                             U=0.1, 
                             E_F=-0.5,
                             omega_D=0.02)

@@ -45,7 +45,7 @@ def compute_heat_capacity(internal_energies, temperatures):
     return np.gradient(internal_energies, temperatures)
 
 fig, ax = plt.subplots()
-N=8000
+N=10000
 E_F=-0.5
 U=0.1
 SYSTEM = 'bcc'
@@ -90,7 +90,7 @@ for (i, row), (_, row_tc) in zip(main_df.iterrows(), tc_df.iterrows()):
     
 sm = cm.ScalarMappable(cmap=cmap, norm=norm)
 sm.set_array([])
-cbar = fig.colorbar(sm, ax=ax, label="g")
+cbar = fig.colorbar(sm, ax=ax, label="$g$")
 
 ax.set_xlabel(r"$T / T_c$")
 ax.set_ylabel(r"$C_V$")
