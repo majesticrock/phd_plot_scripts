@@ -17,7 +17,7 @@ for U, lambda_c, marker in zip([0., 0.05, 0.1], [1.86, 1.8, 1.8], ["x", "v", "o"
     mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 5)
     main_df = main_df[mask].reset_index(drop=True)
 
-    interactions = main_df["g"].to_numpy(dtype=np.float64) - U
+    interactions = main_df["g"].to_numpy(dtype=np.float64)# - U
     max_gaps = main_df["max_gaps"]
     TCs = np.zeros_like(interactions)
     TC_errors = np.zeros_like(interactions)
