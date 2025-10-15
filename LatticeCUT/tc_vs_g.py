@@ -12,7 +12,7 @@ fig, (ax, ax_ratio) = plt.subplots(nrows=2, sharex=True)
 
 SYSTEM = 'bcc'
 N=10000
-for U, lambda_c, marker in zip([0., 0.05, 0.1], [1.86, 1.8, 1.8], ["x", "v", "o"]):
+for U, g_c, marker in zip([0., 0.05, 0.1], [1.848, 1.8, 1.8], ["x", "v", "o"]):
     main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", condition=[f"U={U}", "E_F=-0.5"]).sort_values('g')
     mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 5)
     main_df = main_df[mask].reset_index(drop=True)
@@ -29,15 +29,14 @@ for U, lambda_c, marker in zip([0., 0.05, 0.1], [1.86, 1.8, 1.8], ["x", "v", "o"
         TC_errors[i] = np.sqrt(pcov[1][1])
 
     ax.plot(interactions, TCs, marker=marker)
-    mask = (interactions >= lambda_c) & (interactions < 2.1 - U)
+    mask = (interactions >= g_c) & (interactions < 2.1 - U)
 
     Tc_before_critical = TCs[mask][0]
-    def critical_fit(x, lambda_c, a, b, c):
-        #return a * np.where(x > lambda_c, np.sqrt(x - lambda_c), 0.0) 
-        return np.where(x > lambda_c, a  / np.abs(np.log(x - lambda_c) + b), 0.0) + Tc_before_critical + c
+    def critical_fit(x, g_c, a, b):
+        return a * np.where(x > g_c, np.sqrt(x - g_c), 0.0) + b
 
     #popt, pcov = curve_fit(critical_fit, interactions[mask], TCs[mask], 
-    #                       bounds=([lambda_c - 0.05, -np.inf, -np.inf, -np.inf], [lambda_c + 0.05, np.inf, np.inf, np.inf]))
+    #                       bounds=([g_c, -np.inf, -np.inf], [g_c + 0.05, np.inf, np.inf]))
     #for i in range(len(popt)):
     #    print(f"{popt[i]} +/- {np.sqrt(pcov[i][i])}")
     #l_lin = np.linspace(popt[0], 2.2, 2500)

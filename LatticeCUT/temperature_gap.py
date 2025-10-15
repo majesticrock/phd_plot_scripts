@@ -8,7 +8,7 @@ from get_data import *
 SYSTEM = 'bcc'
 N=10000
 params = lattice_cut_params(N=N, 
-                            g=1.85,
+                            g=1.852,
                             U=0., 
                             E_F=-0.5,
                             omega_D=0.02)
