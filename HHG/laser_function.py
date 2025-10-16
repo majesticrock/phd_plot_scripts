@@ -38,17 +38,26 @@ def plot_laser(df, electric_field=False):
     plt.show()
 
 if __name__ == '__main__':
-    __PLOT_E_FIELD__ = False
+    TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
+    __PLOT_E_FIELD__ = True
     fig, ax = create_frame(__PLOT_E_FIELD__)
 
     main_df = load_panda("HHG", "cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
+                    **hhg_params(T=300, E_F=118, v_F=1e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
     #add_laser_to_plot(main_df, ax, False, label="Vector potential")
     add_laser_to_plot(main_df, ax, True, label="Electric field", normalize=True)
-    ax.axhline(0, c="k", ls="--", linewidth=1.5)
+    N_extra = 15
+    T_SHIFT = N_extra * 0.03318960199004975 * main_df["photon_energy"] / TIME_TO_UNITLESS
     
-    N_extra = 16
-    time_scale = 6.67111 * main_df["photon_energy"] / (6.582119569509065698e-1 * 2 * np.pi)
+    #main_df = load_panda("HHG", "test/dcos_laser/PiFlux", "current_density.json.gz", 
+    #                **hhg_params(T=300, E_F=118, v_F=1e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
+    #main_df["t_begin"] += T_SHIFT
+    #main_df["t_end"] = T_SHIFT + main_df["t_end"] * 2 * np.pi
+    #add_laser_to_plot(main_df, ax, False, label="Dcos", normalize=False)
+    
+    ax.axhline(0, ls="-", linewidth=1.5)
+    
+    time_scale = 6.67111 * main_df["photon_energy"] / TIME_TO_UNITLESS
     dt = time_scale / 201 # number of sample points of the electric field
     ax.axvline(N_extra * dt, c="k")
     ax.axvline(time_scale + N_extra * dt, c="k")
@@ -57,6 +66,7 @@ if __name__ == '__main__':
     EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
     LASER = np.loadtxt(f"{EXP_PATH}HHG/pulse_AB.dat").transpose()
     
-    ax.plot((16 * 0.03318960199004975 + LASER[0]) * main_df["photon_energy"] / (6.582119569509065698e-1 * 2 * np.pi), (LASER[1] + LASER[2]) / np.max(np.abs(LASER[1] + LASER[2])), label="Exp", ls="--")
+    ax.plot(T_SHIFT + LASER[0] * main_df["photon_energy"] / TIME_TO_UNITLESS, (LASER[1] + LASER[2]) / np.max(np.abs(LASER[1] + LASER[2])), 
+            label="Exp", ls="--")
     
     plt.show()
