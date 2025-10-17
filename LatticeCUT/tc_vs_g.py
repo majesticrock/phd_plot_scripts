@@ -11,9 +11,10 @@ def find_tc_fit(T, A, Tc):
 fig, (ax, ax_ratio) = plt.subplots(nrows=2, sharex=True)
 
 SYSTEM = 'bcc'
+OMEGA_D=0.02
 N=10000
 for U, g_c, marker in zip([0., 0.05, 0.1], [1.848, 1.8, 1.8], ["x", "v", "o"]):
-    main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", condition=[f"U={U}", "E_F=-0.5"]).sort_values('g')
+    main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", condition=[f"U={U}", "E_F=-0.5", f"omega_D={OMEGA_D}"]).sort_values('g')
     mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 5)
     main_df = main_df[mask].reset_index(drop=True)
 
