@@ -49,17 +49,17 @@ def cos_dist(N):
 def run_and_plot(axes, axes_fft, params, color):
     """Run one simulation with given params and plot results with a given color."""
 
-    df_A = load_panda("HHG", f"{params['DIR']}/expA_laser/{params['MODEL']}", "current_density.json.gz", 
+    df_A = load_panda("HHG", f"{params['DIR']}/dcosA_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
-    df_B = load_panda("HHG", f"{params['DIR']}/expB_laser/{params['MODEL']}", "current_density.json.gz", 
+    df_B = load_panda("HHG", f"{params['DIR']}/dcosB_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
-    main_df = load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MODEL']}", "current_density.json.gz", 
+    main_df = load_panda("HHG", f"{params['DIR']}/dcos_laser/{params['MODEL']}", "current_density.json.gz", 
                          **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                       field_amplitude=1., photon_energy=1., 
                                       tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
@@ -135,6 +135,9 @@ fig_fft, axes_fft = cdf.create_frame(
 for ax in axes_fft:
     ax.set_yscale("log")
     ax.set_xlim(0, MAX_FREQ)
+    
+    for i in range(1, MAX_FREQ, 2):
+        ax.axvline(i, color="gray", ls="--")
 
 # Colormap setup
 norm = colors.Normalize(vmin=min(sweep_values), vmax=max(sweep_values))

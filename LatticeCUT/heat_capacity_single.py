@@ -48,12 +48,12 @@ fig, ax = plt.subplots()
 N=10000
 SYSTEM = 'bcc'
 E_F=-0.5
-G=1.55
+G=1.862
 params = lattice_cut_params(N=N, 
                             g=G,
                             U=0., 
                             E_F=E_F,
-                            omega_D=0.03)
+                            omega_D=0.02)
 
 tc_df   = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
 main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "all_gaps.json.gz", **params)

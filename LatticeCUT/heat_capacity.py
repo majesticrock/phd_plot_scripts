@@ -48,7 +48,7 @@ fig, ax = plt.subplots()
 N=10000
 E_F=-0.5
 U=0.0
-OMEGA_D=0.03
+OMEGA_D=0.02
 SYSTEM = 'bcc'
 main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "all_gaps.json.gz", condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
 tc_df   = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
