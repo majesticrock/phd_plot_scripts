@@ -18,19 +18,19 @@ TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # === Choose sweep parameter here ===
-sweep_param = "T_AVE"
-sweep_values = [50]
+sweep_param = "v_F"
+sweep_values = [1e6, 1.5e6]
 
 # Default parameters in one place
 PARAMS = {
     "DIR": "test",
     "MODEL": "PiFlux",
-    "v_F": 1.5e6,
+    "v_F": 1e6,
     "W": 200,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 30,
+    "TAU_DIAG": 10,
     "T_AVE":  50
 }
 
@@ -70,8 +70,8 @@ def run_and_plot(axes, axes_fft, params, color):
     __kernel = cauchy(times, times[len(times)//2], sigma )
     #__kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
 
-    signal_A  = -np.gradient(np.convolve(df_A["current_density_time"],    __kernel, mode='same'))
-    signal_B  = -np.gradient(np.convolve(df_B["current_density_time"],    __kernel, mode='same'))
+    signal_A  = -np.gradient(np.convolve(df_A["current_density_time"]   , __kernel, mode='same'))
+    signal_B  = -np.gradient(np.convolve(df_B["current_density_time"]   , __kernel, mode='same'))
     signal_AB = -np.gradient(np.convolve(main_df["current_density_time"], __kernel, mode='same'))
     
     inter_A = interp1d(times, signal_A, fill_value=0.0, bounds_error=False)
@@ -117,18 +117,18 @@ def run_and_plot(axes, axes_fft, params, color):
 fig, axes = cdt.create_frame(
     nrows=3, figsize=(8.4, 8),
     ylabel_list=[
-        legend(r"j_\mathrm{lin}(t)", "a.b."),
-        legend(r"j_\mathrm{sim}(t)", "a.b."),
-        legend(r"j_\mathrm{sim}(t) - j_\mathrm{lin}(t)", "a.b."),
+        legend(r"\partial_t j_\mathrm{lin}(t)", "a.b."),
+        legend(r"\partial_t j_\mathrm{sim}(t)", "a.b."),
+        legend(r"\partial_t (j_\mathrm{sim}(t) - j_\mathrm{lin}(t))", "a.b."),
     ]
 )
 
 fig_fft, axes_fft = cdf.create_frame(
     nrows=3, figsize=(8.4, 8),
     ylabel_list=[
-        legend(r"j_\mathrm{lin}(\omega)", "a.b."),
-        legend(r"j_\mathrm{sim}(\omega)", "a.b."),
-        legend(r"j_\mathrm{sim} - j_\mathrm{lin}", "a.b."),
+        legend(r"|\mathrm{lin.~Signal}|^2", "a.b."),
+        legend(r"|\mathrm{sim.~Signal}|^2", "a.b."),
+        legend(r"|\mathrm{NL~Signal}|^2", "a.b."),
     ]
 )
 
@@ -150,7 +150,7 @@ for val in sweep_values:
 
 times = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
 laser = np.gradient(main_df["laser_function"])
-axes[0].plot(times, laser / np.max(laser), c="red", ls="--")
+#axes[0].plot(times, laser / np.max(laser), c="red", ls="--")
 
 # --- Experimental data ---
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"

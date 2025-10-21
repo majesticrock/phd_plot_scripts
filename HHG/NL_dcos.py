@@ -18,19 +18,19 @@ TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # === Choose sweep parameter here ===
-sweep_param = "T_AVE"
-sweep_values = [50]
+sweep_param = "v_F"
+sweep_values = [1e6, 1.5e6]
 
 # Default parameters in one place
 PARAMS = {
     "DIR": "test",
     "MODEL": "PiFlux",
-    "v_F": 1.5e6,
+    "v_F": 1e6,
     "W": 200,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 30,
+    "TAU_DIAG": 10,
     "T_AVE":  50
 }
 
@@ -164,10 +164,10 @@ exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTA
 n_exp = len(exp_times)
 exp_freqs = rfftfreq(n_exp, exp_times[1] - exp_times[0])
 
-for i in range(3):
-    axes[i].plot(exp_times, -exp_signals[i] / np.max(exp_signals[i]), label="Experimental data", ls="--", color="k")
-    exp_fft = np.abs(rfft(exp_signals[i], n_exp))**2
-    axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experimental data", ls="--", color="k")
+#for i in range(3):
+#    axes[i].plot(exp_times, -exp_signals[i] / np.max(exp_signals[i]), label="Experimental data", ls="--", color="k")
+#    exp_fft = np.abs(rfft(exp_signals[i], n_exp))**2
+#    axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experimental data", ls="--", color="k")
 
 axes[0].legend()
 axes_fft[0].legend(loc="upper right")
