@@ -13,8 +13,9 @@ fig, (ax, ax_ratio) = plt.subplots(nrows=2, sharex=True)
 SYSTEM = 'bcc'
 OMEGA_D=0.02
 N=10000
-for U, g_c, marker in zip([0., 0.05, 0.1], [1.848, 1.8, 1.8], ["x", "v", "o"]):
-    main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", condition=[f"U={U}", "E_F=-0.5", f"omega_D={OMEGA_D}"]).sort_values('g')
+for U, g_c, marker in zip([0., 0.05, 0.1, 0.2], [1.848, 1.85, 1.88, 1875], ["x", "v", "o", "s"]):
+    main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", 
+                       condition=[f"U={U}", "E_F=-0.5", f"omega_D={OMEGA_D}"]).sort_values('g')
     mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 5)
     main_df = main_df[mask].reset_index(drop=True)
 
@@ -32,7 +33,6 @@ for U, g_c, marker in zip([0., 0.05, 0.1], [1.848, 1.8, 1.8], ["x", "v", "o"]):
     ax.plot(interactions, TCs, marker=marker)
     mask = (interactions >= g_c) & (interactions < 2.1 - U)
 
-    Tc_before_critical = TCs[mask][0]
     def critical_fit(x, g_c, a, b):
         return a * np.where(x > g_c, np.sqrt(x - g_c), 0.0) + b
 

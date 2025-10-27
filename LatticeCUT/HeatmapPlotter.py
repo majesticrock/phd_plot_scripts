@@ -25,8 +25,8 @@ G_MAX_PLOT = 2.5
 
 __BEGIN_OFFSET__ = 1e-4
 __RANGE__ = 1e-4
-__SECOND_BEGIN__ = 1e-7
-__SECOND_RANGE__ = 1e-7
+__SECOND_BEGIN__ = 1e-9
+__SECOND_RANGE__ = 1e-8
 __PEAK_PROMINCE__ = 1.
 
 __INITIAL_IMAG__ = 1e-5j
@@ -42,13 +42,13 @@ def derivative_gaussian_bell(x, mu, sigma):
     return -((x - mu) / sigma**2) * gaussian_bell(x, mu, sigma)
 
 def is_phase_peak(peak):
-    return abs(peak) < 1e-3
+    return abs(peak) < 1.5e-3
 
 def extract_model_settings(ds):
     return f"dos={ds['dos_name']}  omega_D={ds['omega_D']}  g={ds['g']}  U={ds['U']}  E_F={ds['E_F']}"
 
 class HeatmapPlotter:
-    def __init__(self, data_frame_param, parameter_name, xlabel, zlabel=r'$\mathcal{A}(\omega)$', xscale="linear", yscale="linear",
+    def __init__(self, data_frame_param, parameter_name, xlabel, zlabel=r'$\mathcal{A}(\omega) / W^{-1}$', xscale="linear", yscale="linear",
                  energy_range=(1e-10, 2.5), scale_energy_by_gaps=False, cf_ignore=(70, 250)):
         self.data_frame = data_frame_param.sort_values(parameter_name).reset_index(drop=True)
         
@@ -76,7 +76,7 @@ class HeatmapPlotter:
         indizes = find_peaks(spectral, prominence=8 * self.true_gaps[pos] * __PEAK_PROMINCE__)[0]
         positions = np.array([self.__scale_if__(self.y[i], pos) for i in indizes])
         positions = positions[positions < self.true_gaps[pos] - __CONTINUUM_CUT_SHIFT__]
-        positions[positions < 1e-4] = 0
+        positions[is_phase_peak(positions)] = 0
         return positions
 
     def __get_error__(self, key, i):
@@ -115,7 +115,8 @@ class HeatmapPlotter:
                                         begin_offset          = __BEGIN_OFFSET__ if not is_phase_peak(peak_position) else peak_position + __BEGIN_OFFSET__,
                                         reversed              = self.__decide_if_to_reverse__(__i, _intial_positions, self.true_gaps[i]),
                                         lower_continuum_edge  = self.true_gaps[i],
-                                        peak_pos_range        = self.y[20] - self.y[0], )
+                                        peak_pos_range        = self.y[20] - self.y[0],
+                                        improve_peak_position = not is_phase_peak(peak_position))
                                 for __i, peak_position in enumerate(_intial_positions) ]
         
         for j in range(len(__result)):
@@ -263,7 +264,7 @@ class HeatmapPlotter:
         #levels = np.linspace(0, (1.01 * cbar_max)**(1./CBAR_EXP), 101, endpoint=True)**CBAR_EXP
         #cnorm = mcolors.PowerNorm(vmin=0, vmax=1.01 * cbar_max, gamma=1/CBAR_EXP)
         
-        levels = np.power(10, np.linspace(-2, 2, 101, endpoint=True))
+        levels = np.power(10, np.linspace(-2, 3, 101, endpoint=True))
  
         spectral_functions_higgs = np.where(spectral_functions_higgs <= 1e-2, 1e-2, spectral_functions_higgs)
         spectral_functions_phase = np.where(spectral_functions_phase <= 1e-2, 1e-2, spectral_functions_phase)
@@ -283,11 +284,11 @@ class HeatmapPlotter:
 
         if labels:
             if self.scale_energy_by_gaps:
-                axes[0].set_ylabel(legend(r"\omega / (2 \Delta_\mathrm{max})"))
-                axes[1].set_ylabel(legend(r"\omega / (2 \Delta_\mathrm{max})"))
+                axes[0].set_ylabel("Higgs\n " + legend(r"\omega / (2 \Delta_\mathrm{max})"))
+                axes[1].set_ylabel("Phase\n " + legend(r"\omega / (2 \Delta_\mathrm{max})"))
             else:
-                axes[0].set_ylabel(legend(r"\omega"))
-                axes[1].set_ylabel(legend(r"\omega"))
+                axes[0].set_ylabel("Higgs\n " + legend(r"\omega / W"))
+                axes[1].set_ylabel("Phase\n " + legend(r"\omega / W"))
         axes[1].set_xlabel(self.xlabel)
 
         return contour_higgs
@@ -299,10 +300,10 @@ def __get_cf_ignore__(cf_ignore, i):
 
 def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='inferno', cbar_max=CBAR_MAX, energy_range=None, fig=None, axes=None, cf_ignore=(70, 250)):
     if energy_range is None:
-        energy_range = (0., 0.29) if not scale_energy_by_gaps else (0., 1.95)
+        energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
         assert(axes is None)
-        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.66}
+        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.6}
         fig, axes = create_large_figure(**__figkwargs) if len(tasks) > 2 else create_normal_figure(**__figkwargs)
         fig.subplots_adjust(wspace=0.05, hspace=0.05)
         
@@ -347,8 +348,12 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, cmap='infern
 
         cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), orientation='vertical', fraction=0.1, pad=0.025, extend='max', ticks=ticks)
     
+    for ax in axes.ravel().tolist():
+        ax.set_ylim(energy_range[0] + 1e-8, energy_range[1])
+    
     cbar.locator = ticker.LogLocator(10)
-    cbar.set_ticks(cbar.locator.tick_values(1e-1, 1e1))
+    cbar.set_ticks(cbar.locator.tick_values(1e-1, 1e2))
     cbar.minorticks_off()
-    cbar.set_label(legend(r'\mathcal{A}(\omega)'))
+    cbar.set_label(legend(r'\mathcal{A}(\omega) / W^{-1}'))
+    
     return fig, axes, plotters, cbar
