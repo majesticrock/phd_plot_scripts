@@ -141,8 +141,12 @@ class ParamSelector(tk.Tk):
         data_box.grid(row=1, column=0, padx=5, pady=5)
         
         laser_box = ttk.Combobox(self, textvariable=self.system_selector_vars['laser'], state="readonly", 
-                                 values=["cosine_laser", "continuous_laser", "exp_laser", "expA_laser", "expB_laser", 
-                                         "quench_laser", "powerlaw1_laser", "dcos_laser", "dcosA_laser", "dcosB_laser"])
+                                 values=["dgauss_laser", "dgaussA_laser", "dgaussB_laser",
+                                         "exp_laser", "expA_laser", "expB_laser", 
+                                         "dcos_laser", "dcosA_laser", "dcosB_laser",
+                                         "cosine_laser", "continuous_laser", 
+                                         "quench_laser", "powerlaw1_laser", 
+                                         ])
         laser_box.grid(row=1, column=1, padx=5, pady=5)
         #laser_box.current(0)
         
@@ -253,7 +257,7 @@ class ParamSelector(tk.Tk):
         if self.overlay_laser.get():
             if self.time_fig is None:
                 self.time_fig, self.time_ax = current_density_time.create_frame()
-            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label="$j$", derivative=True, t_average=50)
+            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label="$j$", derivative=True, t_average=50, normalize=True)
             if self.laser_ax is None:
                 self.laser_ax = self.time_ax.twinx()
             self.laser_ax = self.time_ax.twinx()
@@ -277,7 +281,7 @@ class ParamSelector(tk.Tk):
         else:
             if self.time_fig is None:
                 self.time_fig, self.time_ax = current_density_time.create_frame()
-            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label=f"${self.count_time}$", normalize=False)
+            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label=f"${self.count_time}$", normalize=True)
             self.count_time += 1
         
     def laser(self):

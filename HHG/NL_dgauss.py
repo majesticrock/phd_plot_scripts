@@ -25,7 +25,7 @@ sweep_values = [1.5e6]
 PARAMS = {
     "DIR": "test",
     "MODEL": "PiFlux",
-    "v_F": 1e6,
+    "v_F": 1.5e6,
     "W": 200,
     "T": 300,
     "E_F": 118,
@@ -49,17 +49,17 @@ def cos_dist(N):
 def run_and_plot(axes, axes_fft, params, color):
     """Run one simulation with given params and plot results with a given color."""
 
-    df_A = load_panda("HHG", f"{params['DIR']}/dcosA_laser/{params['MODEL']}", "current_density.json.gz", 
+    df_A = load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
-    df_B = load_panda("HHG", f"{params['DIR']}/dcosB_laser/{params['MODEL']}", "current_density.json.gz", 
+    df_B = load_panda("HHG", f"{params['DIR']}/dgaussB_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
-    main_df = load_panda("HHG", f"{params['DIR']}/dcos_laser/{params['MODEL']}", "current_density.json.gz", 
+    main_df = load_panda("HHG", f"{params['DIR']}/dgauss_laser/{params['MODEL']}", "current_density.json.gz", 
                          **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                       field_amplitude=1., photon_energy=1., 
                                       tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))

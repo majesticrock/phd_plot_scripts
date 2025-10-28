@@ -33,28 +33,26 @@ def create_frame(nrows=1, ncols=1, ylabel_list=None, **kwargs):
 
 def add_current_density_to_plot(df, ax, label=None, sigma=None, normalize=True, substract=None, shift=0, derivative=True, t_average=50, **kwargs):
     times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
-    if derivative:
-        __data = np.gradient(df["current_density_time"], times[1]-times[0])
-    else:
-        __data = df["current_density_time"]
-        
+    __data = df["current_density_time"]
     if t_average > 0:
         __std_dev = 1e-3 * t_average * df["photon_energy"] / (2 * np.pi * 0.6582119569509065)
         __kernel = gaussian(times, times[len(times)//2], 0.5 * __std_dev)
         __data = np.convolve(__data, __kernel, mode='same')
-        
-    if substract is None:
-        normalization = 1. / np.max(np.abs(__data)) if normalize else 1.0
-        y_data = __data * normalization
-    else:
-        y_data = __data - substract(times)
-        if normalize:
-            y_data /= np.max(y_data)
-    #y_data *= -1 # only the magnitude matters, but the inverted sign looks better
-    ax.plot(times, y_data - shift, label=label, **kwargs)
+    
+    if derivative:
+        __data = -np.gradient(__data, times[1]-times[0])
+    
+    if substract is not None:
+        __data -= substract(times)
+    
+    normalization = np.max(np.abs(__data)) if normalize else 1.0
+    __data /= normalization
+    #__data *= -1 # only the magnitude matters, but the inverted sign looks better
+    ax.plot(times, __data - shift, label=label, **kwargs)
+
     if sigma is not None:
         worst_case = 4 * sigma * normalization
-        ax.fill_between(times, y_data - worst_case, y_data + worst_case, alpha=0.2, **kwargs)
+        ax.fill_between(times, __data - worst_case, __data + worst_case, alpha=0.2, **kwargs)
 
 def plot_j(df):
     fig, ax = create_frame()
