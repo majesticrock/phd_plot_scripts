@@ -13,7 +13,7 @@ from legend import *
 
 def compute_current_density(main_df):
     frequencies = main_df["frequencies"]
-    current_density = frequencies * (main_df["current_density_frequency_real"] + 1.0j * main_df["current_density_frequency_imag"])
+    current_density = (main_df["current_density_frequency_real"] + 1.0j * main_df["current_density_frequency_imag"])
     if main_df["diagonal_relaxation_time"] > 0:
         current_density += (1.0j * main_df["current_density_time"][-1] * frequencies / ((1. / main_df["diagonal_relaxation_time"]) + 1.0j * frequencies)) * np.exp(-main_df["t_end"] * ((1. / main_df["diagonal_relaxation_time"]) + 1.0j * frequencies))
     else:
@@ -76,6 +76,8 @@ def plot_j(main_df, max_freq=None):
     
     
 if __name__ == '__main__':
-    main_df = load_panda("HHG", "test/cosine_laser/PiFlux", "current_density.json.gz", 
-                     **hhg_params(T=0, E_F=0, v_F=1.5e5, band_width=400, field_amplitude=1.6, photon_energy=5.25, tau_diag=30, tau_offdiag=-1, t0=0))
+    main_df = load_panda("HHG", "alt_current/dgauss_laser/PiFlux", "current_density.json.gz", 
+                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=200, 
+                                  field_amplitude=1, photon_energy=1, tau_diag=10, 
+                                  tau_offdiag=-1, t0=0))
     plot_j(main_df)

@@ -257,7 +257,7 @@ class ParamSelector(tk.Tk):
         if self.overlay_laser.get():
             if self.time_fig is None:
                 self.time_fig, self.time_ax = current_density_time.create_frame()
-            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label="$j$", derivative=True, t_average=50, normalize=True)
+            current_density_time.add_current_density_to_plot(main_df, self.time_ax, label="$j$", normalize=True)
             if self.laser_ax is None:
                 self.laser_ax = self.time_ax.twinx()
             self.laser_ax = self.time_ax.twinx()
