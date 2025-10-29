@@ -18,12 +18,12 @@ TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # === Choose sweep parameter here ===
-sweep_param = "v_F"
-sweep_values = [1.5e6]
+sweep_param = "W"
+sweep_values = [150, 200, 250, 300]
 
 # Default parameters in one place
 PARAMS = {
-    "DIR": "test",
+    "DIR": "4cycles",
     "MODEL": "PiFlux",
     "v_F": 1.5e6,
     "W": 200,
@@ -110,7 +110,10 @@ def run_and_plot(axes, axes_fft, params, color):
     fftplot = np.abs(rfft(signal_AB - plot_data_combined, n))**2
     axes_fft[2].plot(freqs_scipy, fftplot / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
     
-    return main_df
+    return main_df, {
+        "times": times,
+        "data": plot_data_combined,
+    }
 
 
 # --- Figure setup ---
@@ -145,11 +148,13 @@ cmap = cm.viridis
 sm = cm.ScalarMappable(norm=norm, cmap=cmap)
 
 # --- Sweep loop ---
+sim_latest = None
 for val in sweep_values:
     params = PARAMS.copy()
-    params[sweep_param] = val  # override chosen parameter
+    params[sweep_param] = val
     color = cmap(norm(val))
-    main_df = run_and_plot(axes, axes_fft, params, color)
+    main_df, sim_out = run_and_plot(axes, axes_fft, params, color)
+    sim_latest = sim_out
 
 times = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
 laser = np.gradient(main_df["laser_function"])
@@ -158,16 +163,24 @@ axes[0].plot(times, laser / np.max(laser), c="red", ls="--")
 # --- Experimental data ---
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / TIME_TO_UNITLESS
+exp_times = EXPERIMENTAL_DATA[0] * main_df["photon_energy"] / TIME_TO_UNITLESS
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 
 n_exp = len(exp_times)
 exp_freqs = rfftfreq(n_exp, exp_times[1] - exp_times[0])
 
-#for i in range(3):
-#    axes[i].plot(exp_times, -exp_signals[i] / np.max(exp_signals[i]), label="Experimental data", ls="--", color="k")
-#    exp_fft = np.abs(rfft(exp_signals[i], n_exp))**2
-#    axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experimental data", ls="--", color="k")
+sim_idx = np.argmax(np.abs(sim_latest["data"]))
+sim_tmax = sim_latest["times"][sim_idx]
+
+exp_idx = np.argmax(np.abs(exp_signals[0]))
+exp_tmax = exp_times[exp_idx]
+
+for i in range(3):
+    axes[i].plot(exp_times + sim_tmax - exp_tmax, -exp_signals[i] / np.max(exp_signals[i]),
+                 label=f"Experimental data", ls="--", color="k")
+
+    exp_fft = np.abs(rfft(exp_signals[i], n_exp))**2
+    #axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experimental data", ls="--", color="k")
 
 axes[0].legend()
 axes_fft[0].legend(loc="upper right")

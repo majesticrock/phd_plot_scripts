@@ -18,14 +18,14 @@ TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # === Choose sweep parameter here ===
-sweep_param = "v_F"
-sweep_values = [1e6, 1.5e6]
+sweep_param = "W"
+sweep_values = [200]
 
 # Default parameters in one place
 PARAMS = {
     "DIR": "test",
     "MODEL": "PiFlux",
-    "v_F": 1e6,
+    "v_F": 1.5e6,
     "W": 200,
     "T": 300,
     "E_F": 118,

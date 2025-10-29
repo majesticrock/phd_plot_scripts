@@ -119,7 +119,7 @@ axes_fft[2].plot(freqs_scipy, fftplot / np.max(fftplot))
 
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times = (18 * 0.03318960199004975 + EXPERIMENTAL_DATA[0])
+exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0])
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 
 n_exp = len(exp_times)
@@ -127,7 +127,7 @@ exp_freqs = rfftfreq(n_exp, exp_times[1] - exp_times[0])
 exp_fft_mask = (exp_times >= FFT_CUTS[0]) & (exp_times <= FFT_CUTS[1])
 
 LASER_DATA = np.loadtxt(EXP_PATH + "HHG/pulse_AB.dat").transpose()
-laser_times = 18 * 0.03318960199004975 + LASER_DATA[0]
+laser_times = 15 * 0.03318960199004975 + LASER_DATA[0]
 laser_plot = -(LASER_DATA[1] + LASER_DATA[2])
 laser_deriv = -np.gradient(laser_plot)
 
