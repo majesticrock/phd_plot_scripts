@@ -13,12 +13,13 @@ from get_data import *
 from legend import *
 
 MAX_FREQ = 20
-TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
+HBAR = 0.6582119569509065
+TIME_TO_UNITLESS = 2 * np.pi * HBAR
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # === Choose sweep parameter here ===
-sweep_param = "v_F"
-sweep_values = [1.5e6]
+sweep_param = "W"
+sweep_values = [200]
 
 # Default parameters in one place
 PARAMS = {
@@ -92,13 +93,17 @@ for val in sweep_values:
     main_df = run_and_plot(ax, ax_fft, params, color)
 
 times = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
-laser = np.gradient(main_df["laser_function"])
-ax.plot(times, laser / np.max(laser), c="red", ls="--")
+laser = (np.gradient(main_df["laser_function"]))
+ax.plot(times, laser / np.max(np.abs(laser)), c="red", ls="--")
 
 # --- Experimental data ---
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
+#LASER_DATA = np.loadtxt(EXP_PATH + "HHG/pulse_AB.dat").transpose()
+#laser_times = (7 * 0.03318960199004975 + LASER_DATA[0]) * main_df["photon_energy"] / TIME_TO_UNITLESS
+#ax.plot(laser_times, -LASER_DATA[1] / np.max(np.abs(LASER_DATA[1])), c="k", ls=":")
+
 EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times = EXPERIMENTAL_DATA[0] * main_df["photon_energy"] / TIME_TO_UNITLESS
+exp_times = (7 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / TIME_TO_UNITLESS
 exp_signal = EXPERIMENTAL_DATA[3]
 
 n_exp = len(exp_times)
