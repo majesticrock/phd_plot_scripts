@@ -85,12 +85,16 @@ fig, ax = plt.subplots()
 
 # list of (data_dir_prefix, label, method)
 variants = [
-    ("test_ddtj0/expA_laser", "ddt-j-0 $\\partial_t j(t)$", "ddtj"),
-    ("test_ddtj/expA_laser", "ddt-j-1 $\\partial_t j(t)$", "ddtj"),
+    #("test_ddtj0/expA_laser", "ddt-j-0 $\\partial_t j(t)$", "ddtj"),
+    ("test_ddtj1/expA_laser", "ddt-j-1 $\\partial_t j(t)$", "ddtj"),
     ("test_ddtj2/expA_laser", "ddt-j-2 $\\partial_t j(t)$", "ddtj"),
-    ("test_base/expA_laser", "base-1 $\\partial_t j(t)$", "jt"),
-    ("test_base2/expA_laser", "base-2 $\\partial_t j(t)$", "jt"),
+    ("test_ddtj16/expA_laser", "ddt-j-16 $\\partial_t j(t)$", "ddtj"),
+    #("test_ddtjk/expA_laser", "ddt-j-k $\\partial_t j(t)$", "ddtj"),
+    #("test_basek/expA_laser", "base-k $\\partial_t j(t)$", "jt"),
+    ("test_base/expA_laser", "base $\\partial_t j(t)$", "jt"),
 ]
+
+
 fft_results = []
 
 for data_prefix, label, method in variants:
@@ -126,7 +130,7 @@ EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domai
 exp_times = 7 * 0.03318960199004975 + EXPERIMENTAL_DATA[0] # 0.03318960199004975 is the exp dt; we added 7 "zeros" before the laser actually starts
 exp_signal = EXPERIMENTAL_DATA[3]
 n_exp = len(exp_times)
-ax.plot(exp_times, exp_signal / np.max(np.abs(exp_signal)), "k--", label="Emitted $E(t)$")
+ax.plot(exp_times, -exp_signal / np.max(np.abs(exp_signal)), "k--", label="Emitted $E(t)$")
 ax.legend()    
 
 # --- plot FFTs of experimental data ---
