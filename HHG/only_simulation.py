@@ -11,9 +11,9 @@ HBAR = 0.6582119569509065
 
 # Default parameters in one place
 params = {
-    "DIR": "test_new",
+    "DIR": "test",
     "MODEL": "PiFlux",
-    "v_F": 1.5e6,
+    "v_F": 1.5e3,
     "W": 200,
     "T": 300,
     "E_F": 118,
@@ -36,7 +36,7 @@ def cos_dist(N):
 
 fig, ax = plt.subplots()
 
-main_df = load_panda("HHG", f"{params['DIR']}/expA_laser/{params['MODEL']}", "current_density.json.gz", 
+main_df = load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", "current_density.json.gz", 
                   **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                field_amplitude=1., photon_energy=1., 
                                tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
@@ -47,13 +47,11 @@ times = np.linspace(0, main_df["t_end"] - main_df["t_begin"],N) * HBAR / main_df
 sigma = 0.001 * params["T_AVE"]
 __kernel = cauchy(times, times[N//2], sigma )
 
-j_t = -(main_df["current_density_time"])
-signal  = np.cumsum(j_t)
-#ax.plot(times, j_t / np.max(np.abs(j_t)), label=f"Simulation $j(t)$")
-#ax.plot(times, signal / np.max(np.abs(signal)), label=f"Simulation $\\partial_t j(t)$")
+j_t = -np.convolve((main_df["current_density_time"]), __kernel, mode="same")
+ddtj  = np.gradient(j_t)
 
-ax.plot(times, j_t / np.max(np.abs(j_t)), label=f"Simulation $\\partial_t j(t)$")
-ax.plot(times, signal / np.max(np.abs(signal)), label=f"Simulation $j(t)$")
+ax.plot(times, j_t / np.max(np.abs(j_t)), label=f"Simulation $j(t)$")
+ax.plot(times, ddtj / np.max(np.abs(ddtj)), label=f"Simulation $\\partial_t j(t)$")
 
 laser = -np.gradient(main_df["laser_function"])
 ax.plot(times, laser / np.max(np.abs(laser)), label="Laser $E(t)$", c="k", ls="--")
@@ -62,5 +60,26 @@ ax.set_ylabel("Signal")
 ax.set_xlabel("$t$ (ps)")
 ax.legend()
 fig.tight_layout()
+
+
+# FFT of ddtj
+dt = times[1] - times[0]
+n = len(times)
+freqs = (np.fft.rfftfreq(n, d=dt) * HBAR) 
+fft_ddtj = np.abs(np.fft.rfft(ddtj, n=n))**2
+fft_ddtj = fft_ddtj / fft_ddtj.max()
+
+fig_fft, ax_fft = plt.subplots()
+ax_fft.plot(freqs, fft_ddtj, label=r'$\partial_t j$')
+ax_fft.set_xlim(0, freqs.max())
+ax_fft.set_xlabel(r"$\omega / \omega_\mathrm{L}$")
+ax_fft.set_ylabel("Normalized FFT")
+ax_fft.legend()
+ax_fft.set_yscale("log")
+
+for i in range(1, int(ax_fft.get_xlim()[1]), 2):
+    ax_fft.axvline(i, c="k", alpha=0.6, ls="--", zorder=-5)
+
+fig_fft.tight_layout()
 
 plt.show()
