@@ -12,10 +12,8 @@ from legend import *
 
 from scipy.fft import rfft, rfftfreq
 
-new_t = False
-
 MAX_FREQ = 40
-DIR = "cascade_new" if new_t else "cascade_prec"
+DIR = "cascade"
 MODEL = "PiFlux"
 v_F = 1.5e6
 W = 200

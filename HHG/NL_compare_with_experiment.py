@@ -23,9 +23,9 @@ sweep_values = [200]
 
 # Default parameters in one place
 PARAMS = {
-    "DIR": "test",
+    "DIR": "cascade",
     "MODEL": "PiFlux",
-    "v_F": 1.5e6,
+    "v_F": 5e5,
     "W": 200,
     "T": 300,
     "E_F": 118,
