@@ -5,16 +5,16 @@ import matplotlib.pyplot as plt
 # ---------------------------
 # Parameters
 # ---------------------------
-Delta = 100.0
-J = 23.395646  # assumed precomputed
+Delta = 50.0
+J = -15.525293  # assumed precomputed
 
-A0 = 10
-OMEGA_L = 1
-N_LASER = 8
+A0 = 15.
+OMEGA_L = 1.
+N_LASER = 4.
 OMEGA_ENV = OMEGA_L / N_LASER
-T_MAX = 2 * N_LASER * np.pi / OMEGA_L
+T_MAX = 2. * N_LASER * np.pi / OMEGA_L
 N_K = 200
-N_T = 2000
+N_T = 20000
 
 k_vals = np.linspace(-np.pi, np.pi, N_K, endpoint=False)
 times = np.linspace(0, T_MAX, N_T)

@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
-DELTA = 10
-J = np.sqrt(4. + DELTA)
-MU = 0.75 * DELTA + 0.5 * np.sqrt(4 * J**2 + 0.25 * DELTA**2)
+DELTA = 40
+J = -np.sqrt(4. + DELTA)
+MU = 0.25 * DELTA - 0.5 * np.sqrt(4 * J**2 + 0.25 * DELTA**2)
 
 def sqrt_expression(k):
     return np.sqrt(4 * J**2 * np.cos(0.5 * np.pi * k)**2 + 0.25 * DELTA**2)
@@ -16,7 +16,7 @@ def dispersion_minus(k):
     return -MU + 0.5 * DELTA - sqrt_expression(k)
 
 def two_cos(k):
-    return 2. * np.cos(np.pi * k)
+    return -2. * np.cos(np.pi * k)
 
 fig, ax = plt.subplots()
 ax.set_ylabel("$\\varepsilon$")
@@ -28,6 +28,7 @@ ax.plot(x, two_cos(x), label="$2 \\cos k$")
 ax.plot(x, dispersion_plus(x), ls="--", label="Band A")
 ax.plot(x, dispersion_minus(x), ls="-.", label="Band B")
 ax.legend()
+ax.grid()
 
 def fermi_function(epsilon, beta=1e2):
     return 1. / (np.exp(beta * epsilon) + 1.)
@@ -47,9 +48,9 @@ def sigma_eq_expectation(k, T=1e-2):
     pref = (f_plus - f_minus) / h_mag
     return np.array([pref * h_x, 0.0, pref * h_z])
 
-A0 = 1.5
+A0 = 1.
 OMEGA_L = 1.
-N_LASER = 8
+N_LASER = 4
 OMEGA_ENV = OMEGA_L / N_LASER
 T_MAX = 2 * N_LASER * np.pi / OMEGA_L
 N_K = 200
@@ -105,7 +106,7 @@ A_t = vector_potential(t_eval)  # shape (N_T,)
 # ks has shape (N_K,), A_t has shape (N_T,)
 # result of (ks[None, :] - A_t[:, None]) has shape (N_T, N_K)
 sin_matrix = np.sin(ks[None, :] - A_t[:, None])
-f_k = fermi_function(2 * np.cos(ks))  # shape (N_K,)
+f_k = fermi_function(-2. * np.cos(ks))  # shape (N_K,)
 
 # Multiply and sum over k (axis=1)
 sum_k_t = np.sum(sin_matrix * f_k[None, :], axis=1)
@@ -116,6 +117,8 @@ ax_j.plot(t_eval * OMEGA_L, sum_k_t / np.max(sum_k_t), label="$j_1(t)$")
 ax_j.set_xlabel(r'$t / T_L$')
 ax_j.set_ylabel(r'Signal')
 ax_j.legend()
+
+ax_j.text(0.1, 0.1, f"Diff: {np.max(sum_k_t) - np.max(S_t)}", transform=ax_j.transAxes)
 
 fig_j.tight_layout()
 

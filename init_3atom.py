@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import root_scalar
 
 # Parameters
-Delta = 100.0
+Delta = 50.0
 k_vals = np.linspace(-np.pi, np.pi, 500)
 
 # Function to compute band width of lowest eigenvalue
@@ -23,7 +23,7 @@ def lowest_band_width(J, Delta):
 
 # Find J such that width of lowest band = 4
 res = root_scalar(lowest_band_width, args=(Delta,), bracket=[0.01, 50], method='bisect')
-J_target = res.root
+J_target = -res.root
 print(f"Adjusted J for width 4: {J_target:.6f}")
 
 # Now compute eigenvalues with this J
@@ -48,7 +48,7 @@ fig, ax = plt.subplots()
 for n in range(3):
     ax.plot(k_vals / np.pi, eigvals_shifted[n, :], label=f'Band {n+1}')
     
-ax.plot(k_vals / np.pi, 2 * np.cos(k_vals), ls="--", label=r"$2 \cos (k)$")
+ax.plot(k_vals / np.pi, -2 * np.cos(k_vals), ls="--", label=r"$2 \cos (k)$")
 ax.set_xlabel(r'$k / \pi$')
 ax.set_ylabel(r'$\varepsilon$')
 ax.grid()
