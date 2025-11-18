@@ -45,11 +45,11 @@ def create_frame(nrows=1, ylabel_list=None, **kwargs):
     fig, ax = plt.subplots(nrows=nrows, sharex=True, **kwargs)
     if (nrows == 1):
         ax.set_yscale("log")
+        ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
         if ylabel_list is None:
-            ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
+            ax.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
         else:
-            ax.set_xlabel(ylabel_list)
-        ax.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
+            ax.set_ylabel(ylabel_list)
     else:
         ax[-1].set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
         for i, a in enumerate(ax):

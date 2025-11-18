@@ -19,13 +19,13 @@ FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # === Choose sweep parameter here ===
 sweep_param = "W"
-sweep_values = [200]
+sweep_values = [150, 200, 250, 300]
 
 # Default parameters in one place
 PARAMS = {
     "DIR": "cascade",
     "MODEL": "PiFlux",
-    "v_F": 5e5,
+    "v_F": 1e5,
     "W": 200,
     "T": 300,
     "E_F": 118,
@@ -69,7 +69,7 @@ def run_and_plot(axes, axes_fft, params, color):
 
     __kernel = cauchy(times, times[len(times)//2], sigma )
     #__kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
-
+    
     signal_A  = -np.gradient(np.convolve(df_A["current_density_time"]   , __kernel, mode='same'))
     signal_B  = -np.gradient(np.convolve(df_B["current_density_time"]   , __kernel, mode='same'))
     signal_AB = -np.gradient(np.convolve(main_df["current_density_time"], __kernel, mode='same'))
@@ -87,28 +87,30 @@ def run_and_plot(axes, axes_fft, params, color):
         return A + B
 
     t0_unitless = 0 * main_df["photon_energy"] / TIME_TO_UNITLESS
-    plot_data_combined = combined_inter(times, t0_unitless)
-
+    time_mask = (times >= 0)# & (times < 6.98)
+    plot_data_combined = combined_inter(times, t0_unitless)[time_mask]
+    signal_AB = signal_AB[time_mask]
+    
     # --- Time-domain plots ---
-    axes[0].plot(times, plot_data_combined / np.max(plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
-    axes[1].plot(times, signal_AB / np.max(signal_AB), color=color, label=f"{sweep_param}={params[sweep_param]}")
-    axes[2].plot(times, (signal_AB - plot_data_combined) / np.max(signal_AB - plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
-
-    #axes[0].plot(times[:len(__kernel)], __kernel, color="red", label="Kernel")
+    axes[0].plot(times[time_mask], plot_data_combined / np.max(plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    axes[1].plot(times[time_mask], signal_AB / np.max(signal_AB), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    axes[2].plot(times[time_mask], (signal_AB - plot_data_combined) / np.max(signal_AB - plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
 
     # --- Frequency-domain plots ---
-    n = len(times) * 4
+    n = len(times[time_mask]) * 4
     dt = times[1] - times[0]
     freqs_scipy = rfftfreq(n, dt)
-
+    mask = freqs_scipy <= MAX_FREQ
+    freqs_scipy = freqs_scipy[mask]
+    
     fftplot = np.abs(rfft(plot_data_combined, n))**2
-    axes_fft[0].plot(freqs_scipy, fftplot / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    axes_fft[0].plot(freqs_scipy, fftplot[mask] / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
 
     fftplot = np.abs(rfft(signal_AB, n))**2
-    axes_fft[1].plot(freqs_scipy, fftplot / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    axes_fft[1].plot(freqs_scipy, fftplot[mask] / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
 
     fftplot = np.abs(rfft(signal_AB - plot_data_combined, n))**2
-    axes_fft[2].plot(freqs_scipy, fftplot / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    axes_fft[2].plot(freqs_scipy, fftplot[mask] / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
     
     return main_df
 
@@ -117,24 +119,27 @@ def run_and_plot(axes, axes_fft, params, color):
 fig, axes = cdt.create_frame(
     nrows=3, figsize=(8.4, 8),
     ylabel_list=[
-        legend(r"\partial_t j_\mathrm{lin}(t)", "a.b."),
-        legend(r"\partial_t j_\mathrm{sim}(t)", "a.b."),
-        legend(r"\partial_t (j_\mathrm{sim}(t) - j_\mathrm{lin}(t))", "a.b."),
+        legend(r"j_\mathrm{lin}(t)", "a.u."),#                      \partial_t 
+        legend(r"j_\mathrm{sim}(t)", "a.u."),#                      \partial_t 
+        legend(r"(j_\mathrm{sim}(t) - j_\mathrm{lin}(t))", "a.u."),#\partial_t 
     ]
 )
 
 fig_fft, axes_fft = cdf.create_frame(
     nrows=3, figsize=(8.4, 8),
     ylabel_list=[
-        legend(r"|\mathrm{lin.~Signal}|^2", "a.b."),
-        legend(r"|\mathrm{sim.~Signal}|^2", "a.b."),
-        legend(r"|\mathrm{NL~Signal}|^2", "a.b."),
+        legend(r"|\mathrm{lin.~Signal}|^2", "a.u."),
+        legend(r"|\mathrm{sim.~Signal}|^2", "a.u."),
+        legend(r"|\mathrm{NL~Signal}|^2", "a.u."),
     ]
 )
 
 for ax in axes_fft:
     ax.set_yscale("log")
     ax.set_xlim(0, MAX_FREQ)
+    
+    for i in range(1, MAX_FREQ, 2):
+        ax.axvline(i, color="gray", ls="--")
 
 # Colormap setup
 norm = colors.Normalize(vmin=min(sweep_values), vmax=max(sweep_values))
@@ -150,7 +155,8 @@ for val in sweep_values:
 
 times = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
 laser = np.gradient(main_df["laser_function"])
-#axes[0].plot(times, laser / np.max(laser), c="red", ls="--")
+#axes[0].plot(times, laser / np.max(laser), c="red", ls=":", label="Laser $E(t)$")
+#axes[1].plot(times, laser / np.max(laser), c="red", ls=":", label="Laser $E(t)$")
 
 # --- Experimental data ---
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
@@ -158,13 +164,13 @@ EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domai
 exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / TIME_TO_UNITLESS
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 
-n_exp = len(exp_times)
+n_exp = len(exp_times) * 2
 exp_freqs = rfftfreq(n_exp, exp_times[1] - exp_times[0])
 
 for i in range(3):
-    axes[i].plot(exp_times, -exp_signals[i] / np.max(exp_signals[i]), label="Experimental data", ls="--", color="k")
+    axes[i].plot(exp_times, -exp_signals[i] / np.max(np.abs(exp_signals[i])), label="Experiment", ls="--", color="k")
     exp_fft = np.abs(rfft(exp_signals[i], n_exp))**2
-    axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experimental data", ls="--", color="k")
+    axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experiment", ls="--", color="k")
 
 axes[0].legend()
 axes_fft[0].legend(loc="upper right")

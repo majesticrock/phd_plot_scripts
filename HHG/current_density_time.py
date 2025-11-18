@@ -16,11 +16,12 @@ def sech_distrubution(x, mu, sigma):
 def create_frame(nrows=1, ncols=1, ylabel_list=None, **kwargs):
     fig, ax = plt.subplots(nrows=nrows, sharex=True, **kwargs)
     if (nrows == 1 and ncols==1):
+        ax.set_xlabel(legend(r"t / T_\mathrm{L}"))
         if ylabel_list is None:
-            ax.set_xlabel(legend(r"t / T_\mathrm{L}"))
+            ax.set_ylabel(legend(r"j(t)", "normalized"))
         else:
-            ax.set_xlabel(ylabel_list)
-        ax.set_ylabel(legend(r"j(t)", "normalized"))
+            ax.set_ylabel(ylabel_list)
+        
     else:
         ax[-1].set_xlabel(legend(r"t / T_\mathrm{L}"))
         for i, a in enumerate(ax):

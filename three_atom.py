@@ -1,20 +1,13 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+from one_atom import *
 
 # ---------------------------
 # Parameters
 # ---------------------------
 Delta = 50.0
 J = -15.525293  # assumed precomputed
-
-A0 = 15.
-OMEGA_L = 1.
-N_LASER = 4.
-OMEGA_ENV = OMEGA_L / N_LASER
-T_MAX = 2. * N_LASER * np.pi / OMEGA_L
-N_K = 200
-N_T = 20000
 
 k_vals = np.linspace(-np.pi, np.pi, N_K, endpoint=False)
 times = np.linspace(0, T_MAX, N_T)
@@ -40,49 +33,52 @@ def W(k_eff):
         [-w_conj, 0, w],
         [w, -w_conj, 0]
     ], dtype=complex)
+
+def rho(k_eff):
+    eigvals, eigvecs = np.linalg.eigh(H(k_eff))
+    boltz = np.exp(-BETA * eigvals)
+    Z = np.sum(boltz)
+    return eigvecs @ np.diag(boltz / Z) @ eigvecs.conj().T
+    
     
 # W is j(t) / i
 W_exp_BZ = np.zeros(len(times), dtype=complex)
 
-# Loop over k
 for ik, k0 in enumerate(k_vals):
-    # Initial eigenvectors
-    eigvals0, eigvecs0 = np.linalg.eigh(H(k0))
-    occupied_indices = np.where(eigvals0 < 0)[0]
 
-    psi0 = eigvecs0
-    psi0_flat = np.ascontiguousarray(psi0).reshape(-1).view(np.float64)
+    # Initial thermal density matrix
+    rho0 = rho(k0)
+    rho0_flat = np.ascontiguousarray(rho0).reshape(-1).view(np.float64)
 
-    # Time evolution for this k
-    def schrodinger_all(t, psi_flat):
-        psi = psi_flat.view(np.complex128).reshape((3, 3))
+    # Liouville-von Neumann evolution: dρ/dt = -i[H,ρ]
+    def liouville(t, rho_flat):
+        __rho = rho_flat.view(np.complex128).reshape((3, 3))
         k_eff = k0 - vector_potential(t)
         H_t = H(k_eff)
-        dpsi_dt = -1j * H_t @ psi
-        return dpsi_dt.reshape(-1).view(np.float64)
+        comm = H_t @ __rho - __rho @ H_t
+        return (-1j * comm + RELAX * (rho(k_eff) - __rho)).reshape(-1).view(np.float64)
 
+    # Solve for ρ(t)
     sol = solve_ivp(
-        fun=schrodinger_all,
+        fun=liouville,
         t_span=[0, T_MAX],
-        y0=psi0_flat,
+        y0=rho0_flat,
         t_eval=times,
         method='DOP853',
-        rtol=1e-8,   # relative tolerance
-        atol=1e-12    # absolute tolerance
+        rtol=1e-6,
+        atol=1e-8
     )
 
-    psi_t = np.ascontiguousarray(sol.y.T).view(np.complex128)
-    psi_t = psi_t.reshape((-1, 3, 3)).transpose(1, 2, 0)
+    rho_t = np.ascontiguousarray(sol.y.T).view(np.complex128)
+    rho_t = rho_t.reshape((-1, 3, 3)).transpose(1, 2, 0)
 
-    # Compute T=0 expectation value for this k
+    # Expectation value from density matrix: Tr[ρ(t) W(t)]
     for i, t in enumerate(times):
         k_eff = k0 - vector_potential(t)
         W_t = W(k_eff)
-        W_sum_k = 0
-        for n in occupied_indices:
-            vec = psi_t[:, n, i]
-            W_sum_k += np.vdot(vec, W_t @ vec)
-        W_exp_BZ[i] += W_sum_k
+        rho_now = rho_t[:, :, i]
+        W_exp_BZ[i] += np.trace(rho_now @ W_t)
+
 
 # Normalize by number of k-points (optional)
 W_exp_BZ *= 1j * J / (3 * N_K)
