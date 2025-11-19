@@ -6,23 +6,26 @@ __ap.append()
 from get_data import *
 
 SYSTEM = 'bcc'
-N=10000
+DIR = 'test'
+N=2000
+U=0.0
 params = lattice_cut_params(N=N, 
-                            g=1.85,
-                            U=0.2, 
+                            g=1.5,
+                            U=U, 
                             E_F=-0.5,
                             omega_D=0.02)
-main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
-gap_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "all_gaps.json.gz", **params)
+main_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "T_C.json.gz", **params)
+gap_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "all_gaps.json.gz", **params)
 fig, ax = plt.subplots()
 
 X, Y = np.meshgrid(np.linspace(-1, 1, N, endpoint=True), main_df["temperatures"])
 Z = np.array([ (gap if gap[0] < 0 else -gap) for gap in gap_df["finite_gaps"] ])
 
-print(np.min(Z[0]), np.max(Z[0]))
-
 min_max = np.max(np.abs(Z))
-cont = ax.pcolormesh(X, Y, Z, norm=TwoSlopeNorm(vcenter=0, vmin=-min_max, vmax=min_max), cmap="seismic")
+if U!=0.0:
+    cont = ax.pcolormesh(X, Y, Z, norm=TwoSlopeNorm(vcenter=0, vmin=-min_max, vmax=min_max), cmap="seismic")
+else:
+    cont = ax.pcolormesh(X, Y, Z, cmap="viridis")
 
 cbar = fig.colorbar(cont, ax=ax)
 cbar.set_label(r"$\Delta$")
