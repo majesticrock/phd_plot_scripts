@@ -5,46 +5,50 @@ __ap.append()
 from get_data import *
 from scipy.optimize import curve_fit
 
-def find_tc_fit(T, A, Tc):
-    return A * np.sqrt(Tc - T)
+def linear_model(T, m, b):
+    return m*T + b
 
 fig, (ax, ax_ratio) = plt.subplots(nrows=2, sharex=True)
 
 SYSTEM = 'bcc'
 OMEGA_D=0.02
 N=10000
-for U, g_c, marker in zip([0., 0.05, 0.1, 0.2], [1.848, 1.85, 1.88, 1875], ["x", "v", "o", "s"]):
-    main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", 
-                       condition=[f"U={U}", "E_F=-0.5", f"omega_D={OMEGA_D}"]).sort_values('g')
-    mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 5)
-    main_df = main_df[mask].reset_index(drop=True)
+U=0.0
+E_F=-0.2
 
-    interactions = main_df["g"].to_numpy(dtype=np.float64) - U
-    max_gaps = main_df["max_gaps"]
-    TCs = np.zeros_like(interactions)
-    TC_errors = np.zeros_like(interactions)
+main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", 
+                   condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
+mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 10)
 
-    for i, (Ts, deltas) in enumerate(zip(main_df["temperatures"], max_gaps)):
-        cut = len(Ts) // 2
-        popt, pcov = curve_fit(find_tc_fit, Ts[-cut:], deltas[-cut:], bounds=( [-np.inf, Ts[-1]], [np.inf, Ts[-1] + 10 * (Ts[-1] - Ts[-2])] ))
-        TCs[i] = popt[1]
-        TC_errors[i] = np.sqrt(pcov[1][1])
+main_df = main_df[mask].reset_index(drop=True)
+interactions = main_df["g"].to_numpy(dtype=np.float64) - U
 
-    ax.plot(interactions, TCs, marker=marker)
-    mask = (interactions >= g_c) & (interactions < 2.1 - U)
+main_df["time"] = pd.to_datetime(main_df["time"], format="%d-%m-%Y %H:%M:%S")
+cutoff = pd.to_datetime(main_df["time"].dt.year.astype(str) + "-11-21")
+result = main_df[main_df["time"] < cutoff]
+for _, xresult in result.iterrows():
+    print(xresult["g"])
 
-    def critical_fit(x, g_c, a, b):
-        return a * np.where(x > g_c, np.sqrt(x - g_c), 0.0) + b
+max_gaps = main_df["max_gaps"]
+TCs = np.zeros_like(interactions)
 
-    #popt, pcov = curve_fit(critical_fit, interactions[mask], TCs[mask], 
-    #                       bounds=([g_c, -np.inf, -np.inf], [g_c + 0.05, np.inf, np.inf]))
-    #for i in range(len(popt)):
-    #    print(f"{popt[i]} +/- {np.sqrt(pcov[i][i])}")
-    #l_lin = np.linspace(popt[0], 2.2, 2500)
-    #ax.plot(l_lin, critical_fit(l_lin, *popt), ls="--")
+for i, (_Ts, _deltas) in enumerate(zip(main_df["temperatures"], max_gaps)):
+    mask = np.abs(_deltas) > 1e-8
+    Ts = np.array(_Ts)[mask]
+    deltas = np.array(_deltas)[mask]
     
-    gaps_at_zero = np.array([delta[0] for delta in max_gaps])
-    ax_ratio.plot(interactions, gaps_at_zero / TCs, label=f"$\\mu^*={U}$", marker=marker)
+    cut = np.min([np.argmin(np.abs(Ts - 0.95 * Ts[-1])), len(Ts) - 5])
+    T_fit = Ts[cut:]
+    y_fit = (deltas[cut:])**2
+    
+    popt, pcov = curve_fit(linear_model, T_fit, y_fit)
+    m, b = popt
+    TCs[i] = b / (-m)
+    
+ax.plot(interactions, TCs)
+
+gaps_at_zero = np.array([delta[0] for delta in max_gaps])
+ax_ratio.plot(interactions, gaps_at_zero / TCs, label=f"$\\mu^*={U}$")
     
 ax_ratio.axhline(1.764, color="k", ls="--", label="BCS")
 ax.set_ylabel(r'$T_C$')

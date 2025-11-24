@@ -3,32 +3,54 @@ import numpy as np
 import __path_appender as __ap
 __ap.append()
 from get_data import *
+from scipy.optimize import curve_fit
 
 SYSTEM = 'bcc'
 N=10000
 params = lattice_cut_params(N=N, 
-                            g=1.89,
-                            U=0., 
-                            E_F=-0.5,
+                            g=1.6,
+                            U=0.0, 
+                            E_F=-0.2,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
 
 fig, ax = plt.subplots()
 
+def linear_model(T, m, b):
+    return m*T + b
+
 Ts = main_df['temperatures']
-max_gaps = np.array([ gaps for gaps in main_df['max_gaps'] ])
-ax.plot(Ts, max_gaps, label="Data")
+deltas = np.array(main_df['max_gaps'])
 
-from scipy.optimize import curve_fit
-def fit_func(T, A, Tc):
-    return A * np.sqrt(Tc - T)
-cut = len(Ts) // 2
-popt, pcov = curve_fit(fit_func, Ts[-cut:], max_gaps[-cut:], bounds=( [-np.inf, Ts[-1]], [np.inf, Ts[-1] + 10 * (Ts[-1] - Ts[-2])] ))
-print(f"A ={popt[0]} +/- {np.sqrt(pcov[0][0])}")
-print(f"Tc={popt[1]} +/- {np.sqrt(pcov[1][1])}")
+cut = np.min([np.argmin(np.abs(Ts - 0.95 * Ts[-1])), len(Ts) - 5])
+T_fit = Ts[cut:]
+y_fit = (deltas[cut:])**2
 
-t_lin = np.linspace(Ts[len(Ts) // 5], popt[1], 1000)
-ax.plot(t_lin, fit_func(t_lin, *popt), ls="--", label="Fit")
+popt, pcov = curve_fit(linear_model, T_fit, y_fit)
+m, b = popt
+dm, db = np.sqrt(np.diag(pcov))
+
+#print("m =", m, "+/-", dm)
+#print("b =", b, "+/-", db)
+#print("\nCovariance matrix:")
+#print(pcov)
+
+# Convert to A and Tc
+A = np.sqrt(-m)
+Tc = b / (-m)
+
+# error propagation
+dA = abs(0.5/np.sqrt(-m) * dm)
+dTc = np.sqrt((b/m**2)**2 * dm**2 + (1/m**2)*db**2 + 2*(b/m**2)*(-1/m)*pcov[0,1])
+
+print(f"\nA = {A} ± {dA}")
+print(f"Tc = {Tc} ± {dTc}")
+
+# plot check
+t_lin = np.linspace(T_fit.min(), Tc, 300)
+plt.plot(Ts, deltas, "x--", label="data")
+plt.plot(t_lin, np.sqrt(linear_model(t_lin, *popt)), "--", label="linearized fit")
+plt.axvline(T_fit[0], linestyle=":", color="k")
 
 ax.legend()
 ax.set_xlabel(r'$T$')

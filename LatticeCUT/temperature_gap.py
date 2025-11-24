@@ -6,13 +6,13 @@ __ap.append()
 from get_data import *
 
 SYSTEM = 'bcc'
-DIR = 'test'
-N=2000
+DIR = '.'
+N=10000
 U=0.0
 params = lattice_cut_params(N=N, 
-                            g=1.5,
+                            g=1.61,
                             U=U, 
-                            E_F=-0.5,
+                            E_F=-0.2,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "T_C.json.gz", **params)
 gap_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "all_gaps.json.gz", **params)
@@ -25,7 +25,7 @@ min_max = np.max(np.abs(Z))
 if U!=0.0:
     cont = ax.pcolormesh(X, Y, Z, norm=TwoSlopeNorm(vcenter=0, vmin=-min_max, vmax=min_max), cmap="seismic")
 else:
-    cont = ax.pcolormesh(X, Y, Z, cmap="viridis")
+    cont = ax.pcolormesh(X, Y, np.abs(Z), cmap="viridis")
 
 cbar = fig.colorbar(cont, ax=ax)
 cbar.set_label(r"$\Delta$")

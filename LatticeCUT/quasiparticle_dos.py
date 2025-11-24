@@ -8,24 +8,31 @@ from scipy.interpolate import interp1d
 fig, ax = plt.subplots()
 
 SYSTEM = 'bcc'
-G=2.5
+U=0
+E_F=-0.5
 dfs = [
     load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=G,
-                                         U=0, 
-                                         E_F=0.0,
+                                         g=1.0,
+                                         U=U, 
+                                         E_F=E_F,
                                          omega_D=0.02)),
     load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=G,
-                                         U=0, 
-                                         E_F=-0.5,
+                                         g=2.0,
+                                         U=U, 
+                                         E_F=E_F,
+                                         omega_D=0.02)),
+    load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=2.5,
+                                         U=U, 
+                                         E_F=E_F,
                                          omega_D=0.02)),
     ]
 
 for main_df in dfs:
-    E_F = main_df['E_F']
+    G = main_df['g']
     
     energies = main_df['energies']
     sp_dos = interp1d(main_df['energies'], main_df['dos'], bounds_error=False, fill_value=0.0)
@@ -74,16 +81,16 @@ for main_df in dfs:
             return 0.0
 
     for i, g in enumerate(func):
-        qp_dos_pos[i] += u_integrand_if_root_exists(g, -1., E_F-true_gap_at_eps_to_EF) 
-        qp_dos_pos[i] += u_integrand_if_root_exists(g, -E_F-true_gap_at_eps_to_EF, -abs(E_F))
-        qp_dos_pos[i] += u_integrand_if_root_exists(g, -abs(E_F), -E_F+true_gap_at_eps_to_EF)
-        qp_dos_pos[i] += u_integrand_if_root_exists(g, -E_F+true_gap_at_eps_to_EF, 1.)
+        qp_dos_pos[i] += u_integrand_if_root_exists(g, -1., -abs(E_F)-true_gap_at_eps_to_EF) 
+        qp_dos_pos[i] += u_integrand_if_root_exists(g, -abs(E_F)-true_gap_at_eps_to_EF, -abs(E_F))
+        qp_dos_pos[i] += u_integrand_if_root_exists(g, -abs(E_F), abs(E_F)+true_gap_at_eps_to_EF)
+        qp_dos_pos[i] += u_integrand_if_root_exists(g, abs(E_F)+true_gap_at_eps_to_EF, 1.)
 
     for i, g in enumerate(func):
-        qp_dos_neg[i] += v_integrand_if_root_exists(g, -1., E_F-true_gap_at_eps_to_EF) 
-        qp_dos_neg[i] += v_integrand_if_root_exists(g, -E_F-true_gap_at_eps_to_EF, -abs(E_F))
-        qp_dos_neg[i] += v_integrand_if_root_exists(g, -abs(E_F), -E_F+true_gap_at_eps_to_EF)
-        qp_dos_neg[i] += v_integrand_if_root_exists(g, -E_F+true_gap_at_eps_to_EF, 1.)
+        qp_dos_neg[i] += v_integrand_if_root_exists(g, -1., -abs(E_F)-true_gap_at_eps_to_EF) 
+        qp_dos_neg[i] += v_integrand_if_root_exists(g, -abs(E_F)-true_gap_at_eps_to_EF, -abs(E_F))
+        qp_dos_neg[i] += v_integrand_if_root_exists(g, -abs(E_F), abs(E_F)+true_gap_at_eps_to_EF)
+        qp_dos_neg[i] += v_integrand_if_root_exists(g, abs(E_F)+true_gap_at_eps_to_EF, 1.)
 
     ax.plot(np.concatenate([-omegas[::-1], omegas]), np.concatenate([qp_dos_neg[::-1], qp_dos_pos]),
             label=f"$E_F = {E_F}, g={G}$")
