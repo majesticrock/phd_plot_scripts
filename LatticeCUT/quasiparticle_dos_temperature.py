@@ -10,9 +10,9 @@ from find_roots import find_all_roots
 fig, ax = plt.subplots()
 
 SYSTEM = 'bcc'
-G=2.5
+G=2
 E_F=-0.5
-U=0
+U=0.
 N=10000
 main_df = load_panda("lattice_cut", f"T_C/{SYSTEM}", "all_gaps.json.gz",
                     **lattice_cut_params(N=N, 
@@ -37,11 +37,14 @@ energies = np.linspace(-1, 1, N)
 sp_dos = interp1d(energies, dos_df['dos'], bounds_error=False, fill_value=0.0)
 
 temps = tc_df['temperatures']
-temps_picks = np.array([0.0, 0.05, 0.1, 0.2, 0.5, 0.75, 1.]) * temps[-1]
-plot_indizes = np.argmin(np.abs(np.array(temps)[:, None] - temps_picks[None, :]), axis=0)
+temps_picks = np.array([0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.])
+plot_indizes = np.argmin(np.abs(np.array(temps)[:, None] - temps_picks[None, :] * temps[-1]), axis=0)
 
 n_curves = len(plot_indizes)
 cmap = plt.get_cmap("viridis")
+
+min_E = 0
+max_E = 0
 
 for c, idx in enumerate(plot_indizes):
     gaps = main_df['finite_gaps'][idx]
@@ -53,7 +56,7 @@ for c, idx in enumerate(plot_indizes):
     E_inter = interp1d(energies, quasiparticle_energies, bounds_error=False, fill_value=0.0)
     E_deriv_inter = interp1d(energies, np.gradient(quasiparticle_energies, energies[1] - energies[0]), bounds_error=False, fill_value=0.0)
 
-    omegas = np.linspace(1e-4, 1.05 * np.max(quasiparticle_energies), 2000)
+    omegas = np.linspace(1.1 * np.max(quasiparticle_energies), 0.0, 200, endpoint=False)[::-1]
     func = [ interp1d(energies, quasiparticle_energies - omega, bounds_error=False, fill_value=0.0) for omega in omegas ]
 
     from scipy.optimize import brentq
@@ -85,41 +88,41 @@ for c, idx in enumerate(plot_indizes):
         except ValueError:
             return 0.0
 
-    brackets = [-1., 
-                -abs(mu)-true_gap_at_eps_to_EF,  
-                -abs(mu), 
-                -abs(mu)+true_gap_at_eps_to_EF,
-                0.0,
-                abs(mu)-true_gap_at_eps_to_EF,
-                abs(mu), 
-                abs(mu)+true_gap_at_eps_to_EF, 
-                1.]
-
     for i, g in enumerate(func):
         roots = find_all_roots(g)
         for root in roots:
             qp_dos_pos[i] += integrand(root) * u_k(root)
         
-        #for b in range(len(brackets)-1):
-        #    qp_dos_pos[i] += u_integrand_if_root_exists(g, brackets[b], brackets[b+1])
-
     for i, g in enumerate(func):
         roots = find_all_roots(g)
         for root in roots:
             qp_dos_neg[i] += integrand(root) * v_k(root)
-        #for b in range(len(brackets)-1):
-        #    qp_dos_neg[i] += v_integrand_if_root_exists(g, brackets[b], brackets[b+1])
-    
-    color = cmap(c / (n_curves - 1) if n_curves > 1 else 0.0)
-    ax.plot(np.concatenate([-omegas[::-1], omegas]), np.concatenate([qp_dos_neg[::-1], qp_dos_pos]),
-            color=color, label=f"T={temps[idx]:.3f}")
 
+    color = cmap(c / (n_curves - 1) if n_curves > 1 else 0.0)
+    
+    
+    none_zero_dos_index = len(qp_dos_pos) - 1 - np.argmax(qp_dos_neg[::-1] > 1e-8)
+    if(-omegas[none_zero_dos_index] < min_E):
+        min_E = -omegas[none_zero_dos_index]
+    none_zero_dos_index = len(qp_dos_pos) - 1 - np.argmax(qp_dos_pos[::-1] > 1e-8)
+    if(omegas[none_zero_dos_index] > max_E):
+        max_E = omegas[none_zero_dos_index]
+    
+    AX_DISTANCE = 0.5
+    ax.plot(np.concatenate([-omegas[::-1], omegas]), AX_DISTANCE * c + np.concatenate([qp_dos_neg[::-1], qp_dos_pos]),
+            color=color, label=f"$T={temps_picks[c]}T_c$")
+    if c != 0:
+        axh = ax.secondary_xaxis(AX_DISTANCE * c, transform=ax.transData)
+        axh.set_xticklabels([])
+        axh.tick_params(axis='x', direction='inout', which='both')
+        axh.tick_params(axis='x', length=8)          # major ticks
+        axh.tick_params(axis='x', which='minor', length=5)
+
+ax.set_xlim(min_E - 0.05, max_E + 0.05)
 ax.legend()
 ax.set_xlabel(r"$E / W$")
 ax.set_ylabel(r"$\rho_\mathrm{qp}(E) / W^{-1}$")
-#ax.set_ylim(0, 4)
-ax.set_yscale("log")
-ax.set_ylim(1e-4, 1e3)
+ax.set_ylim(0, 5.5)
 fig.tight_layout()
 
 plt.show()

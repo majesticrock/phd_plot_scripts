@@ -10,7 +10,7 @@ DIR = '.'
 N=10000
 U=0.0
 params = lattice_cut_params(N=N, 
-                            g=1.61,
+                            g=1.4,
                             U=U, 
                             E_F=-0.2,
                             omega_D=0.02)
@@ -19,7 +19,7 @@ gap_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "all_gaps.json.gz", **
 fig, ax = plt.subplots()
 
 X, Y = np.meshgrid(np.linspace(-1, 1, N, endpoint=True), main_df["temperatures"])
-Z = np.array([ (gap if gap[0] < 0 else -gap) for gap in gap_df["finite_gaps"] ])
+Z = gap_df["finite_gaps"]
 
 min_max = np.max(np.abs(Z))
 if U!=0.0:
