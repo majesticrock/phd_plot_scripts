@@ -123,6 +123,5 @@ ax.legend()
 ax.set_xlabel(r"$E / W$")
 ax.set_ylabel(r"$\rho_\mathrm{qp}(E) / W^{-1}$")
 ax.set_ylim(0, 5.5)
-fig.tight_layout()
 
 plt.show()

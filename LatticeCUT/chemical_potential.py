@@ -35,7 +35,7 @@ if __name__ == "__main__":
     N=10000
     SYSTEM = 'bcc'
     E_F=-0.5
-    U=0.01
+    U=0.2
     OMEGA_D=0.02
     
     G_ENH = 1.88 if U==0 else 1.95
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     ax.set_xlabel(r'$T / W$')
     ax.set_ylabel(r'$(\mu - E_\mathrm{F}) / W$')
     
-    Gs = np.array([1., 1.2, 1.4, 1.6, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3])
+    Gs = np.array([1.9, 1.925, 1.95, 1.975, 2.0, 2.025, 2.05, 2.075])
     cmap_below = plt.get_cmap("YlGnBu")
     cmap_above = plt.get_cmap("hot_r")
     norm_below = cm.Normalize(Gs[0] - 0.4, G_ENH)
@@ -80,10 +80,10 @@ if __name__ == "__main__":
     
     ax.legend(loc="upper right", ncols=2, title="$g$")
     
-    lim = -0.059
-    ax.set_ylim(lim, 0.001)
-    i = np.argmin(np.abs(lim - chemical_potentials_ns))
-    ax.set_xlim(0, temps[i])
+    #lim = -0.059
+    #ax.set_ylim(lim, 0.001)
+    #i = np.argmin(np.abs(lim - chemical_potentials_ns))
+    #ax.set_xlim(0, temps[i])
     
     fig.tight_layout()
     plt.show()
