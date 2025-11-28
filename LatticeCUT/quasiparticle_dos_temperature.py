@@ -10,7 +10,7 @@ from find_roots import find_all_roots
 fig, ax = plt.subplots()
 
 SYSTEM = 'bcc'
-G=2
+G=1.5
 E_F=-0.5
 U=0.
 N=10000

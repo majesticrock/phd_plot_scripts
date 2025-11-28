@@ -7,17 +7,17 @@ from get_data import *
 from scipy.signal import find_peaks
 
 SYSTEM = 'bcc'
-main_df = load_panda("lattice_cut", f"confined/{SYSTEM}", "resolvents.json.gz",
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=2.6, 
-                                         U=0.1, 
+                                         g=1.95, 
+                                         U=0.01, 
                                          E_F=-0.5,
                                          omega_D=0.02))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(main_df, ignore_first=200, ignore_last=300)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=230, ignore_last=400)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
@@ -28,7 +28,7 @@ plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-w_lin = np.linspace(-0.005 * main_df["continuum_boundaries"][1], 1.1 * main_df["continuum_boundaries"][1], 15000, dtype=complex)
+w_lin = np.linspace(-0.005 * main_df["continuum_boundaries"][1], 0.2, 15000, dtype=complex)#
 w_lin += 1e-5j
 
 A_phase = resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True)
