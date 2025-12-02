@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import numpy as np
 import pandas as pd
 import string
@@ -13,6 +11,7 @@ from legend import *
 from matplotlib import ticker
 
 from create_figure import *
+from make_panels_touch import make_panels_touch
 
 CBAR_MAX = 20
 CBAR_EXP = 2
@@ -23,8 +22,8 @@ FILE_ENDING = ".pdf"
 G_MAX_LOAD = 2.5
 G_MAX_PLOT = 2.5
 
-__BEGIN_OFFSET__ = 1e-4
-__RANGE__ = 1e-4
+__BEGIN_OFFSET__ = 2e-3
+__RANGE__ = 2e-3
 __SECOND_BEGIN__ = 1e-9
 __SECOND_RANGE__ = 1e-8
 __PEAK_PROMINCE__ = 1.
@@ -123,9 +122,17 @@ class HeatmapPlotter:
             current_range = __RANGE__
             current_offset = __BEGIN_OFFSET__
             
+            __best_fit = __result[j]
+            
+            def deviation(_current):
+                if higgs or not is_phase_peak(_current.position):
+                    return abs(_current.slope.nominal_value + 1)
+                else:
+                    return abs(_current.slope.nominal_value + 2)
+            
             def break_condition():
                 if higgs or not is_phase_peak(__result[j].position):
-                    return abs(__result[j].slope.nominal_value + 1) > 0.01
+                    return abs(__result[j].slope.nominal_value + 1) > 0.005
                 else:
                     return abs(__result[j].slope.nominal_value + 2) > 0.2
             
@@ -140,11 +147,15 @@ class HeatmapPlotter:
                                                 reversed              = self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]),
                                                 lower_continuum_edge  = self.true_gaps[i],
                                                 improve_peak_position = False)
+                    if deviation(__result[j]) < deviation(__best_fit):
+                        __best_fit = __result[j]
                     current_offset *= 0.2
                 current_range *= 0.2
-
+                
+            __result[j] = __best_fit
+            
             if not higgs and is_phase_peak(__result[j].position):
-                if abs(__result[j].slope.nominal_value + 2) > 0.2:
+                if abs(__result[j].slope.nominal_value + 2) > 0.33:
                     print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
                     print(__result[j])
                     print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]), "\n")

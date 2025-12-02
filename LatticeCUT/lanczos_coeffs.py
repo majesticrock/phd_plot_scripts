@@ -7,7 +7,7 @@ from get_data import *
 SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=1.93, 
+                                         g=1.66, 
                                          U=0.01, 
                                          E_F=-0.5,
                                          omega_D=0.02))

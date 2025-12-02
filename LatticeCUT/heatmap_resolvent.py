@@ -10,15 +10,16 @@ N=16000
 OMEGA_D=0.02
 E_F=-0.5
 DOS="bcc"
+U=0.01
 n_mode = 0
 
-all_data = load_all(f"lattice_cut/./{DOS}/N={N}", "resolvents.json.gz", condition="U=0.1")
+all_data = load_all(f"lattice_cut/./{DOS}/N={N}", "resolvents.json.gz", condition=f"U={U}")
 
 tasks = [
-    (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D}"), "g", legend("g"))
+    (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & U == {U}"), "g", legend("g"))
 ]
 
-fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(230, 400))
+fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(250, 400))
     
 #for plotter in plotters:
 #    plotter.HiggsModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/higgs_{n_mode}.pkl")

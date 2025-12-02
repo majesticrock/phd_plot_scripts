@@ -10,7 +10,7 @@ DIR = '.'
 N=10000
 U=0.0
 params = lattice_cut_params(N=N, 
-                            g=1.4,
+                            g=2.0,
                             U=U, 
                             E_F=-0.2,
                             omega_D=0.02)
