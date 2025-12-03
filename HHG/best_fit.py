@@ -25,11 +25,8 @@ T_AVE_values = 0.001 * np.array([25, 35, 50])
 import os
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
 EXPERIMENTAL_DATA = np.loadtxt(f"{EXP_PATH}HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times_raw = 18 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
-exp_signals = np.array([EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[2]])  # A+B, A, B
-
-NORMALIZATION_EXPERIMENT = np.max(np.abs(exp_signals[0]))
-exp_signals /= NORMALIZATION_EXPERIMENT
+exp_times_raw = 15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]
+nl_exp = EXPERIMENTAL_DATA[4] / np.max(np.abs(EXPERIMENTAL_DATA[4]))
 
 def gaussian(x, mu, sigma):
     return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
@@ -54,14 +51,23 @@ def compute_simulation_signal(times, df, T_AVE):
     #__kernel = np.ones(N)/N
     #__kernel = gaussian(times, times[len(times)//2], sigma)
     #__kernel = sech_distrubution(times, times[len(times)//2], sigma)
-    #__kernel = cauchy(times, times[len(times)//2], sigma)
-    __kernel = laplace(times, times[len(times)//2], sigma)
-    __kernel = cos_dist(N)
+    __kernel = cauchy(times, times[len(times)//2], sigma)
+    #__kernel = laplace(times, times[len(times)//2], sigma)
+    #__kernel = cos_dist(N)
 
     __data = np.convolve(__data, __kernel, mode='same')
     __data = -np.gradient(__data, times[1] - times[0])
     
     return __data
+
+def compute_nonlinear(times, dfs, T_AVE):
+    signal_AB = compute_simulation_signal(times, dfs[0], T_AVE)
+    signal_A  = compute_simulation_signal(times, dfs[1], T_AVE)
+    signal_B  = compute_simulation_signal(times, dfs[2], T_AVE)
+    
+    NL_signal = signal_AB - signal_A - signal_B
+    NL_signal /= np.max(np.abs(NL_signal))
+    return NL_signal
 
 summed_diffs = np.zeros((len(W_values), len(TAU_DIAG_values), len(T_AVE_values)))
 for i, W in enumerate(W_values):
@@ -70,30 +76,25 @@ for i, W in enumerate(W_values):
                 load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz",
                          **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                                       field_amplitude=1., photon_energy=1.,
-                                      tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0)),
+                                      tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0), print_date=False),
                 load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz",
                       **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                                    field_amplitude=1., photon_energy=1.,
-                                   tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0)),
+                                   tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0), print_date=False),
                 load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz",
                       **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                                    field_amplitude=1., photon_energy=1.,
-                                   tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
+                                   tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0), print_date=False)
             ]
         
-        for exp_signal, df in zip(exp_signals, dfs):
-            exp_times = exp_times_raw * df["photon_energy"] / TIME_TO_UNITLESS
-            times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
-                
-            for k, T_AVE in enumerate(T_AVE_values):
-                signal = compute_simulation_signal(times, df, T_AVE)
-                
-                if k==0:
-                    NORMALIZATION_SIMULATION = np.max(np.abs(signal)) 
-                normalized_simulation = signal / NORMALIZATION_SIMULATION
-                interpolate_simulation = np.interp(exp_times, times, normalized_simulation)
-
-                summed_diffs[i][j][k] += np.linalg.norm(np.abs(exp_signal) - np.abs(interpolate_simulation))
+        times = np.linspace(0, dfs[0]["t_end"] - dfs[0]["t_begin"], len(dfs[0]["current_density_time"])) / (2 * np.pi)
+        exp_times = exp_times_raw * dfs[0]["photon_energy"] / TIME_TO_UNITLESS
+        mask = (exp_times > 3) & (exp_times < 8)
+        
+        for k, T_AVE in enumerate(T_AVE_values):
+            interpolate_simulation = np.interp(exp_times[mask], times, compute_nonlinear(times, dfs, T_AVE))
+            
+            summed_diffs[i][j][k] += np.linalg.norm(nl_exp[mask] - interpolate_simulation)
 
 prev_min_index = [0, 0, 0]
 prev_min_value = summed_diffs[0][0][0]
@@ -111,7 +112,7 @@ T_AVE = T_AVE_values[prev_min_index[2]]
 print(f"Minimized difference at W={W}, tau_diag={TAU_DIAG}, t_ave={T_AVE}")
 print("Difference is", prev_min_value)
 
-fig, axes = plt.subplots(nrows=3, sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0), figsize=(8, 8))
+fig, ax = plt.subplots()
 dfs = [
         load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz",
                  **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
@@ -127,62 +128,44 @@ dfs = [
                            tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
     ]
 
-for k, (ax, exp_signal, df) in enumerate(zip(axes, exp_signals, dfs)):
-    exp_times = exp_times_raw * df["photon_energy"] / TIME_TO_UNITLESS
-        
-    times = np.linspace(0, df["t_end"] - df["t_begin"], len(df["current_density_time"])) / (2 * np.pi)
-    signal = compute_simulation_signal(times, df, T_AVE)
-    
-    if k==0:
-        NORMALIZATION_SIMULATION = np.max(np.abs(signal)) 
-    normalized_simulation = signal / NORMALIZATION_SIMULATION
-    
-    ax.plot(times, normalized_simulation, label="Sim")
-    ax.plot(exp_times, exp_signal, "k--", label="Exp")
-    #laser = np.gradient(df["laser_function"])
-    #ax.plot(times, laser / np.max(np.abs(laser)), "r:", label="Laser")
 
-axes[0].legend()
-axes[-1].set_xlabel(r"$t / T_\mathrm{L}$")
-axes[0].set_ylabel(r"Signal A+B")
-axes[1].set_ylabel(r"Signal A")
-axes[2].set_ylabel(r"Signal B")
+exp_times = exp_times_raw * dfs[0]["photon_energy"] / TIME_TO_UNITLESS
+times = np.linspace(0, dfs[0]["t_end"] - dfs[0]["t_begin"], len(dfs[0]["current_density_time"])) / (2 * np.pi)
+nl_simulation = compute_nonlinear(times, dfs, T_AVE)
+
+ax.plot(times, nl_simulation, label="Sim")
+ax.plot(exp_times, nl_exp, "k--", label="Exp")
+#laser = np.gradient(df["laser_function"])
+#ax.plot(times, laser / np.max(np.abs(laser)), "r:", label="Laser")
+
+ax.legend()
+ax.set_xlabel(r"$t / T_\mathrm{L}$")
+ax.set_ylabel(r"nl. signal")
 
 fig.tight_layout()
 
 
 from scipy.fft import rfft, rfftfreq
-fig_fft, axes_fft = plt.subplots(nrows=3, sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0), figsize=(6, 10))
+fig_fft, ax_fft = plt.subplots()
 OMEGA_MAX = 22
 
-LINEAR_AB_EXP = exp_signals[1] + exp_signals[2]
-PROPER_AB_EXP = exp_signals[0]
-NONLINEAR_EXP = PROPER_AB_EXP - LINEAR_AB_EXP
+fft_sim = np.abs(rfft(nl_simulation))
+freqs_sim = rfftfreq(len(nl_simulation), times[1] - times[0])
+    
+fft_exp = np.abs(rfft(nl_exp))
+freqs_exp = rfftfreq(len(nl_exp), exp_times[1] - exp_times[0])
+    
+ax_fft.plot(freqs_sim, fft_sim / np.max(fft_sim), label="Sim")
+ax_fft.plot(freqs_exp, fft_exp / np.max(fft_exp), "k--", label="Exp")
+ax_fft.set_yscale("log")
+ax_fft.set_xlim(0, OMEGA_MAX)
 
-LINEAR_AB_SIM = (compute_simulation_signal(times, dfs[1], T_AVE) + compute_simulation_signal(times, dfs[2], T_AVE)) / NORMALIZATION_SIMULATION
-PROPER_AB_SIM = compute_simulation_signal(times, dfs[0], T_AVE) / NORMALIZATION_SIMULATION
-NONLINEAR_SIM = PROPER_AB_SIM - LINEAR_AB_SIM
-
-for ax, sim, exp in zip(axes_fft, [LINEAR_AB_SIM, PROPER_AB_SIM, NONLINEAR_SIM], [LINEAR_AB_EXP, PROPER_AB_EXP, NONLINEAR_EXP]):
-    fft_sim = np.abs(rfft(sim))
-    freqs_sim = rfftfreq(len(sim), times[1] - times[0])
+for i in range(0, OMEGA_MAX, 2):
+    ax_fft.axvline(i+1, c="k", ls=":", alpha=0.5)
     
-    fft_exp = np.abs(rfft(exp))
-    freqs_exp = rfftfreq(len(exp), exp_times[1] - exp_times[0])
-    
-    ax.plot(freqs_sim, fft_sim / np.max(fft_sim), label="Sim")
-    ax.plot(freqs_exp, fft_exp / np.max(fft_exp), "k--", label="Exp")
-    ax.set_yscale("log")
-    ax.set_xlim(0, OMEGA_MAX)
-    
-    for i in range(0, OMEGA_MAX, 2):
-        ax.axvline(i+1, c="k", ls=":", alpha=0.5)
-    
-axes_fft[0].legend()
-axes_fft[-1].set_xlabel(r"$\omega / \omega_\mathrm{L}$")
-axes_fft[0].set_ylabel(r"FFT linear")
-axes_fft[1].set_ylabel(r"FFT proper")
-axes_fft[2].set_ylabel(r"FFT nonlinear")
+ax_fft.legend()
+ax_fft.set_xlabel(r"$\omega / \omega_\mathrm{L}$")
+ax_fft.set_ylabel(r"FFT")
 
 fig_fft.tight_layout()
 
