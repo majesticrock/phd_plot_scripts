@@ -9,7 +9,7 @@ from scipy.signal import find_peaks
 SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=1.2, 
+                                         g=2, 
                                          U=0.0, 
                                          E_F=0,
                                          omega_D=0.02))
@@ -17,7 +17,7 @@ main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(main_df, ignore_first=100, ignore_last=400)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=105, ignore_last=500)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
@@ -39,14 +39,14 @@ plotter.plot(w_lin.real, A_higgs, label="Higgs")
 
 resolvents.mark_continuum(ax)
 
-find_peaks_result = find_peaks(A_phase, prominence=0.05)[0]
-for res in find_peaks_result:
-    x = w_lin[res].real
-    ax.axvline(x, c="red", ls=":")
-find_peaks_result = find_peaks(A_higgs, prominence=0.05)[0]
-for res in find_peaks_result:
-    x = w_lin[res].real
-    ax.axvline(x, c="green", ls=":")
+#find_peaks_result = find_peaks(A_phase, prominence=0.05)[0]
+#for res in find_peaks_result:
+#    x = w_lin[res].real
+#    ax.axvline(x, c="red", ls=":")
+#find_peaks_result = find_peaks(A_higgs, prominence=0.05)[0]
+#for res in find_peaks_result:
+#    x = w_lin[res].real
+#    ax.axvline(x, c="green", ls=":")
 
 ax.set_ylim(-0.05, 5)
 ax.set_xlim(np.min(w_lin.real), np.max(w_lin.real))
