@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm, colors
+import os
 
 from scipy.interpolate import interp1d
 from scipy.fft import rfft, rfftfreq
@@ -17,9 +18,13 @@ MAX_FREQ = 20
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
+# FFT window (unitless time)
+FFT_TMIN = 1.0
+FFT_TMAX = 9.0
+
 # === Choose sweep parameter here ===
 sweep_param = "W"
-sweep_values = [150, 200, 250, 300]
+sweep_values = [150, 200, 250, 300, 350, 400, 450, 500, 550, 600]
 
 # Default parameters in one place
 PARAMS = {
@@ -30,7 +35,7 @@ PARAMS = {
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 10,
+    "TAU_DIAG": 30,
     "T_AVE":  50
 }
 
@@ -87,29 +92,45 @@ def run_and_plot(axes, axes_fft, params, color):
         return A + B
 
     t0_unitless = 0 * main_df["photon_energy"] / TIME_TO_UNITLESS
-    time_mask = (times >= 0)# & (times < 6.98)
-    plot_data_combined = combined_inter(times, t0_unitless)[time_mask]
-    signal_AB = signal_AB[time_mask]
+    # --- Restrict to FFT interval and resample to uniform grids ---
+    tmin, tmax = FFT_TMIN, FFT_TMAX
+    sim_mask = (times >= tmin) & (times <= tmax)
+    if np.sum(sim_mask) < 2:
+        # fallback to entire range
+        sim_mask = (times >= 0)
+
+    # choose simulation dt from available samples in interval
+    sim_dts = np.diff(times[sim_mask])
+    if len(sim_dts) > 0:
+        dt_sim = np.min(sim_dts)
+    else:
+        dt_sim = times[1] - times[0]
+
+    uniform_t_sim = np.arange(tmin, tmax, dt_sim)
+    plot_data_combined = combined_inter(uniform_t_sim, t0_unitless)
+    # interpolate simulated combined and AB signals onto uniform grid
+    interp_AB = interp1d(times, signal_AB, fill_value=0.0, bounds_error=False)
+    signal_AB_u = interp_AB(uniform_t_sim)
     
-    # --- Time-domain plots ---
-    axes[0].plot(times[time_mask], plot_data_combined / np.max(plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
-    axes[1].plot(times[time_mask], signal_AB / np.max(signal_AB), color=color, label=f"{sweep_param}={params[sweep_param]}")
-    axes[2].plot(times[time_mask], (signal_AB - plot_data_combined) / np.max(signal_AB - plot_data_combined), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    # --- Time-domain plots (use uniform sim time for comparisons) ---
+    axes[0].plot(uniform_t_sim, plot_data_combined / np.max(np.abs(plot_data_combined)), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    axes[1].plot(uniform_t_sim, signal_AB_u / np.max(np.abs(signal_AB_u)), color=color, label=f"{sweep_param}={params[sweep_param]}")
+    axes[2].plot(uniform_t_sim, (signal_AB_u - plot_data_combined) / np.max(np.abs(signal_AB_u - plot_data_combined)), color=color, label=f"{sweep_param}={params[sweep_param]}")
 
     # --- Frequency-domain plots ---
-    n = len(times[time_mask]) * 4
-    dt = times[1] - times[0]
+    # --- Frequency-domain plots (use resampled uniform sim grid) ---
+    n = len(uniform_t_sim) * 4
+    dt = dt_sim
     freqs_scipy = rfftfreq(n, dt)
     mask = freqs_scipy <= MAX_FREQ
     freqs_scipy = freqs_scipy[mask]
-    
     fftplot = np.abs(rfft(plot_data_combined, n))**2
     axes_fft[0].plot(freqs_scipy, fftplot[mask] / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
 
-    fftplot = np.abs(rfft(signal_AB, n))**2
+    fftplot = np.abs(rfft(signal_AB_u, n))**2
     axes_fft[1].plot(freqs_scipy, fftplot[mask] / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
 
-    fftplot = np.abs(rfft(signal_AB - plot_data_combined, n))**2
+    fftplot = np.abs(rfft(signal_AB_u - plot_data_combined, n))**2
     axes_fft[2].plot(freqs_scipy, fftplot[mask] / np.max(fftplot), color=color, label=f"{sweep_param}={params[sweep_param]}")
     
     return main_df
@@ -164,12 +185,30 @@ EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domai
 exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / TIME_TO_UNITLESS
 exp_signals = np.array([EXPERIMENTAL_DATA[2] + EXPERIMENTAL_DATA[3], EXPERIMENTAL_DATA[1], EXPERIMENTAL_DATA[4]])
 
-n_exp = len(exp_times) * 2
-exp_freqs = rfftfreq(n_exp, exp_times[1] - exp_times[0])
+# Resample experimental signals onto a uniform grid inside FFT window and compute FFTs
+exp_mask = (exp_times >= FFT_TMIN) & (exp_times <= FFT_TMAX)
+if np.sum(exp_mask) < 2:
+    exp_mask = np.ones_like(exp_times, dtype=bool)
+
+exp_dts = np.diff(exp_times[exp_mask])
+if len(exp_dts) > 0:
+    dt_exp = np.min(exp_dts)
+else:
+    dt_exp = exp_times[1] - exp_times[0]
+
+uniform_t_exp = np.arange(FFT_TMIN, FFT_TMAX, dt_exp)
 
 for i in range(3):
+    # time-domain: plot original experimental sampling for reference
     axes[i].plot(exp_times, -exp_signals[i] / np.max(np.abs(exp_signals[i])), label="Experiment", ls="--", color="k")
-    exp_fft = np.abs(rfft(exp_signals[i], n_exp))**2
+    axes[i].set_xlim(FFT_TMIN, FFT_TMAX)
+
+    # interpolate experimental signal onto uniform grid for FFT
+    interp_exp = interp1d(exp_times, exp_signals[i], fill_value=0.0, bounds_error=False)
+    exp_sig_u = interp_exp(uniform_t_exp)
+    n_exp = len(uniform_t_exp) * 4
+    exp_freqs = rfftfreq(n_exp, dt_exp)
+    exp_fft = np.abs(rfft(exp_sig_u, n_exp))**2
     axes_fft[i].plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experiment", ls="--", color="k")
 
 axes[0].legend()

@@ -7,7 +7,7 @@ import spectral_peak_analyzer as spa
 from get_data import *
 from scipy.signal import find_peaks
 
-FIT_PEAK_N = 2
+FIT_PEAK_N = 1
 MODE_TYPE = "amplitude_SC"
 
 def is_phase_peak(peak):
@@ -16,11 +16,11 @@ def is_phase_peak(peak):
 SYSTEM = "bcc"
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=1.72, 
+                                         g=2.5, 
                                          U=0, 
-                                         E_F=-0.5,
+                                         E_F=0,
                                          omega_D=0.02))
-resolvents = cf.ContinuedFraction(main_df, ignore_first=236, ignore_last=250)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=236, ignore_last=270)
 
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$\ln (\omega / t)$")
