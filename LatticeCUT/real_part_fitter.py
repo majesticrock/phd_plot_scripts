@@ -7,8 +7,8 @@ import spectral_peak_analyzer as spa
 from get_data import *
 from scipy.signal import find_peaks
 
-FIT_PEAK_N = 1
-MODE_TYPE = "amplitude_SC"
+FIT_PEAK_N = 0
+MODE_TYPE = "phase_SC"
 
 def is_phase_peak(peak):
     return abs(peak) < 1e-3

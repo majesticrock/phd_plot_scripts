@@ -18,17 +18,18 @@ b_inf = (main_df["continuum_boundaries"][1]**2 - main_df["continuum_boundaries"]
 A = main_df["resolvents.phase_SC"][0]["a_i"]
 B = main_df["resolvents.phase_SC"][0]["b_i"]
 
+terminate = True
 
 def g_tail(z, a_inf, b_inf):
-    # branch chosen so sqrt > 0 for z < omega_-^2
-    return (z - a_inf - np.sqrt((z - a_inf)**2 - 4*b_inf**2)) / (2*b_inf**2)
+    if terminate:
+        return (z - a_inf - np.sign(z.real - a_inf) * np.sqrt((z - a_inf)**2 - 4*b_inf**2)) / (2*b_inf**2)
+    return 0.0
 
 def cf_denominator(z, A, B, k0, a_inf, b_inf):
-    Sigma = B[k0] * g_tail(z, a_inf, b_inf)
-    D = z - A[k0] - Sigma
-    for k in range(k0, 0, -1):
-        D = z - A[k-1] - B[k] / D
-    return D
+    D = z - A[k0] - B[k0 + 1] * g_tail(z, a_inf, b_inf)
+    for k in range(k0 - 1, -1, -1):
+        D = z - A[k] - B[k+1] / D
+    return D / B[0]
 
 from scipy.optimize import brentq
 
@@ -62,10 +63,10 @@ def bound_state_weight(zb, A, B, k0, a_inf, b_inf, dz=1e-8):
     Dp = cf_denominator((zb + dz)**2, A, B, k0, a_inf, b_inf)
     Dm = cf_denominator((zb - dz)**2, A, B, k0, a_inf, b_inf)
     dDdz = (Dp - Dm) / (2*dz)
-    return B[0] / dDdz
+    return 1. / dDdz
 
 
-k0 = 250  # conservative, stable
+k0 = 150  # conservative, stable
 z_bound = find_bound_states(A, B, a_inf, b_inf, k0)
 
 print("Bound states (omega, weight):")
@@ -74,14 +75,21 @@ for zb in z_bound:
     weight = bound_state_weight(omega_b, A, B, k0, a_inf, b_inf)
     if weight < 0:
         continue
-    print(f"ω = {omega_b:.12f},   Z = {weight:.6e}")
+    print(f"ω = {omega_b:.12e},   Z = {weight:.6e}")
 
-
-cf_data = ccf.ContinuedFractionData(a_inf, b_inf**2, np.array([main_df["continuum_boundaries"][0]**2, main_df["continuum_boundaries"][1]**2]), 
-                            A, B, k0, True)
-state_info = ccf.classify_bound_states(cf_data, 2000, 1e-8, 32, 200)
+state_info_list = []
 print("")
-for info in state_info:
-    if info[1] < 1e-8 and info[0] > 1e-8:
-        continue
-    print(f"ω = {info[0]:.12f},   Z = {info[1]:6e}")
+
+for k_term in (k0 + np.arange(-10, 10, 1)):
+    cf_data = ccf.ContinuedFractionData(a_inf, b_inf**2, 
+                                        np.array([main_df["continuum_boundaries"][0]**2, main_df["continuum_boundaries"][1]**2]), 
+                                        A, B, k0, terminate)
+    state_info = ccf.classify_bound_states(cf_data, 2000, 1e-8, 48, 200)
+    state_info_list.append(state_info)
+
+#for info in state_info:
+#    if info[1] < 1e-8 and info[0] > 1e-8:
+#        continue
+#    print(f"ω = {info[0]:.12e},   Z = {info[1]:6e}")
+#print(ccf.denominator(0.0, cf_data), cf_denominator(0.0j, A, B, k0, a_inf, b_inf))
+
