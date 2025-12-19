@@ -30,12 +30,12 @@ sweep_values = [150, 200, 250, 300, 350, 400, 450, 500, 550, 600]
 PARAMS = {
     "DIR": "cascade",
     "MODEL": "PiFlux",
-    "v_F": 1e5,
+    "v_F": 5e5,
     "W": 200,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 30,
+    "TAU_DIAG": 10,
     "T_AVE":  50
 }
 
