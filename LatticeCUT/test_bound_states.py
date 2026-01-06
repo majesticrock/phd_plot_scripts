@@ -6,22 +6,23 @@ from get_data import *
 
 import cpp_continued_fraction as ccf
 
-SYSTEM = 'bcc'
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=16000, 
-                                         g=1.2, 
+SYSTEM = 'sc'
+main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=2000, 
+                                         g=2.5, 
                                          U=0.0, 
                                          E_F=0,
                                          omega_D=0.02))
 a_inf = (main_df["continuum_boundaries"][0]**2 + main_df["continuum_boundaries"][1]**2) * 0.5
 b_inf = (main_df["continuum_boundaries"][1]**2 - main_df["continuum_boundaries"][0]**2) * 0.25
-A = main_df["resolvents.amplitude_SC"][0]["a_i"]
-B = main_df["resolvents.amplitude_SC"][0]["b_i"]
+A = main_df["resolvents.phase_SC"][0]["a_i"]
+B = main_df["resolvents.phase_SC"][0]["b_i"]
 
-k_min = 250
+k_min = 150
+total_n_lines = 20
 terminate = True
 diffs = (A[k_min:-1] - a_inf)**2 / a_inf**2 + (np.sqrt(B[k_min + 1:]) - b_inf)**2 / b_inf**2
-k0_candidates = np.argsort(diffs)[:40] + k_min
+k0_candidates = np.argsort(diffs)[:total_n_lines] + k_min
 print(k0_candidates)
 state_info_list = []
 
@@ -75,8 +76,9 @@ def associate_energies(data, tol):
 
     for c in clusters:
         energies = c["energies"]
-        weights = c["weights"]
         n = len(energies)
+        weights = np.zeros(total_n_lines)
+        weights[:n] = c["weights"]
 
         # --- Energy (position) ---
         wsum = sum(weights)
@@ -87,7 +89,7 @@ def associate_energies(data, tol):
             for e, w in zip(energies, weights)
         ) / wsum
 
-        energy_error = sqrt(energy_variance) * (len(data) / n)
+        energy_error = sqrt(energy_variance) * (total_n_lines / n)
 
         # --- Weight ---
         mean_weight = sum(weights) / n
@@ -96,7 +98,7 @@ def associate_energies(data, tol):
             (w - mean_weight) ** 2 for w in weights
         ) / n
 
-        weight_error = sqrt(weight_variance) * (len(data) / n)
+        weight_error = sqrt(weight_variance)
 
         results.append({
             "energy": mean_energy,
@@ -116,6 +118,6 @@ for r in out:
     #total_uncertainty = max(r['weight_error'] / abs(r['weight']), r['energy_error'] / abs(r['energy']))
     #if total_certainty < 0.05:
     #    continue
-    print(f"Energy = {r['energy']:.6e}, Certainty: {1 - r['energy_error'] / abs(r['energy']):.4f}, "
-          f"Weight = {r['weight']:.6e}, Certainty: {1 - r['weight_error'] / abs(r['weight']):.4f}, "
+    print(f"Energy = {r['energy']:.6e}, Uncertainty: {r['energy_error'] / abs(r['energy']):.4f}, "
+          f"Weight = {r['weight']:.6e}, Uncertainty: {r['weight_error'] / abs(r['weight']):.4f}, "
           f"Count: {r['count']}")
