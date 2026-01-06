@@ -10,49 +10,41 @@ main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "residuals.json.gz",
                                          g=2.5, 
                                          U=0.0, 
                                          E_F=0,
-                                         omega_D=0.02), print_date=False)
+                                         omega_D=0.02), numpy_conversion=False)
 
-fig, axes = plt.subplots(nrows=3, ncols=2, sharex=True)
+fig, axes = plt.subplots(nrows=3, sharex=True)
 fig.subplots_adjust(hspace=0)
-N = len(main_df["amplitude.eigenvectors"][1])
+N = len(main_df["phase.eigenvectors"][0])
 
 epsilon = np.linspace(-1, 1, N)
 
-axes[0, 0].plot(epsilon, main_df["amplitude.eigenvectors"][1], label="$j=1$")
-axes[0, 0].plot(epsilon, main_df["amplitude.eigenvectors"][3], label="$j=2$")
-axes[0, 0].plot(epsilon, main_df["amplitude.eigenvectors"][5], label="$j=3$")
+def add_line(ax, y, **kwargs):
+    if len(y) != N:
+        return
+    ax.plot(epsilon, y, **kwargs)
 
-axes[1, 0].plot(epsilon, main_df["phase.eigenvectors"][1][:N])
-axes[1, 0].plot(epsilon, main_df["phase.eigenvectors"][4][:N])
+add_line(axes[0], main_df["amplitude.eigenvectors"][1][:N], label="$j=1$")
+add_line(axes[0], main_df["amplitude.eigenvectors"][3][:N], label="$j=2$")
+add_line(axes[0], main_df["amplitude.eigenvectors"][5][:N], label="$j=3$")
+add_line(axes[0], main_df["amplitude.eigenvectors"][7][:N], label="$j=4$")
 
-axes[2, 0].plot(epsilon, main_df["phase.eigenvectors"][1][N:])
-axes[2, 0].plot(epsilon, main_df["phase.eigenvectors"][4][N:])
+add_line(axes[1], main_df["amplitude.eigenvectors"][1][N:], label="$j=1$")
+add_line(axes[1], main_df["amplitude.eigenvectors"][3][N:], label="$j=2$")
+add_line(axes[1], main_df["amplitude.eigenvectors"][5][N:], label="$j=3$")
+add_line(axes[1], main_df["amplitude.eigenvectors"][7][N:], label="$j=4$")
 
-axes[0, 1].plot(epsilon, main_df["amplitude.transformed_vectors"][1][:N], label="1st mode")
-axes[0, 1].plot(epsilon, main_df["amplitude.transformed_vectors"][3][:N], label="2nd mode")
-axes[0, 1].plot(epsilon, main_df["amplitude.transformed_vectors"][5][:N], label="3rd mode")
+#add_line(axes[2], main_df["phase.eigenvectors"][0])
+#add_line(axes[2], main_df["phase.eigenvectors"][1], ls="--")
+add_line(axes[2], main_df["phase.eigenvectors"][2])
+add_line(axes[2], main_df["phase.eigenvectors"][4])
+add_line(axes[2], main_df["phase.eigenvectors"][6])
+add_line(axes[2], main_df["phase.eigenvectors"][8])
 
-axes[1, 1].plot(epsilon, main_df["amplitude.transformed_vectors"][1][N:], label="1st mode")
-axes[1, 1].plot(epsilon, main_df["amplitude.transformed_vectors"][3][N:], label="2nd mode")
-axes[1, 1].plot(epsilon, main_df["amplitude.transformed_vectors"][5][N:], label="3rd mode")
+axes[0].set_ylabel(r"$c^\dagger c^\dagger + c c$")
+axes[1].set_ylabel(r"$c^\dagger c$")
+axes[2].set_ylabel(r"$c^\dagger c^\dagger - c c$")
 
-axes[2, 1].plot(epsilon, main_df["phase.transformed_vectors"][1])
-axes[2, 1].plot(epsilon, main_df["phase.transformed_vectors"][4])
-
-
-axes[0, 0].set_ylabel(r"$c^\dagger c^\dagger - c c$")
-axes[1, 0].set_ylabel(r"$c^\dagger c^\dagger + c c$")
-axes[2, 0].set_ylabel(r"$c^\dagger c$")
-
-axes[0, 1].set_ylabel(r"$c^\dagger c^\dagger + c c$")
-axes[1, 1].set_ylabel(r"$c^\dagger c$")
-axes[2, 1].set_ylabel(r"$c^\dagger c^\dagger - c c$")
-
-axes[0, 0].set_title(r"$| v_j \rangle$")
-axes[0, 1].set_title(r"$|\psi_j \rangle $")
-
-axes[-1, 0].set_xlabel(r"$\varepsilon / W$")
-axes[-1, 1].set_xlabel(r"$\varepsilon / W$")
-axes[0, 0].legend(loc="upper right")
+axes[-1].set_xlabel(r"$\varepsilon / W$")
+axes[0].legend(loc="upper right")
 
 plt.show()
