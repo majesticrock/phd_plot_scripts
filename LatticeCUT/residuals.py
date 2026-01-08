@@ -4,8 +4,9 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'sc'
-params = lattice_cut_params(N=4000, 
+SYSTEM = 'bcc'
+N=4000
+params = lattice_cut_params(N=N, 
                               g=2.5, 
                               U=0.0, 
                               E_F=0,
@@ -13,14 +14,12 @@ params = lattice_cut_params(N=4000,
 main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "residuals.json.gz", **params, numpy_conversion=False)
 gap_df  = load_panda("lattice_cut", f"./test/{SYSTEM}", "gap.json.gz", **params)
 resolvent_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "resolvents.json.gz", **params)
+epsilon = np.linspace(-1, 1, N)
 
 omega_minus, _ = resolvent_df["continuum_boundaries"]
 
 fig, axes = plt.subplots(nrows=3, sharex=True)
 fig.subplots_adjust(hspace=0)
-N = len(main_df["phase.eigenvectors"][0])
-
-epsilon = np.linspace(-1, 1, N)
 
 def add_line(ax, y, **kwargs):
     y = np.asarray(y)

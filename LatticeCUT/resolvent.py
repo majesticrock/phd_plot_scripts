@@ -9,7 +9,7 @@ from scipy.signal import find_peaks
 SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=1.6, 
+                                         g=0.8, 
                                          U=0.0, 
                                          E_F=0,
                                          omega_D=0.02))
@@ -28,7 +28,7 @@ plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-w_lin = np.linspace(-0.005 * main_df["continuum_boundaries"][1], 0.29, 5000, dtype=complex)#
+w_lin = np.linspace(-0.0005 * main_df["continuum_boundaries"][1], 0.2, 5000, dtype=complex)#
 w_lin += 1e-4j
 
 A_phase = resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True)
