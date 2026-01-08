@@ -9,7 +9,7 @@ import continued_fraction_pandas as cf
 from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
 SYSTEM = "bcc"
-G   = 1.8
+G   = 1.2
 E_F = 0
 OMEGA_D = 0.02
 N = 16000
