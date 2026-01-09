@@ -6,19 +6,19 @@ from get_data import *
 
 import cpp_continued_fraction as ccf
 
-SYSTEM = 'sc'
-main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=2000, 
-                                         g=2.5, 
+SYSTEM = 'bcc'
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=2.2, 
                                          U=0.0, 
-                                         E_F=0,
+                                         E_F=-0.5,
                                          omega_D=0.02))
 a_inf = (main_df["continuum_boundaries"][0]**2 + main_df["continuum_boundaries"][1]**2) * 0.5
 b_inf = (main_df["continuum_boundaries"][1]**2 - main_df["continuum_boundaries"][0]**2) * 0.25
 A = main_df["resolvents.phase_SC"][0]["a_i"]
 B = main_df["resolvents.phase_SC"][0]["b_i"]
 
-k_min = 150
+k_min = 250
 total_n_lines = 20
 terminate = True
 diffs = (A[k_min:-1] - a_inf)**2 / a_inf**2 + (np.sqrt(B[k_min + 1:]) - b_inf)**2 / b_inf**2
@@ -27,11 +27,11 @@ print(k0_candidates)
 state_info_list = []
 
 for k0 in k0_candidates:
-        cf_data = ccf.ContinuedFractionData(a_inf, b_inf**2, 
-                                            np.array([main_df["continuum_boundaries"][0]**2, main_df["continuum_boundaries"][1]**2]), 
-                                            A, B, k0, terminate)
-        state_info = ccf.classify_bound_states(cf_data, 2000, 1e-8, 48, 200)
-        state_info_list.append(state_info)
+    cf_data = ccf.ContinuedFractionData(a_inf, b_inf**2, 
+                                        np.array([main_df["continuum_boundaries"][0]**2, main_df["continuum_boundaries"][1]**2]), 
+                                        A, B, k0, terminate)
+    state_info = ccf.classify_bound_states(cf_data, 5000, 1e-8, 48, 200)
+    state_info_list.append(state_info)
 
 from math import sqrt
 
@@ -113,8 +113,8 @@ def associate_energies(data, tol):
 
 out = associate_energies(state_info_list, tol=1e-3)
 for r in out:
-    if r["count"] < 5:
-        continue
+    #if r["count"] < 5:
+    #    continue
     #total_uncertainty = max(r['weight_error'] / abs(r['weight']), r['energy_error'] / abs(r['energy']))
     #if total_certainty < 0.05:
     #    continue
