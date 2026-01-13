@@ -8,9 +8,9 @@ from get_data import *
 import continued_fraction_pandas as cf
 from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
-SYSTEM = "bcc"
-G   = 1.2
-E_F = 0
+SYSTEM = "fcc"
+G   = 3.
+E_F = -0.5
 OMEGA_D = 0.02
 N = 16000
 
@@ -39,8 +39,8 @@ main_df = load_panda(
     )
 )
 
-w_lin = np.linspace(0, .5 * main_df["continuum_boundaries"][1], 5000, dtype=complex)
-w_lin += 1e-3j
+w_lin = np.linspace(0, 1.5 * main_df["continuum_boundaries"][0], 5000, dtype=complex)
+w_lin += 1e-4j
 
 resolvents = cf.ContinuedFraction(
     main_df,

@@ -4,7 +4,7 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'sc'
+SYSTEM = 'bcc'
 N=8000
 params = lattice_cut_params(N=N, 
                               g=3., 
@@ -29,23 +29,20 @@ def add_line(ax, y, **kwargs):
         y = -y
     ax.plot(epsilon, y / np.max(np.abs(y)), **kwargs)
 
-offset = 1
+offset = 0
 add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 0][:N], label="$j=1$")
-add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 2][:N], label="$j=2$")
-add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 4][:N], label="$j=3$")
-add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 6][:N], label="$j=4$")
+add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 1][:N], label="Enhanced")
+add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 3][:N], label="$j=2$")
 add_line(axes[0], gap_df["Delta"], ls="--", c="k", label=r"$\Delta$")
 
-add_line(axes[1], main_df["amplitude.eigenvectors"][offset + 0][N:], label="$j=1$")
-add_line(axes[1], main_df["amplitude.eigenvectors"][offset + 2][N:], label="$j=2$")
-add_line(axes[1], main_df["amplitude.eigenvectors"][offset + 4][N:], label="$j=3$")
-add_line(axes[1], main_df["amplitude.eigenvectors"][offset + 6][N:], label="$j=4$")
+add_line(axes[1], main_df["amplitude.eigenvectors"][offset + 0][N:])
+add_line(axes[1], main_df["amplitude.eigenvectors"][offset + 1][N:])
+add_line(axes[1], main_df["amplitude.eigenvectors"][offset + 3][N:])
 add_line(axes[1], gap_df["Delta"], ls="--", c="k", label=r"$\Delta$")
 
 add_line(axes[2], main_df["phase.eigenvectors"][0])
 add_line(axes[2], main_df["phase.eigenvectors"][2])
-add_line(axes[2], main_df["phase.eigenvectors"][4])
-add_line(axes[2], main_df["phase.eigenvectors"][6])
+add_line(axes[2], main_df["phase.eigenvectors"][3])
 add_line(axes[2], gap_df["Delta"], ls="--", c="k")
 
 axes[0].set_ylabel(r"$c^\dagger c^\dagger + c c$")

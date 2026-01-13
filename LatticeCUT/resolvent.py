@@ -7,17 +7,17 @@ from get_data import *
 from scipy.signal import find_peaks
 
 SYSTEM = 'bcc'
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=16000, 
-                                         g=2.1, 
-                                         U=0.0, 
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=8000, 
+                                         g=3, 
+                                         U=0.1, 
                                          E_F=-0.5,
                                          omega_D=0.02))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(main_df, ignore_first=300, ignore_last=320)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=200, ignore_last=250)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
@@ -28,7 +28,7 @@ plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
 
-w_lin = np.linspace(-0.0005 * main_df["continuum_boundaries"][1], 0.2, 5000, dtype=complex)#
+w_lin = np.linspace(-0.005 * main_df["continuum_boundaries"][0], 1.5 * main_df["continuum_boundaries"][0], 5000, dtype=complex)#
 w_lin += 1e-4j
 
 A_phase = resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True)
@@ -37,7 +37,7 @@ A_higgs = resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True
 plotter.plot(w_lin.real, A_phase, label="Phase")
 plotter.plot(w_lin.real, A_higgs, label="Higgs")
 
-plotter.plot(w_lin.real, resolvents.denominator(w_lin.real, "phase_SC", withTerminator=True).real)
+#plotter.plot(w_lin.real, resolvents.denominator(w_lin.real, "phase_SC", withTerminator=True).real)
 
 resolvents.mark_continuum(ax)
 
