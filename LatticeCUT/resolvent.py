@@ -7,17 +7,17 @@ from get_data import *
 from scipy.signal import find_peaks
 
 SYSTEM = 'bcc'
-main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=8000, 
-                                         g=3, 
-                                         U=0.1, 
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=1.2, 
+                                         U=0., 
                                          E_F=-0.5,
                                          omega_D=0.02))
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(main_df, ignore_first=200, ignore_last=250)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=250, ignore_last=300)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()

@@ -6,10 +6,10 @@ from get_data import *
 
 import cpp_continued_fraction as ccf
 
-SYSTEM = 'sc'
+SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                     **lattice_cut_params(N=16000, 
-                                         g=0.6, 
+                                         g=2.5, 
                                          U=0.0, 
                                          E_F=0,
                                          omega_D=0.02))

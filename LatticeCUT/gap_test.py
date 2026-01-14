@@ -6,11 +6,11 @@ from get_data import *
 
 fig, ax = plt.subplots()
 
-SYSTEM = 'bcc'
+SYSTEM = 'fcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
-                    **lattice_cut_params(N=10000, 
-                                         g=1.8,
-                                         U=0.01, 
+                    **lattice_cut_params(N=16000, 
+                                         g=2.9,
+                                         U=0, 
                                          E_F=-0.5,
                                          omega_D=0.02))
 

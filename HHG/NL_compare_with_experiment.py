@@ -36,7 +36,7 @@ PARAMS = {
     "E_F": 118,
     "TAU_OFFDIAG": -1,
     "TAU_DIAG": 10,
-    "T_AVE":  50
+    "T_AVE":  25
 }
 
 

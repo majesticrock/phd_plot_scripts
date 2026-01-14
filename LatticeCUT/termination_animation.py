@@ -8,16 +8,16 @@ from get_data import *
 import continued_fraction_pandas as cf
 from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
-SYSTEM = "fcc"
-G   = 3.
-E_F = -0.5
+SYSTEM = "bcc"
+G   = 0.95
+E_F = 0
 OMEGA_D = 0.02
 N = 16000
 
 cmap = plt.get_cmap("jet")
-step = 3
-shift_range = np.arange(-100, 200, step)
-init = 170
+step = 4
+shift_range = np.arange(-10, 200, step)
+init = 200
 
 FWHM = 15. / step
 sigma = FWHM / (2.0 * np.sqrt(2.0 * np.log(2.0)))
@@ -39,8 +39,9 @@ main_df = load_panda(
     )
 )
 
-w_lin = np.linspace(0, 1.5 * main_df["continuum_boundaries"][0], 5000, dtype=complex)
-w_lin += 1e-4j
+print(main_df["continuum_boundaries"][0])
+w_lin = np.linspace(0.5 * main_df["continuum_boundaries"][0], 1.25 * main_df["continuum_boundaries"][0], 5000, dtype=complex)
+w_lin += 1e-5j
 
 resolvents = cf.ContinuedFraction(
     main_df,
@@ -135,7 +136,7 @@ for _ in shift_range:
 # --- Axes formatting ---
 for ax in axes:
     resolvents.mark_continuum(ax, label=None)
-    ax.set_ylim(-0.05, 5)
+    ax.set_ylim(-0.05, 15)
     ax.set_xlim(w_lin.real.min(), w_lin.real.max())
     ax.set_xlabel(r"$\omega$")
 
