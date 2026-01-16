@@ -4,31 +4,31 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'fcc'
-N=8000
+SYSTEM = 'sc'
+N=4000
 params = lattice_cut_params(N=N, 
-                            g=2.1,
+                            g=3.,
                             U=0.0, 
-                            E_F=-0.5,
+                            E_F=0.,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "full_diagonalization.json.gz", **params)
 
 def compute_resolvent(evs, weights, z):
     resolvent = np.zeros_like(z, dtype=np.complex128)
     for ev, weight in zip(evs, weights):
-        resolvent += weight / (z**2 - ev)
+        resolvent += weight / (z**2 - ev**2)
     return resolvent
 
 evs = np.asarray(main_df["amplitude.eigenvalues"])
 
 print(main_df["continuum_boundaries"])
-for i, (e, w) in enumerate(zip(np.sqrt(evs[:10]), main_df["amplitude.weights"][0][:10])):
+for i, (e, w) in enumerate(zip(evs[:10], main_df["amplitude.weights"][0][:10])):
     print(i, f"- ev: {e:.6f}, weight: {w:.6f}")
 
-for i, (e, w) in enumerate(zip(np.sqrt(evs[:10]), main_df["phase.weights"][0][:10])):
+for i, (e, w) in enumerate(zip(evs[:10], main_df["phase.weights"][0][:10])):
     print(i, f"- ev: {e:.6f}, weight: {w:.6f}")
 
-z = np.linspace(0, np.sqrt(np.max(evs)) * 1.01, 20000) + 1e-5j
+z = np.linspace(0, np.max(evs) * 1.01, 20000) + 1e-5j
 
 fig_r, axes_r = plt.subplots(nrows=2, sharex=True, sharey=True)
 fig_r.subplots_adjust(hspace=0)
@@ -62,7 +62,7 @@ def add_line(ax, y, **kwargs):
         y = -y
     ax.plot(epsilon, y / np.max(np.abs(y)), **kwargs)
 
-for i in [3, 6]:#range(len(main_df["amplitude.first_eigenvectors"])):
+for i in [3, 5, 7, 9]:#range(len(main_df["amplitude.first_eigenvectors"])):
     add_line(axes_wv[0], main_df["amplitude.first_eigenvectors"][i][:N], label=f"$j={i}$")
     add_line(axes_wv[1], main_df["amplitude.first_eigenvectors"][i][N:], label=f"$j={i}$")
     add_line(axes_wv[2], main_df["phase.first_eigenvectors"][i], label=f"$j={i}$")
