@@ -4,7 +4,7 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'sc'
+SYSTEM = 'fcc'
 N=4000
 params = lattice_cut_params(N=N, 
                             g=3.,
@@ -19,27 +19,25 @@ def compute_resolvent(evs, weights, z):
         resolvent += weight / (z**2 - ev**2)
     return resolvent
 
-evs = np.asarray(main_df["amplitude.eigenvalues"])
-
-print(main_df["continuum_boundaries"])
-for i, (e, w) in enumerate(zip(evs[:10], main_df["amplitude.weights"][0][:10])):
-    print(i, f"- ev: {e:.6f}, weight: {w:.6f}")
-
-for i, (e, w) in enumerate(zip(evs[:10], main_df["phase.weights"][0][:10])):
-    print(i, f"- ev: {e:.6f}, weight: {w:.6f}")
-
-z = np.linspace(0, np.max(evs) * 1.01, 20000) + 1e-5j
-
 fig_r, axes_r = plt.subplots(nrows=2, sharex=True, sharey=True)
 fig_r.subplots_adjust(hspace=0)
 axes_r[0].set_ylabel("Higgs")
 axes_r[1].set_ylabel("Phase")
 axes_r[1].set_xlabel(r"$\omega$")
 
+evs = np.asarray(main_df["amplitude.eigenvalues"])
+z = np.linspace(0, np.max(evs) * 1.01, 20000) + 1e-5j
 axes_r[0].plot(z.real, -np.imag(compute_resolvent(evs, np.asarray(main_df["amplitude.weights"][0]), z)))
+
 
 evs = np.asarray(main_df["phase.eigenvalues"])
 axes_r[1].plot(z.real, -np.imag(compute_resolvent(evs, np.asarray(main_df["phase.weights"][0]), z)))
+
+for i, (e, w) in enumerate(zip(np.asarray(main_df["amplitude.eigenvalues"]), main_df["amplitude.weights"][0][:12])):
+    print(i, f"- ev: {e:.9f}, weight: {w}")
+print("########################")
+for i, (e, w) in enumerate(zip(np.asarray(main_df["phase.eigenvalues"]), main_df["phase.weights"][0][:12])):
+    print(i, f"- ev: {e:.9f}, weight: {w}")
 
 for ax in axes_r:
     ax.axvline(main_df["continuum_boundaries"][0], ls="--", c="k")
@@ -62,11 +60,22 @@ def add_line(ax, y, **kwargs):
         y = -y
     ax.plot(epsilon, y / np.max(np.abs(y)), **kwargs)
 
-for i in [3, 5, 7, 9]:#range(len(main_df["amplitude.first_eigenvectors"])):
-    add_line(axes_wv[0], main_df["amplitude.first_eigenvectors"][i][:N], label=f"$j={i}$")
-    add_line(axes_wv[1], main_df["amplitude.first_eigenvectors"][i][N:], label=f"$j={i}$")
-    add_line(axes_wv[2], main_df["phase.first_eigenvectors"][i], label=f"$j={i}$")
+for i in [1, 3, 5, 7]:
+    if main_df["amplitude.eigenvalues"][i] > main_df["continuum_boundaries"][0]:
+        continue
+    if main_df["amplitude.weights"][0][i] < 1e-4:
+        continue
+    
+    add_line(axes_wv[0], main_df["amplitude.first_eigenvectors"][i][:N])
+    add_line(axes_wv[1], main_df["amplitude.first_eigenvectors"][i][N:])
 
-axes_wv[0].legend(loc="upper right")
+for i in [0, 2, 4, 6, 10]:
+    if main_df["phase.eigenvalues"][i] > main_df["continuum_boundaries"][0]:
+        continue
+    if main_df["phase.weights"][0][i] < 1e-4:
+        continue
+    add_line(axes_wv[2], main_df["phase.first_eigenvectors"][i])
+
+#axes_wv[0].legend(loc="upper right")
 
 plt.show()

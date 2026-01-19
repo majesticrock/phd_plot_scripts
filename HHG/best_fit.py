@@ -7,16 +7,20 @@ from get_data import *
 from legend import *
 
 # Fixed Parameters
-DIR = "cascade_prec"
+DIR = "cascade"
 MODEL = "PiFlux"
-v_F = 1.5e6
+v_F = 5e5
 T = 300
 E_F = 118
 TAU_OFFDIAG = -1
 
+FFT_TMIN = 1.0
+FFT_TMAX = 9.0
+
 # Parameter grids
-W_values = [100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350]
-TAU_DIAG_values = [10, 15, 20, 25, 30]
+W_values = [150, 200, 250, 300, 350, 400, 450, 500, 550, 600]
+TAU_DIAG_values = [5, 10, 20, 30]
+TAU_DIAG_values = [5, 10, 20, 30]
 
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
@@ -49,9 +53,9 @@ def compute_simulation_signal(times, df, T_AVE):
     __data = -df["current_density_time"]
     
     #__kernel = np.ones(N)/N
-    #__kernel = gaussian(times, times[len(times)//2], sigma)
+    __kernel = gaussian(times, times[len(times)//2], sigma)
     #__kernel = sech_distrubution(times, times[len(times)//2], sigma)
-    __kernel = cauchy(times, times[len(times)//2], sigma)
+    #__kernel = cauchy(times, times[len(times)//2], sigma)
     #__kernel = laplace(times, times[len(times)//2], sigma)
     #__kernel = cos_dist(N)
 
@@ -89,7 +93,7 @@ for i, W in enumerate(W_values):
         
         times = np.linspace(0, dfs[0]["t_end"] - dfs[0]["t_begin"], len(dfs[0]["current_density_time"])) / (2 * np.pi)
         exp_times = exp_times_raw * dfs[0]["photon_energy"] / TIME_TO_UNITLESS
-        mask = (exp_times > 3) & (exp_times < 8)
+        mask = (exp_times > FFT_TMIN) & (exp_times < FFT_TMAX)
         
         for k, T_AVE in enumerate(T_AVE_values):
             interpolate_simulation = np.interp(exp_times[mask], times, compute_nonlinear(times, dfs, T_AVE))

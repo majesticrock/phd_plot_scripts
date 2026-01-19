@@ -24,7 +24,7 @@ FFT_TMAX = 9.0
 
 # === Choose sweep parameter here ===
 sweep_param = "W"
-sweep_values = [150, 200, 250, 300, 350, 400, 450, 500, 550, 600]
+sweep_values = [350, 400, 450, 500, 550, 600]
 
 # Default parameters in one place
 PARAMS = {
@@ -35,8 +35,8 @@ PARAMS = {
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 10,
-    "T_AVE":  25
+    "TAU_DIAG": 30,
+    "T_AVE": 35
 }
 
 
@@ -72,7 +72,7 @@ def run_and_plot(axes, axes_fft, params, color):
     times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
     sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
 
-    __kernel = cauchy(times, times[len(times)//2], sigma )
+    __kernel = gaussian(times, times[len(times)//2], sigma)#cauchy(times, times[len(times)//2], sigma )
     #__kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
     
     signal_A  = -np.gradient(np.convolve(df_A["current_density_time"]   , __kernel, mode='same'))
@@ -119,7 +119,7 @@ def run_and_plot(axes, axes_fft, params, color):
 
     # --- Frequency-domain plots ---
     # --- Frequency-domain plots (use resampled uniform sim grid) ---
-    n = len(uniform_t_sim) * 4
+    n = len(uniform_t_sim) * 8
     dt = dt_sim
     freqs_scipy = rfftfreq(n, dt)
     mask = freqs_scipy <= MAX_FREQ

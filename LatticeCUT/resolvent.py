@@ -6,12 +6,12 @@ from create_zoom import *
 from get_data import *
 from scipy.signal import find_peaks
 
-SYSTEM = 'bcc'
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=16000, 
-                                         g=1.2, 
+SYSTEM = 'sc'
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=4000, 
+                                         g=3.0, 
                                          U=0., 
-                                         E_F=-0.5,
+                                         E_F=0,
                                          omega_D=0.02))
 
 import continued_fraction_pandas as cf

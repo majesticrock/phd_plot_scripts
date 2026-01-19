@@ -4,8 +4,8 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'bcc'
-N=8000
+SYSTEM = 'sc'
+N=4000
 params = lattice_cut_params(N=N, 
                               g=3., 
                               U=0.0, 
@@ -30,6 +30,7 @@ def add_line(ax, y, **kwargs):
     ax.plot(epsilon, y / np.max(np.abs(y)), **kwargs)
 
 offset = 1
+print(main_df["amplitude.eigenvalues"])
 add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 0][:N], label="$j=1$")
 add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 2][:N], label="$j=2$")
 add_line(axes[0], main_df["amplitude.eigenvectors"][offset + 4][:N], label="$j=3$")
