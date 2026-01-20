@@ -4,9 +4,9 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-PICK = 6
+PICK = 4
 SYSTEM = 'fcc'
-N=4000
+N=16000
 
 fig_wv, axes_wv = plt.subplots(nrows=3, sharex=True, sharey=True)
 fig_wv.subplots_adjust(hspace=0)
@@ -30,7 +30,7 @@ def add_line(ax, y, **kwargs):
         ax[0].plot(epsilon, y[:N] / norm, **kwargs)
         ax[1].plot(epsilon, y[N:] / norm, **kwargs)
 
-Gs = [2.4, 2.45, 2.5, 2.55, 2.6, 2.65, 2.7, 2.8, 2.9, 3.0]
+Gs = [2.4, 2.45, 2.5, 2.55, 2.6, 2.65, 2.8, 2.9, 3.0]
 cmap = plt.get_cmap('plasma', len(Gs))
 for i, g in enumerate(Gs):
     params = lattice_cut_params(N=N, 
@@ -38,7 +38,7 @@ for i, g in enumerate(Gs):
                                 U=0.0, 
                                 E_F=-0.5,
                                 omega_D=0.02)
-    main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "full_diagonalization.json.gz", **params)
+    main_df = load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params)
 
     add_line(axes_wv[:2], main_df["amplitude.first_eigenvectors"][PICK], label=f"$g={g}$", c=cmap(i / len(Gs)))
     add_line(axes_wv[2], main_df["phase.first_eigenvectors"][PICK], label=f"$g={g}$", c=cmap(i / len(Gs)))

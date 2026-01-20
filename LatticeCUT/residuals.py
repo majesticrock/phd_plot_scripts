@@ -4,13 +4,14 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'sc'
+SYSTEM = 'fcc'
 N=4000
 params = lattice_cut_params(N=N, 
-                              g=3., 
-                              U=0.0, 
-                              E_F=0,
-                              omega_D=0.02)
+                            g=2.5,
+                            U=0.0, 
+                            E_F=-0.5,
+                            omega_D=0.02)
+
 main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "residuals.json.gz", **params, numpy_conversion=False)
 gap_df  = load_panda("lattice_cut", f"./test/{SYSTEM}", "gap.json.gz", **params)
 resolvent_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "resolvents.json.gz", **params)

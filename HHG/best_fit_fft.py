@@ -88,7 +88,7 @@ for i, W in enumerate(W_values):
                                    tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0), print_date=False)
             ]
         
-        times = 0.95 * np.linspace(0, dfs[0]["t_end"] - dfs[0]["t_begin"], len(dfs[0]["current_density_time"])) / (2 * np.pi)
+        times = (1./0.95) * np.linspace(0, dfs[0]["t_end"] - dfs[0]["t_begin"], len(dfs[0]["current_density_time"])) / (2 * np.pi)
         exp_times = exp_times_raw * dfs[0]["photon_energy"] / TIME_TO_UNITLESS
         
         pre_fft_mask = (exp_times > FFT_TMIN) & (exp_times < FFT_TMAX)
