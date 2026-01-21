@@ -4,14 +4,14 @@ import __path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'fcc'
-N=4000
+SYSTEM = 'bcc'
+N=16000
 params = lattice_cut_params(N=N, 
-                            g=2.5,
+                            g=0.3,
                             U=0.0, 
-                            E_F=-0.5,
+                            E_F=0,
                             omega_D=0.02)
-main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "full_diagonalization.json.gz", **params)
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params)
 
 def compute_resolvent(evs, weights, z):
     resolvent = np.zeros_like(z, dtype=np.complex128)
@@ -64,8 +64,8 @@ def add_line(ax, y, **kwargs):
 for i in range(len(main_df["amplitude.first_eigenvectors"])):
     if main_df["amplitude.eigenvalues"][i] > main_df["continuum_boundaries"][0]:
         continue
-    if main_df["amplitude.weights"][0][i] < 1e-4:
-        continue
+    #if main_df["amplitude.weights"][0][i] < 1e-4:
+    #    continue
     
     add_line(axes_wv[0], main_df["amplitude.first_eigenvectors"][i][:N], label=f"{i}")
     add_line(axes_wv[1], main_df["amplitude.first_eigenvectors"][i][N:])
@@ -73,9 +73,9 @@ for i in range(len(main_df["amplitude.first_eigenvectors"])):
 for i in range(len(main_df["phase.first_eigenvectors"])):
     if main_df["phase.eigenvalues"][i] > main_df["continuum_boundaries"][0]:
         continue
-    if main_df["phase.weights"][0][i] < 1e-4:
-        continue
-    add_line(axes_wv[2], main_df["phase.first_eigenvectors"][i], label=f"{i}")
+    #if main_df["phase.weights"][0][i] < 1e-4:
+    #    continue
+    #add_line(axes_wv[2], main_df["phase.first_eigenvectors"][i], label=f"{i}")
 
 axes_wv[0].legend(loc="upper right")
 axes_wv[2].legend(loc="upper right")
