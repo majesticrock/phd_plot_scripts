@@ -6,12 +6,12 @@ __ap.append()
 from get_data import *
 
 SYSTEM = 'bcc'
-DIR = 'test'
-N=2000
+DIR = '.'
+N=16000
 E_F=-0.5
 U=0.0
 params = lattice_cut_params(N=N, 
-                            g=2.0,
+                            g=1.0,
                             U=U, 
                             E_F=E_F,
                             omega_D=0.02)

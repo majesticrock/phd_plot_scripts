@@ -7,11 +7,11 @@ from get_data import *
 fig, ax = plt.subplots()
 
 SYSTEM = 'sc'
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
-                    **lattice_cut_params(N=16000, 
+main_df = load_panda("lattice_cut", f"test_bcs/{SYSTEM}", "gap.json.gz",
+                    **lattice_cut_params(N=4000, 
                                          g=1.,
                                          U=0, 
-                                         E_F=0.5,
+                                         E_F=0,
                                          omega_D=0.02))
 
 energy_space = main_df['energies']
@@ -25,12 +25,12 @@ rho_ax = ax.twinx()
 rho_ax.plot(energy_space, main_df['dos'], c='red', ls='--')
 rho_ax.tick_params(axis='y', colors='red')
 rho_ax.yaxis.label.set_color('red')
+rho_ax.set_ylabel(r'$\rho(\epsilon)$')
 
 print(np.sum(main_df['dos'][((energy_space - 0.5) > -0.01) & ((energy_space - 0.5) < 0.01)]) * (energy_space[1] - energy_space[0]))
 
 ax.set_xlabel(r'$\epsilon - \mu$')
 ax.set_ylabel(r'$\Delta$')
-rho_ax.set_ylabel(r'$\rho(\epsilon)$')
 
 particle_holeness = np.sum(energy_space * main_df['Delta'] * (energy_space[1] - energy_space[0]))
 print(f"Gap PHness: {particle_holeness}")

@@ -6,11 +6,11 @@ from get_data import *
 
 import FullDiagPurger as fdp
 
-SYSTEM = 'fcc'
+SYSTEM = 'sc'
 N=16000
-E_F=-0.5
+E_F=0.0
 params = lattice_cut_params(N=N, 
-                            g=2.1,
+                            g=0.2,
                             U=0.0, 
                             E_F=E_F,
                             omega_D=0.02)
@@ -29,7 +29,7 @@ axes_r[1].set_ylabel("Phase")
 axes_r[1].set_xlabel(r"$\omega$")
 
 evs = np.asarray(main_df["amplitude.eigenvalues"])
-z = np.linspace(0, np.max(evs) * 1.01, 20000) + 4e-4j
+z = np.linspace(0, np.max(evs) * 1.01, 20000) + 1e-3j
 axes_r[0].plot(z.real, -np.imag(compute_resolvent(evs, np.asarray(main_df["amplitude.weights"][0]), z)))
 
 

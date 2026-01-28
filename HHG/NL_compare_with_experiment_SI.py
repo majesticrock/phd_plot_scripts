@@ -12,17 +12,17 @@ from legend import *
 
 from scipy.fft import rfft, rfftfreq
 
-MAX_FREQ = 40
+MAX_FREQ = 20
 DIR = "cascade"
 MODEL = "PiFlux"
 v_F = 1.5e6
-W = 200
+W = 450
 T = 300
 E_F = 118
 TAU_OFFDIAG=-1
-TAU_DIAG=15
+TAU_DIAG=5
 
-gamma = 50e-3
+gamma = 25e-3
 
 FFT_CUTS = [1.7, 6.5]
 
@@ -70,7 +70,7 @@ def sech_distrubution(x, mu):
 
 N_ave = int(gamma  / (times[1] - times[0]))
 __theta_kernel = np.ones(N_ave) / N_ave
-__kernel = cauchy(times, times[len(times)//2])
+__kernel = gaussian(times, times[len(times)//2])
 
 signal_A = -np.convolve(np.gradient(df_A["current_density_time"]), __kernel, mode='same')
 signal_B = -np.convolve(np.gradient(df_B["current_density_time"]), __kernel, mode='same')

@@ -9,24 +9,24 @@ from legend import *
 # Fixed Parameters
 DIR = "cascade"
 MODEL = "PiFlux"
-v_F = 5e5
+v_F = 1.5e6
 T = 300
 E_F = 118
 TAU_OFFDIAG = -1
 
 # FFT window (unitless time)
-FFT_TMIN = 1.0
-FFT_TMAX = 9.0
+FFT_TMIN = 3.0
+FFT_TMAX = 7.0
 
 # Parameter grids
-W_values = [150, 200, 250, 300, 350, 400, 450, 500, 550, 600]
+W_values = [ 400, 450, 500, 550, 600]#150, 200, 250, 300, 350,
 TAU_DIAG_values = [5, 10, 20, 30]
 
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 T_AVE_values = 0.001 * np.array([25, 35, 50]) 
 
-OMEGA_MAX = 9
+OMEGA_MAX = 15.5
 
 import os
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
@@ -143,8 +143,8 @@ exp_times = exp_times_raw * dfs[0]["photon_energy"] / TIME_TO_UNITLESS
 times = np.linspace(0, dfs[0]["t_end"] - dfs[0]["t_begin"], len(dfs[0]["current_density_time"])) / (2 * np.pi)
 nl_simulation = compute_nonlinear(times, dfs, T_AVE)
 
-ax.plot(times, nl_simulation, label="Sim")
-ax.plot(exp_times, nl_exp, "k--", label="Exp")
+ax.plot(times, -nl_simulation, label="Sim")
+ax.plot(exp_times - 0.25, nl_exp, "k--", label="Exp")
 #laser = np.gradient(df["laser_function"])
 #ax.plot(times, laser / np.max(np.abs(laser)), "r:", label="Laser")
 
@@ -157,7 +157,6 @@ fig.tight_layout()
 
 from scipy.fft import rfft, rfftfreq
 fig_fft, ax_fft = plt.subplots()
-#OMEGA_MAX = 22
 
 fft_sim = np.abs(rfft(nl_simulation))
 freqs_sim = rfftfreq(len(nl_simulation), times[1] - times[0])
@@ -170,7 +169,7 @@ ax_fft.plot(freqs_exp, fft_exp / np.max(fft_exp), "k--", label="Exp")
 ax_fft.set_yscale("log")
 ax_fft.set_xlim(0, OMEGA_MAX)
 
-for i in range(0, OMEGA_MAX, 2):
+for i in range(0, int(OMEGA_MAX), 2):
     ax_fft.axvline(i+1, c="k", ls=":", alpha=0.5)
     
 ax_fft.legend()

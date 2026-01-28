@@ -14,7 +14,7 @@ __path_appender.append()
 from get_data import *
 from legend import *
 
-MAX_FREQ = 20
+MAX_FREQ = 15
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
@@ -26,13 +26,13 @@ FFT_TMAX = 9.0
 params = {
     "DIR": "cascade",
     "MODEL": "PiFlux",
-    "v_F": 5e5,
-    "W": 300,
+    "v_F": 2e6,
+    "W": 500,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 30,
-    "T_AVE": 45
+    "TAU_DIAG": 5,
+    "T_AVE": 25
 }
 
 
@@ -61,8 +61,7 @@ main_df = load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MODEL']}", "cur
                                   tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
 sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
-__kernel = cauchy(times, times[len(times)//2], sigma)#cauchy(times, times[len(times)//2], sigma )
-#__kernel = cos_dist(int( 1e-3 * params["T_AVE"] * main_df["photon_energy"] / (times[1] - times[0])))
+__kernel = gaussian(times, times[len(times)//2], sigma)
 
 signal_A  = -np.gradient(np.convolve(df_A["current_density_time"]   , __kernel, mode='same'))
 signal_B  = -np.gradient(np.convolve(df_B["current_density_time"]   , __kernel, mode='same'))
@@ -104,10 +103,11 @@ fftplot /= np.max(fftplot)
 freqs = rfftfreq(n, dt_sim)
 
 # --- Figure setup ---
-fig, ax = cdf.create_frame()
+fig, ax = cdf.create_frame(figsize=(8,8))
 
 ax.set_yscale("log")
 ax.set_xlim(0, MAX_FREQ)
+ax.set_ylim(1e-7, 2)
 
 for i in range(1, MAX_FREQ, 2):
     ax.axvline(i, color="gray", ls="--")
@@ -141,7 +141,7 @@ exp_fft = np.abs(rfft(exp_sig_u, n_exp))**2
 # rescale simulation frequencies such that maxima align
 max_sim_idx = np.argmax(fftplot[freqs <= MAX_FREQ])
 max_exp_idx = np.argmax(exp_fft[exp_freqs <= MAX_FREQ])
-freqs *= 0.95
+#freqs *= 0.95
 
 ax.plot(freqs, fftplot, label="Simulation")
 ax.plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experiment", ls="--", color="k")

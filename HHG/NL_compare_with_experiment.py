@@ -23,22 +23,21 @@ FFT_TMIN = 1.0
 FFT_TMAX = 9.0
 
 # === Choose sweep parameter here ===
-sweep_param = "W"
-sweep_values = [350, 400, 450, 500, 550, 600]
+sweep_param = "v_F"
+sweep_values = [5e5, 1e6, 1.5e6, 2e6, 3e6, 4e6, 5e6]
 
 # Default parameters in one place
 PARAMS = {
     "DIR": "cascade",
     "MODEL": "PiFlux",
-    "v_F": 5e5,
-    "W": 200,
+    "v_F": 1.5e6,
+    "W": 500,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 30,
-    "T_AVE": 35
+    "TAU_DIAG": 5,
+    "T_AVE": 25
 }
-
 
 def gaussian(x, mu, gamma):
     return (1 / (gamma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * gamma**2))
@@ -140,9 +139,9 @@ def run_and_plot(axes, axes_fft, params, color):
 fig, axes = cdt.create_frame(
     nrows=3, figsize=(8.4, 8),
     ylabel_list=[
-        legend(r"j_\mathrm{lin}(t)", "a.u."),#                      \partial_t 
-        legend(r"j_\mathrm{sim}(t)", "a.u."),#                      \partial_t 
-        legend(r"(j_\mathrm{sim}(t) - j_\mathrm{lin}(t))", "a.u."),#\partial_t 
+        legend(r"\partial_t j_\mathrm{lin}(t)", "a.u."),                     
+        legend(r"\partial_t j_\mathrm{sim}(t)", "a.u."),
+        legend(r"\partial_t (j_\mathrm{sim}(t) - j_\mathrm{lin}(t))", "a.u."),
     ]
 )
 
