@@ -9,12 +9,14 @@ import FullDiagPurger as fdp
 SYSTEM = 'sc'
 N=16000
 E_F=0.0
+OMEGA_D = 0.02
+DIR = f"./{SYSTEM}"
 params = lattice_cut_params(N=N, 
-                            g=0.2,
-                            U=0.0, 
+                            g=0.3,
+                            U=0, 
                             E_F=E_F,
-                            omega_D=0.02)
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params)
+                            omega_D=OMEGA_D)
+main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
 
 def compute_resolvent(evs, weights, z):
     resolvent = np.zeros_like(z, dtype=np.complex128)
@@ -70,18 +72,36 @@ purger.plot_phase(axes_wv[2]     , label_energy=True)
 axes_wv[0].legend(loc="upper right")
 axes_wv[2].legend(loc="upper right")
 
-fig_g, axes_g = plt.subplots(nrows=3, sharex=True)
-fig_g.subplots_adjust(hspace=0)
-axes_g[0].set_ylabel("Higgs")
-axes_g[1].set_ylabel("Occupation")
-axes_g[2].set_ylabel("Phase")
-axes_g[-1].set_xlabel(r"$\varepsilon - E_\mathrm{F}$")
-axes_g[0].set_xlim(-0.2, 0.2)
+gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
+eps = np.linspace(-1, 1, N) - E_F
+Delta = gap_df["Delta"]
+E = np.sqrt(eps**2 + Delta**2)
 
-purger.plot_glimmering_amplitude(axes_g[:2], label_energy=True)
-purger.plot_glimmering_phase(axes_g[2]     , label_energy=True)
+test_bcs = (Delta / E**2)
+test_bcs /= np.max(test_bcs)
 
-axes_g[0].legend(loc="upper right")
-axes_g[2].legend(loc="upper right")
+test_cut = -Delta / eps
+test_cut /= np.max(test_cut)
+
+axes_wv[0].plot(eps, test_bcs, c="k", ls="--")
+axes_wv[2].plot(eps, test_bcs, c="k", ls="--")
+
+axes_wv[0].plot(eps, test_cut, c="red", ls="-.")
+axes_wv[1].plot(eps, test_cut, c="red", ls="-.")
+axes_wv[2].plot(eps, test_cut, c="red", ls="-.")
+
+#fig_g, axes_g = plt.subplots(nrows=3, sharex=True)
+#fig_g.subplots_adjust(hspace=0)
+#axes_g[0].set_ylabel("Higgs")
+#axes_g[1].set_ylabel("Occupation")
+#axes_g[2].set_ylabel("Phase")
+#axes_g[-1].set_xlabel(r"$\varepsilon - E_\mathrm{F}$")
+#axes_g[0].set_xlim(-0.2, 0.2)
+#
+#purger.plot_glimmering_amplitude(axes_g[:2], label_energy=True)
+#purger.plot_glimmering_phase(axes_g[2]     , label_energy=True)
+#
+#axes_g[0].legend(loc="upper right")
+#axes_g[2].legend(loc="upper right")
 
 plt.show()

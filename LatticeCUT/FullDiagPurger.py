@@ -1,13 +1,13 @@
 import numpy as np
 
-PEAK_DIFF_TOL = 0.005
+PEAK_DIFF_TOL = 0.004
 
 def __fill_temps__(eigenvalues, weights, first_eigenvectors, continuum_edge):
     temp_evs = []
     temp_weights = []
     temp_vectors = []
     for ev, weight, vector in zip(eigenvalues, weights, first_eigenvectors):
-        if ev >= continuum_edge or weight < 1e-7:
+        if ev >= continuum_edge :#or weight < 1e-9:
             continue
         if len(temp_evs) == 0:
             temp_evs.append(ev)
@@ -105,10 +105,11 @@ class FullDiagPurger:
     def plot_phase(self, ax, which='all', label_energy=False, **plot_kwargs):
         if which == 'all':
             for i in range(len(self.phase_first_eigenvectors)):
-                if label_energy:
-                    plot_kwargs["label"] = f"{i+1} ({self.phase_eigenvalues[i]:.3f})"
-                else:
-                    plot_kwargs["label"] = f"{i+1}"
+                if "label" not in plot_kwargs:
+                    if label_energy:
+                        plot_kwargs["label"] = f"{i+1} ({self.phase_eigenvalues[i]:.3f})"
+                    else:
+                        plot_kwargs["label"] = f"{i+1}"
                 __plot_line__(ax, self.epsilon_space, self.phase_first_eigenvectors[i], **plot_kwargs)
         else:
             if len(self.phase_first_eigenvectors) <= which:
@@ -121,10 +122,11 @@ class FullDiagPurger:
     def plot_amplitude(self, axes, which='all', label_energy=False, **plot_kwargs):
         if which == 'all':
             for i in range(len(self.amplitude_first_eigenvectors)):
-                if label_energy:
-                    plot_kwargs["label"] = f"{i+1} ({self.amplitude_eigenvalues[i]:.3f})"
-                else:
-                    plot_kwargs["label"] = f"{i+1}"
+                if "label" not in plot_kwargs:
+                    if label_energy:
+                        plot_kwargs["label"] = f"{i+1} ({self.amplitude_eigenvalues[i]:.3f})"
+                    else:
+                        plot_kwargs["label"] = f"{i+1}"
                 __plot_line__(axes[0], self.epsilon_space, self.amplitude_first_eigenvectors[i][:self.N], **plot_kwargs)
                 __plot_line__(axes[1], self.epsilon_space, self.amplitude_first_eigenvectors[i][self.N:], **plot_kwargs)
         else:
@@ -139,10 +141,11 @@ class FullDiagPurger:
     def plot_glimmering_phase(self, ax, which='all', label_energy=False, **plot_kwargs):
         if which == 'all':
             for i in range(len(self.glimmering_phase_first_eigenvectors)):
-                if label_energy:
-                    plot_kwargs["label"] = f"{i+1} ({self.glimmering_phase_eigenvalues[i]:.3f})"
-                else:
-                    plot_kwargs["label"] = f"{i+1}"
+                if "label" not in plot_kwargs:
+                    if label_energy:
+                        plot_kwargs["label"] = f"{i+1} ({self.glimmering_phase_eigenvalues[i]:.3f})"
+                    else:
+                        plot_kwargs["label"] = f"{i+1}"
                 __plot_line__(ax, self.epsilon_space, self.glimmering_phase_first_eigenvectors[i], **plot_kwargs)
         else:
             if len(self.glimmering_phase_first_eigenvectors) <= which:
@@ -155,10 +158,11 @@ class FullDiagPurger:
     def plot_glimmering_amplitude(self, axes, which='all', label_energy=False, **plot_kwargs):
         if which == 'all':
             for i in range(len(self.glimmering_amplitude_first_eigenvectors)):
-                if label_energy:
-                    plot_kwargs["label"] = f"{i+1} ({self.glimmering_amplitude_eigenvalues[i]:.3f})"
-                else:
-                    plot_kwargs["label"] = f"{i+1}"
+                if "label" not in plot_kwargs:
+                    if label_energy:
+                        plot_kwargs["label"] = f"{i+1} ({self.glimmering_amplitude_eigenvalues[i]:.3f})"
+                    else:
+                        plot_kwargs["label"] = f"{i+1}"
                 __plot_line__(axes[0], self.epsilon_space, self.glimmering_amplitude_first_eigenvectors[i][:self.N], **plot_kwargs)
                 __plot_line__(axes[1], self.epsilon_space, self.glimmering_amplitude_first_eigenvectors[i][self.N:], **plot_kwargs)
         else:
