@@ -7,9 +7,9 @@ from get_data import *
 fig, ax = plt.subplots()
 
 SYSTEM = 'sc'
-main_df = load_panda("lattice_cut", f"test_bcs/{SYSTEM}", "gap.json.gz",
-                    **lattice_cut_params(N=4000, 
-                                         g=1.,
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=0.3,
                                          U=0, 
                                          E_F=0,
                                          omega_D=0.02))

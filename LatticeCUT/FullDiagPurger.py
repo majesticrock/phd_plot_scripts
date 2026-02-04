@@ -7,7 +7,7 @@ def __fill_temps__(eigenvalues, weights, first_eigenvectors, continuum_edge):
     temp_weights = []
     temp_vectors = []
     for ev, weight, vector in zip(eigenvalues, weights, first_eigenvectors):
-        if ev >= continuum_edge :#or weight < 1e-9:
+        if ev >= continuum_edge or weight < 1e-8:
             continue
         if len(temp_evs) == 0:
             temp_evs.append(ev)
@@ -22,9 +22,6 @@ def __fill_temps__(eigenvalues, weights, first_eigenvectors, continuum_edge):
             temp_weights[-1] = weight
             temp_vectors[-1] = vector
     return temp_evs, temp_weights, temp_vectors
-
-def __plot_line__(ax, x, y, **plot_kwargs):
-    ax.plot(x, y / np.max(np.abs(y)), **plot_kwargs)
 
 class FullDiagPurger:
     def __init__(self, system_data, epsilon_space):
@@ -69,18 +66,18 @@ class FullDiagPurger:
         
         self.amplitude_eigenvalues        = np.array([ temp_amplitude_evs[i]     for i in correct_amplitude_indices ])
         self.amplitude_weights            = np.array([ temp_amplitude_weights[i] for i in correct_amplitude_indices ])
-        self.amplitude_first_eigenvectors = np.array([ temp_amplitude_vectors[i] for i in correct_amplitude_indices ])
+        self.amplitude_eigenvectors = np.array([ temp_amplitude_vectors[i] for i in correct_amplitude_indices ])
         
         self.phase_eigenvalues        = np.array([ temp_phase_evs[i]     for i in correct_phase_indices ])
         self.phase_weights            = np.array([ temp_phase_weights[i] for i in correct_phase_indices ])
-        self.phase_first_eigenvectors = np.array([ temp_phase_vectors[i] for i in correct_phase_indices ])
+        self.phase_eigenvectors = np.array([ temp_phase_vectors[i] for i in correct_phase_indices ])
         
-        for i in range(len(self.amplitude_first_eigenvectors)):
-            if np.sum(self.amplitude_first_eigenvectors[i][:self.N]) < 0:
-                self.amplitude_first_eigenvectors[i] *= -1
-        for i in range(len(self.phase_first_eigenvectors)):
-            if np.sum(self.phase_first_eigenvectors[i]) < 0:
-                self.phase_first_eigenvectors[i] *= -1
+        for i in range(len(self.amplitude_eigenvectors)):
+            if np.sum(self.amplitude_eigenvectors[i][:self.N]) < 0:
+                self.amplitude_eigenvectors[i] *= -1
+        for i in range(len(self.phase_eigenvectors)):
+            if np.sum(self.phase_eigenvectors[i]) < 0:
+                self.phase_eigenvectors[i] *= -1
         
         
                 
@@ -89,87 +86,80 @@ class FullDiagPurger:
         
         self.glimmering_amplitude_eigenvalues        = np.array([ temp_amplitude_evs[i]     for i in glimmering_amplitude_indices ])
         self.glimmering_amplitude_weights            = np.array([ temp_amplitude_weights[i] for i in glimmering_amplitude_indices ])
-        self.glimmering_amplitude_first_eigenvectors = np.array([ temp_amplitude_vectors[i] for i in glimmering_amplitude_indices ])
+        self.glimmering_amplitude_eigenvectors = np.array([ temp_amplitude_vectors[i] for i in glimmering_amplitude_indices ])
         
         self.glimmering_phase_eigenvalues        = np.array([ temp_phase_evs[i]     for i in glimmering_phase_indices ])
         self.glimmering_phase_weights            = np.array([ temp_phase_weights[i] for i in glimmering_phase_indices ]) 
-        self.glimmering_phase_first_eigenvectors = np.array([ temp_phase_vectors[i] for i in glimmering_phase_indices ])
+        self.glimmering_phase_eigenvectors = np.array([ temp_phase_vectors[i] for i in glimmering_phase_indices ])
         
-        for i in range(len(self.glimmering_amplitude_first_eigenvectors)):
-            if np.sum(self.glimmering_amplitude_first_eigenvectors[i][:self.N]) < 0:
-                self.glimmering_amplitude_first_eigenvectors[i] *= -1
-        for i in range(len(self.glimmering_phase_first_eigenvectors)):
-            if np.sum(self.glimmering_phase_first_eigenvectors[i]) < 0:
-                self.glimmering_phase_first_eigenvectors[i] *= -1
+        for i in range(len(self.glimmering_amplitude_eigenvectors)):
+            if np.sum(self.glimmering_amplitude_eigenvectors[i][:self.N]) < 0:
+                self.glimmering_amplitude_eigenvectors[i] *= -1
+        for i in range(len(self.glimmering_phase_eigenvectors)):
+            if np.sum(self.glimmering_phase_eigenvectors[i]) < 0:
+                self.glimmering_phase_eigenvectors[i] *= -1
     
+    def plot_line(self, ax, y, combined_norm=True, **plot_kwargs):
+        if len(y) == 2 * self.N:
+            if combined_norm:
+                norm = 1. / np.max(np.abs(y))
+                ax[0].plot(self.epsilon_space, y[:self.N] * norm, **plot_kwargs)
+                ax[1].plot(self.epsilon_space, y[self.N:] * norm, **plot_kwargs)
+                return norm
+            else:
+                norm1 = 1. / np.max(np.abs(y[:self.N]))
+                norm2 = 1. / np.max(np.abs(y[self.N:]))
+                ax[0].plot(self.epsilon_space, y[:self.N] * norm1, **plot_kwargs)
+                ax[1].plot(self.epsilon_space, y[self.N:] * norm2, **plot_kwargs)
+                return norm1 / norm2
+        else:
+            norm = 1. / np.max(np.abs(y))
+            ax.plot(self.epsilon_space, y * norm, **plot_kwargs)
+            return norm
+    
+    ##############################################################
+    def __plot_impl__(self, ax, eigenvectors, eigenvalues, which, label_energy, combined_norm=True, **plot_kwargs):
+        if which == 'all':
+            for i in range(len(eigenvectors)):
+                if label_energy:
+                    plot_kwargs["label"] = f"{i+1} ({eigenvalues[i]:.3f})"
+                else:
+                    plot_kwargs["label"] = f"{i+1}"
+                norm = self.plot_line(ax, eigenvectors[i], combined_norm, **plot_kwargs)
+                if combined_norm == False:
+                    print(f"Multiplied A_eps for i={i} by a factor of {norm}")
+        else:
+            if len(eigenvectors) <= which:
+                print(f"Warning: Tried to plot eigenvector {which}, but only {len(eigenvectors)} available.")
+            else:
+                if label_energy:
+                    plot_kwargs['label'] = f"{eigenvalues[which]:.3f}"
+                norm = self.plot_line(ax, eigenvectors[which], combined_norm, **plot_kwargs)
+                if combined_norm == False:
+                    print(f"Multiplied A_eps for i={which} by a factor of {norm}")
+    
+    ##############################################################
     def plot_phase(self, ax, which='all', label_energy=False, **plot_kwargs):
-        if which == 'all':
-            for i in range(len(self.phase_first_eigenvectors)):
-                if "label" not in plot_kwargs:
-                    if label_energy:
-                        plot_kwargs["label"] = f"{i+1} ({self.phase_eigenvalues[i]:.3f})"
-                    else:
-                        plot_kwargs["label"] = f"{i+1}"
-                __plot_line__(ax, self.epsilon_space, self.phase_first_eigenvectors[i], **plot_kwargs)
-        else:
-            if len(self.phase_first_eigenvectors) <= which:
-                print(f"Warning: Tried to plot phase eigenvector {which}, but only {len(self.phase_first_eigenvectors)} available.")
-            else:
-                if label_energy:
-                    plot_kwargs['label'] = f"{self.phase_eigenvalues[which]:.3f}"
-                __plot_line__(ax, self.epsilon_space, self.phase_first_eigenvectors[which], **plot_kwargs)
+        self.__plot_impl__(ax, self.phase_eigenvectors, self.phase_eigenvalues, which, label_energy, **plot_kwargs)
     
-    def plot_amplitude(self, axes, which='all', label_energy=False, **plot_kwargs):
-        if which == 'all':
-            for i in range(len(self.amplitude_first_eigenvectors)):
-                if "label" not in plot_kwargs:
-                    if label_energy:
-                        plot_kwargs["label"] = f"{i+1} ({self.amplitude_eigenvalues[i]:.3f})"
-                    else:
-                        plot_kwargs["label"] = f"{i+1}"
-                __plot_line__(axes[0], self.epsilon_space, self.amplitude_first_eigenvectors[i][:self.N], **plot_kwargs)
-                __plot_line__(axes[1], self.epsilon_space, self.amplitude_first_eigenvectors[i][self.N:], **plot_kwargs)
-        else:
-            if len(self.amplitude_first_eigenvectors) <= which:
-                print(f"Warning: Tried to plot amplitude eigenvector {which}, but only {len(self.amplitude_first_eigenvectors)} available.")
-            else:
-                if label_energy:
-                    plot_kwargs['label'] = f"{self.amplitude_eigenvalues[which]:.3f}"
-                __plot_line__(axes[0], self.epsilon_space, self.amplitude_first_eigenvectors[which][:self.N], **plot_kwargs)
-                __plot_line__(axes[1], self.epsilon_space, self.amplitude_first_eigenvectors[which][self.N:], **plot_kwargs)
-    
+    ##############################################################
     def plot_glimmering_phase(self, ax, which='all', label_energy=False, **plot_kwargs):
-        if which == 'all':
-            for i in range(len(self.glimmering_phase_first_eigenvectors)):
-                if "label" not in plot_kwargs:
-                    if label_energy:
-                        plot_kwargs["label"] = f"{i+1} ({self.glimmering_phase_eigenvalues[i]:.3f})"
-                    else:
-                        plot_kwargs["label"] = f"{i+1}"
-                __plot_line__(ax, self.epsilon_space, self.glimmering_phase_first_eigenvectors[i], **plot_kwargs)
-        else:
-            if len(self.glimmering_phase_first_eigenvectors) <= which:
-                print(f"Warning: Tried to plot glimmering phase eigenvector {which}, but only {len(self.glimmering_phase_first_eigenvectors)} available.")
-            else:
-                if label_energy:
-                    plot_kwargs['label'] = f"{self.glimmering_phase_eigenvalues[which]:.3f}"
-                __plot_line__(ax, self.epsilon_space, self.glimmering_phase_first_eigenvectors[which], **plot_kwargs)
+        self.__plot_impl__(ax, self.glimmering_phase_eigenvectors, self.glimmering_phase_eigenvalues, which, label_energy, **plot_kwargs)
     
-    def plot_glimmering_amplitude(self, axes, which='all', label_energy=False, **plot_kwargs):
-        if which == 'all':
-            for i in range(len(self.glimmering_amplitude_first_eigenvectors)):
-                if "label" not in plot_kwargs:
-                    if label_energy:
-                        plot_kwargs["label"] = f"{i+1} ({self.glimmering_amplitude_eigenvalues[i]:.3f})"
-                    else:
-                        plot_kwargs["label"] = f"{i+1}"
-                __plot_line__(axes[0], self.epsilon_space, self.glimmering_amplitude_first_eigenvectors[i][:self.N], **plot_kwargs)
-                __plot_line__(axes[1], self.epsilon_space, self.glimmering_amplitude_first_eigenvectors[i][self.N:], **plot_kwargs)
-        else:
-            if len(self.glimmering_amplitude_first_eigenvectors) <= which:
-                print(f"Warning: Tried to plot glimmering amplitude eigenvector {which}, but only {len(self.glimmering_amplitude_first_eigenvectors)} available.")
-            else:
-                if label_energy:
-                    plot_kwargs['label'] = f"{self.glimmering_amplitude_eigenvalues[which]:.3f}"
-                __plot_line__(axes[0], self.epsilon_space, self.glimmering_amplitude_first_eigenvectors[which][:self.N], **plot_kwargs)
-                __plot_line__(axes[1], self.epsilon_space, self.glimmering_amplitude_first_eigenvectors[which][self.N:], **plot_kwargs)
+    ##############################################################
+    def plot_amplitude(self, axes, which='all', label_energy=False, combined_norm=True, **plot_kwargs):
+        self.__plot_impl__(axes, self.amplitude_eigenvectors, self.amplitude_eigenvalues, which, 
+                           label_energy, combined_norm, **plot_kwargs)
+    
+    ##############################################################
+    def plot_glimmering_amplitude(self, axes, which='all', label_energy=False, combined_norm=True, **plot_kwargs):
+        self.__plot_impl__(axes, self.glimmering_amplitude_eigenvectors, self.glimmering_amplitude_eigenvalues, which, 
+                           label_energy, combined_norm, **plot_kwargs)
+        
+    def integral_amplitude(self, which):
+        if which < len(self.amplitude_eigenvectors):
+            pc = (np.sum(self.amplitude_eigenvectors[which][:self.N // 2]**2)          )
+            n  = (np.sum(self.amplitude_eigenvectors[which][self.N:3 * self.N // 2]**2))
+            #print(f"Pair creation integral: {pc}\nOccupation integral: {n}")
+            #print(f"Combined: {pc + n}")
+            return pc, n

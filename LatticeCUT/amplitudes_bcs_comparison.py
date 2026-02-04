@@ -10,7 +10,7 @@ SYSTEM = 'sc'
 N=16000
 E_F=0.0
 OMEGA_D = 0.02
-G = 1
+G = 0.3
 DIR = f"./{SYSTEM}"
 params = lattice_cut_params(N=N, 
                             g=G,
@@ -44,13 +44,11 @@ axes[2].plot(eps, test_pc, c="k", ls="--")
 
 test_num = -Delta**2 / (eps * E)
 test_num /= np.max(test_num)
-axes[1].plot(eps, test_num, c="k", ls="--", label=r"$\Delta_k^2 / (E_k \varepsilon_k)$")
+axes[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k \varepsilon_k)$")
 axes[0].set_title("CUT")
 
 ###########################################################################
-DIR = f"test_bcs/{SYSTEM}"
-N = 4000
-params["N"] = N
+DIR = f"bcs/{SYSTEM}"
 main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
 gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
 

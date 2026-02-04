@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 from matplotlib import cm, colors
 import os
+from scipy.signal import hilbert
 
 from scipy.interpolate import interp1d
 from scipy.fft import rfft, rfftfreq
@@ -16,23 +18,24 @@ from legend import *
 
 MAX_FREQ = 15
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
+print(TIME_TO_UNITLESS)
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # FFT window (unitless time)
-FFT_TMIN = 1.0
-FFT_TMAX = 9.0
+FFT_TMIN = 2.0
+FFT_TMAX = 8.0
 
 # Default parameters in one place
 params = {
-    "DIR": "cascade",
+    "DIR": "cascade_16",
     "MODEL": "PiFlux",
     "v_F": 2e6,
-    "W": 500,
+    "W": 600,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
     "TAU_DIAG": 5,
-    "T_AVE": 25
+    "T_AVE": 28
 }
 
 
@@ -95,10 +98,11 @@ plot_data_combined = combined_inter(uniform_t_sim, t0_unitless)
 # interpolate simulated combined and AB signals onto uniform grid
 interp_AB = interp1d(times, signal_AB, fill_value=0.0, bounds_error=False)
 signal_AB_u = interp_AB(uniform_t_sim)
+non_linear_signal = signal_AB_u - plot_data_combined
 
 # --- Frequency-domain plots ---
 n = len(uniform_t_sim) * 8
-fftplot = np.abs(rfft(signal_AB_u - plot_data_combined, n))**2
+fftplot = np.abs(rfft(non_linear_signal, n))**2
 fftplot /= np.max(fftplot)
 freqs = rfftfreq(n, dt_sim)
 
@@ -138,15 +142,21 @@ n_exp = len(uniform_t_exp) * 4
 exp_freqs = rfftfreq(n_exp, dt_exp)
 exp_fft = np.abs(rfft(exp_sig_u, n_exp))**2
 
-# rescale simulation frequencies such that maxima align
-max_sim_idx = np.argmax(fftplot[freqs <= MAX_FREQ])
-max_exp_idx = np.argmax(exp_fft[exp_freqs <= MAX_FREQ])
-#freqs *= 0.95
-
 ax.plot(freqs, fftplot, label="Simulation")
 ax.plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experiment", ls="--", color="k")
+N_AVG = 25
+fftplot_avg = np.convolve(fftplot, np.ones(N_AVG)/N_AVG, mode='same')
+ax.plot(freqs, fftplot_avg, label="Average", ls="--")
+
+
+
 ax.legend(loc="upper right")
 
 fig.tight_layout()
+
+
+fig_time, ax_time = cdt.create_frame(ylabel_list=r"$\partial_t j_\mathrm{NL}(t)$")
+ax_time.plot(uniform_t_sim, non_linear_signal / np.max(np.abs(non_linear_signal)))
+ax_time.plot(exp_times[exp_mask], EXPERIMENTAL_DATA[4][exp_mask] / np.max(np.abs(EXPERIMENTAL_DATA[4])), ls="--", c="k")
 
 plt.show()
