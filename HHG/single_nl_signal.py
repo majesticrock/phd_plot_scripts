@@ -1,9 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-from matplotlib import cm, colors
 import os
-from scipy.signal import hilbert
 
 from scipy.interpolate import interp1d
 from scipy.fft import rfft, rfftfreq
@@ -11,8 +8,8 @@ from scipy.fft import rfft, rfftfreq
 import current_density_time as cdt
 import current_density_fourier as cdf
 
-import path_appender
-path_appender.append()
+import mrock_centralized_scripts.path_appender as ap
+ap.append()
 from get_data import *
 from legend import *
 
@@ -22,8 +19,8 @@ print(TIME_TO_UNITLESS)
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # FFT window (unitless time)
-FFT_TMIN = 2.0
-FFT_TMAX = 8.0
+FFT_TMIN = 3.0
+FFT_TMAX = 7.0
 
 # Default parameters in one place
 params = {
@@ -108,14 +105,8 @@ freqs = rfftfreq(n, dt_sim)
 
 # --- Figure setup ---
 fig, ax = cdf.create_frame(figsize=(8,8))
-
-ax.set_yscale("log")
-ax.set_xlim(0, MAX_FREQ)
-ax.set_ylim(1e-7, 2)
-
-for i in range(1, MAX_FREQ, 2):
-    ax.axvline(i, color="gray", ls="--")
-
+#for i in range(1, MAX_FREQ, 2):
+#    ax.axvline(i, color="gray", ls="--")
 
 # --- Experimental data ---
 EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
@@ -141,16 +132,23 @@ exp_sig_u = interp_exp(uniform_t_exp)
 n_exp = len(uniform_t_exp) * 4
 exp_freqs = rfftfreq(n_exp, dt_exp)
 exp_fft = np.abs(rfft(exp_sig_u, n_exp))**2
+exp_fft /= np.max(exp_fft)
 
 ax.plot(freqs, fftplot, label="Simulation")
-ax.plot(exp_freqs, exp_fft / np.max(exp_fft), label="Experiment", ls="--", color="k")
-N_AVG = 25
-fftplot_avg = np.convolve(fftplot, np.ones(N_AVG)/N_AVG, mode='same')
-ax.plot(freqs, fftplot_avg, label="Average", ls="--")
+ax.plot(exp_freqs, exp_fft , label="Experiment", ls="--", color="k")
 
+#N_AVG = 35
+#fftplot_avg = np.convolve(fftplot, np.ones(N_AVG)/N_AVG, mode='same')
+#ax.plot(freqs, fftplot_avg, label="Average", ls="--")
 
+peaks = [1, 2.67, 4.2, 5.6, 6.85, 8.3, 9.25]
+for peak in peaks:
+    ax.axvline(peak, ls="--", c="gray")
 
 ax.legend(loc="upper right")
+ax.set_yscale("log")
+ax.set_xlim(0, MAX_FREQ)
+ax.set_ylim(1e-8, 2)
 
 fig.tight_layout()
 

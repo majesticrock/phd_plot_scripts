@@ -8,7 +8,7 @@ fig, ax = plt.subplots()
 
 SYSTEM = 'single_peak20'
 main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "gap.json.gz",
-                    **lattice_cut_params(N=4000, 
+                    **lattice_cut_params(N=10000, 
                                          g=2,
                                          U=0, 
                                          E_F=-0.5,

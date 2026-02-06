@@ -10,11 +10,11 @@ def linear_model(T, m, b):
 
 fig, (ax, ax_ratio) = plt.subplots(nrows=2, sharex=True)
 
-SYSTEM = 'bcc'
+SYSTEM = 'single_peak30'
 OMEGA_D=0.02
 N=10000
 U=0.0
-E_F=-0.2
+E_F=-0.5
 
 main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", 
                    condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')

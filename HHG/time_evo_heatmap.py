@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mc
 
-import path_appender
-path_appender.append()
+import mrock_centralized_scripts.path_appender as ap
+ap.append()
 from get_data import *
 from legend import *
 
