@@ -1,15 +1,15 @@
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
+import mrock_centralized_scripts.LatticeHeatmapPlotter as hp
 from get_data import *
-import HeatmapPlotter as hp
 from legend import *
 import matplotlib.pyplot as plt
 
 N=16000
 OMEGA_D=0.02
 E_F=-0.5
-DOS="fcc"
-U=0
+DOS="bcc"
+U=0.1
 n_mode = 0
 
 all_data = load_pickle(f"lattice_cut/{DOS}/N={N}", "resolvents.pkl")

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
 from matplotlib import colors
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 import continued_fraction_pandas as cf
 
@@ -76,7 +76,7 @@ class HeatmapPlotter:
         self.fig.savefig(filename)
 
 
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
 import concurrent.futures

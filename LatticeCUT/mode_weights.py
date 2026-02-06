@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from legend import *
 import string

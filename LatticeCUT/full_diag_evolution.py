@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
 
-import FullDiagPurger as fdp
+import mrock_centralized_scripts.FullDiagPurger as fdp
 
 PICK = 2
 SYSTEM = 'fcc'

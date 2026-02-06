@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
-from create_figure import *
-import FullDiagPurger as fdp
+from mrock_centralized_scripts.create_figure import *
+import mrock_centralized_scripts.FullDiagPurger as fdp
 
 PICK = 0
 N = 16000

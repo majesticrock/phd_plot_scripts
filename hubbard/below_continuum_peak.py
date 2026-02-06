@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 import resolvent_peak as rp
 import continued_fraction as cf

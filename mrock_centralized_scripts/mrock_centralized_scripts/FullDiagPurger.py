@@ -158,8 +158,8 @@ class FullDiagPurger:
         
     def integral_amplitude(self, which):
         if which < len(self.amplitude_eigenvectors):
-            pc = (np.sum(self.amplitude_eigenvectors[which][:self.N // 2]**2)          )
-            n  = (np.sum(self.amplitude_eigenvectors[which][self.N:3 * self.N // 2]**2))
+            pc = np.sqrt(np.sum(self.amplitude_eigenvectors[which][:self.N // 2]**2)          )
+            n  = np.sqrt(np.sum(self.amplitude_eigenvectors[which][self.N:3 * self.N // 2]**2))
             #print(f"Pair creation integral: {pc}\nOccupation integral: {n}")
             #print(f"Combined: {pc + n}")
             return pc, n

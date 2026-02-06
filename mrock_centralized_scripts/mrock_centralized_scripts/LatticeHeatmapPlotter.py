@@ -3,22 +3,22 @@ import pandas as pd
 import string
 from scipy.signal import find_peaks
 
-import __path_appender as __ap
+from . import path_appender as __ap
 __ap.append()
 import continued_fraction_pandas as cf
 import spectral_peak_analyzer as spa
 from legend import *
 from matplotlib import ticker
 
-from create_figure import *
+from .create_figure import create_normal_figure, create_large_figure
 from make_panels_touch import make_panels_touch
 
-CBAR_MAX = 20
-CBAR_EXP = 2
+CUT_OFF_EXP = -2
+CUT_OFF = 10**CUT_OFF_EXP
 
 # Settings the importer
-G_MAX_LOAD = 3.0
-G_MAX_PLOT = 3.
+G_MAX_LOAD = 3
+G_MAX_PLOT = 2.49
 
 __BEGIN_OFFSET__ = 2e-3
 __RANGE__ = 2e-3
@@ -88,7 +88,7 @@ class HeatmapPlotter:
                  energy_range=(1e-10, 2.5), scale_energy_by_gaps=False, cf_ignore=BaseCFIgnore()):
         self.data_frame = data_frame_param.sort_values(parameter_name).reset_index(drop=True)
         
-        self.y = np.linspace(energy_range[0], energy_range[1], 10000) # meV
+        self.y = np.linspace(energy_range[0], energy_range[1], 1000) # meV
         self.x = (self.data_frame[parameter_name]).to_numpy()
         self.scale_energy_by_gaps = scale_energy_by_gaps
         self.resolvents = [cf.ContinuedFraction(pd_row, 
@@ -104,6 +104,11 @@ class HeatmapPlotter:
         self.zlabel = zlabel
         self.xscale = xscale
         self.yscale = yscale
+        
+        self.data_dict = {
+            "g": self.x,
+            "omega": self.y
+        }
 
     def __scale_if__(self, x, i):
         if self.scale_energy_by_gaps:
@@ -255,14 +260,11 @@ class HeatmapPlotter:
         
         return __result
 
-    def compute_peaks(self):
-        higgs_cpp_results = [ resolvent.classify_bound_states("amplitude_SC", weight_domega=1e-8) 
+    def compute_phase_peaks(self):
+        phase_cpp_results = [ resolvent.classify_bound_states("phase_SC", 
+                                                              weight_domega=1e-8, 
+                                                              is_phase_peak=is_phase_peak) 
                                 for resolvent in self.resolvents ]
-        phase_cpp_results = [ resolvent.classify_bound_states("phase_SC",     weight_domega=1e-8, n_scan=30000, is_phase_peak=is_phase_peak) 
-                                for resolvent in self.resolvents ]
-        
-        __higgs_peak_positions = [ [data[0] for data in cpp_result] for cpp_result in higgs_cpp_results ]
-        __higgs_peak_weights   = [ [data[1] for data in cpp_result] for cpp_result in higgs_cpp_results ]
         
         __phase_peak_positions = [ [data[0] for data in cpp_result] for cpp_result in phase_cpp_results ]
         __phase_peak_weights   = [ [data[1] for data in cpp_result] for cpp_result in phase_cpp_results ]
@@ -283,7 +285,16 @@ class HeatmapPlotter:
             __phase_peak_positions[i][0] = __phase_result.position
             __phase_peak_weights[i][0]   = __phase_result.weight
         
-        return (__higgs_peak_positions, __higgs_peak_weights, __phase_peak_positions, __phase_peak_weights)
+        return (__phase_peak_positions, __phase_peak_weights)
+
+    def compute_higgs_peaks(self):
+        higgs_cpp_results = [ resolvent.classify_bound_states("amplitude_SC", weight_domega=1e-8) 
+                                for resolvent in self.resolvents ]
+
+        __higgs_peak_positions = [ [data[0] for data in cpp_result] for cpp_result in higgs_cpp_results ]
+        __higgs_peak_weights   = [ [data[1] for data in cpp_result] for cpp_result in higgs_cpp_results ]
+        
+        return (__higgs_peak_positions, __higgs_peak_weights)
 
     def __remove_data_below_continuum__(self, spectral_functions):
         if not self.scale_energy_by_gaps:
@@ -293,16 +304,15 @@ class HeatmapPlotter:
             for i in range(self.N_data):
                 spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
 
-    def plot(self, axes, cmap, labels=True):
-        spectral_functions_higgs = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, "amplitude_SC") for __i, res in enumerate(self.resolvents)]).transpose()
-        spectral_functions_phase = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, "phase_SC")     for __i, res in enumerate(self.resolvents)]).transpose()
+    def plot_one(self, ax, cmap, which="amplitude_SC"):
+        spectral_functions = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, which) for __i, res in enumerate(self.resolvents)]).transpose()
 
-        (__higgs_peak_positions, __higgs_peak_weights, __phase_peak_positions, __phase_peak_weights) = self.compute_peaks() 
-
-        self.HiggsModes = pd.DataFrame([ {
+        if which == "amplitude_SC":
+            _peak_positions, _peak_weights = self.compute_higgs_peaks()
+            self.HiggsModes = pd.DataFrame([ {
                 "resolvent_type": "Higgs",
-                "energies": __higgs_peak_positions[i],
-                "weights": __higgs_peak_weights[i],
+                "energies": _peak_positions[i],
+                "weights": _peak_weights[i],
                 "Delta_max": self.data_frame["Delta_max"].iloc[i],
                 "true_gap": self.true_gaps[i],
                 "g": self.data_frame["g"].iloc[i],
@@ -314,10 +324,12 @@ class HeatmapPlotter:
                 "U": self.data_frame["U"].iloc[i],
                 "dos_name" : self.data_frame["dos_name"]
             } for i in range(self.N_data) ])
-        self.PhaseModes = pd.DataFrame([ {
+        else:
+            _peak_positions, _peak_weights = self.compute_phase_peaks()
+            self.PhaseModes = pd.DataFrame([ {
                 "resolvent_type": "Phase",
-                "energies": __phase_peak_positions[i],
-                "weights": __phase_peak_weights[i],
+                "energies": _peak_positions[i],
+                "weights": _peak_weights[i],
                 "Delta_max": self.data_frame["Delta_max"].iloc[i],
                 "true_gap": self.true_gaps[i],
                 "g": self.data_frame["g"].iloc[i],
@@ -330,45 +342,40 @@ class HeatmapPlotter:
                 "dos_name" : self.data_frame["dos_name"]
             } for i in range(self.N_data)])
 
-        self.__remove_data_below_continuum__(spectral_functions_higgs)
-        self.__remove_data_below_continuum__(spectral_functions_phase)
-
+        self.__remove_data_below_continuum__(spectral_functions)
         ## Note, that the phase peak at omega=0 is the derivative of a delta peak
         ## while the other peaks below the continuum are proper delta peaks
         for i in range(self.N_data):
-            for peak_position, weight in zip(__higgs_peak_positions[i], __higgs_peak_weights[i]):
+            for peak_position, weight in zip(_peak_positions[i], _peak_weights[i]):
                 if is_phase_peak(peak_position):
                     summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
                 else:
                     summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
                 mask = summand > 1e-6
-                spectral_functions_higgs[mask, i] += summand[mask]
-            for peak_position, weight in zip(__phase_peak_positions[i], __phase_peak_weights[i]):
-                if is_phase_peak(peak_position):
-                    summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
-                else:
-                    summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
-                mask = summand > 1e-6
-                spectral_functions_phase[mask, i] += summand[mask]
+                spectral_functions[mask, i] += summand[mask]
         
-        levels = np.power(10, np.linspace(-2, 3, 51, endpoint=True))
- 
-        spectral_functions_higgs = np.where(spectral_functions_higgs <= 1e-2, 1e-2, spectral_functions_higgs)
-        spectral_functions_phase = np.where(spectral_functions_phase <= 1e-2, 1e-2, spectral_functions_phase)
+                
+        levels = np.power(10, np.linspace(CUT_OFF_EXP, 3, 51, endpoint=True))
+        spectral_functions = np.where(spectral_functions <= 1e-10, 1e-10, spectral_functions)
         
-        contour_higgs = axes[0].contourf(self.x, self.y, spectral_functions_higgs, cmap=cmap, locator=ticker.LogLocator(), levels=levels, extend='both', zorder=-20)
-        contour_phase = axes[1].contourf(self.x, self.y, spectral_functions_phase, cmap=cmap, locator=ticker.LogLocator(), levels=levels, extend='both', zorder=-20)
-        contour_higgs.set_edgecolor('face')
-        contour_phase.set_edgecolor('face')
+        contour = ax.contourf(self.x, self.y, spectral_functions, cmap=cmap, 
+                              locator=ticker.LogLocator(), levels=levels, extend='both', zorder=-20)
+        contour.set_edgecolor('face')
         
-        for ax in axes:
-            if not self.scale_energy_by_gaps:
-                ax.plot(self.x, self.true_gaps, color="cyan", ls=":")
-            ax.set_rasterization_zorder(-10)
-            ax.set_ylim(0., max(self.y))
-            ax.set_xscale(self.xscale)
-            ax.set_yscale(self.yscale)
+        if not self.scale_energy_by_gaps:
+            ax.plot(self.x, self.true_gaps, color="cyan", ls=":")
+        ax.set_rasterization_zorder(-10)
+        ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale)
+        
+        self.data_dict[f"spectral_functions_{'higgs' if which == 'amplitude_SC' else 'phase'}"] = spectral_functions
+        
+        return contour
 
+    def plot(self, axes, cmap, labels=True):
+        contour_higgs = self.plot_one(axes[0], cmap, "amplitude_SC")
+        self.plot_one(axes[1], cmap, "phase_SC")
+        
         if labels:
             if self.scale_energy_by_gaps:
                 axes[0].set_ylabel("Higgs\n " + legend(r"\omega / (2 \Delta_\mathrm{max})"))
@@ -388,10 +395,10 @@ def __get_cf_ignore__(cf_ignore, i):
     return cf_ignore
 
 def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False, 
-                cmap='inferno', cbar_max=CBAR_MAX, 
+                cmap='inferno', 
                 energy_range=None, 
                 fig=None, axes=None, 
-                cf_ignore=BaseCFIgnore()):
+                cf_ignore=BaseCFIgnore(),):
     if energy_range is None:
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
@@ -399,10 +406,6 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
         __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.6}
         fig, axes = create_large_figure(**__figkwargs) if len(tasks) > 2 else create_normal_figure(**__figkwargs)
         fig.subplots_adjust(wspace=0.05, hspace=0.05)
-        
-    ticks = [0]
-    while ticks[-1] < 0.95 * cbar_max:
-        ticks.append(ticks[-1] + 0.1 * cbar_max)
     
     plotters = []
     if len(tasks) > 1:
@@ -419,7 +422,8 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                                            cf_ignore=__get_cf_ignore__(cf_ignore, i)))
             contour_for_colorbar = plotters[-1].plot(axes[:, i], labels=not bool(i), cmap=cmap)
             
-        cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), orientation='vertical', fraction=0.1, pad=0.025, extend='max', ticks=ticks)
+        cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), 
+                            orientation='vertical', fraction=0.1, pad=0.025, extend='max')
     else:
         for i, ax in enumerate(axes):
             ax.annotate(
@@ -433,14 +437,15 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                                            cf_ignore=__get_cf_ignore__(cf_ignore, i)))
             contour_for_colorbar = plotters[-1].plot(axes[:], labels=not bool(i), cmap=cmap)
 
-        cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), orientation='vertical', fraction=0.1, pad=0.025, extend='max', ticks=ticks)
+        cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), 
+                            orientation='vertical', fraction=0.1, pad=0.025, extend='max')
     
     for ax in axes.ravel().tolist():
         ax.set_ylim(energy_range[0] + 1e-8, energy_range[1])
         ax.set_xlim(0, G_MAX_PLOT)
     
     cbar.locator = ticker.LogLocator(10)
-    cbar.set_ticks(cbar.locator.tick_values(1e-1, 1e2))
+    cbar.set_ticks(cbar.locator.tick_values(10 * CUT_OFF, 1e2))
     cbar.minorticks_off()
     cbar.set_label(legend(r'\mathcal{A}(\omega) / W^{-1}'))
     

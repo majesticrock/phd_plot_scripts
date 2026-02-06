@@ -4,8 +4,8 @@ from scipy.interpolate import interp1d
 
 import current_density_time as cdt
 
-import __path_appender
-__path_appender.append()
+import path_appender
+path_appender.append()
 from get_data import *
 from legend import *
 

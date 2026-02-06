@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mc
 
-import __path_appender
-__path_appender.append()
+import path_appender
+path_appender.append()
 from get_data import *
 from legend import *
 

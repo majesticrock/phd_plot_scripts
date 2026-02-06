@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 import current_density_fourier as cdf
 
-import __path_appender
-__path_appender.append()
+import path_appender
+path_appender.append()
 from get_data import *
 from legend import *
 

@@ -3,7 +3,7 @@ import numpy as np
 import gzip
 from gftool import sc_dos
 
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 import continued_fraction as cf
 

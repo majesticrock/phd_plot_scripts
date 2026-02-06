@@ -1,17 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
 
 fig, ax = plt.subplots()
 
-SYSTEM = 'sc'
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
-                    **lattice_cut_params(N=16000, 
-                                         g=0.3,
+SYSTEM = 'single_peak20'
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "gap.json.gz",
+                    **lattice_cut_params(N=4000, 
+                                         g=2,
                                          U=0, 
-                                         E_F=0,
+                                         E_F=-0.5,
                                          omega_D=0.02))
 
 energy_space = main_df['energies']

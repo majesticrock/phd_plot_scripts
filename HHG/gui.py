@@ -4,8 +4,8 @@ from tkinter import filedialog, ttk
 
 import pandas as pd
 
-import __path_appender
-__path_appender.append()
+import path_appender
+path_appender.append()
 from get_data import *
 import current_density_fourier
 import current_density_time

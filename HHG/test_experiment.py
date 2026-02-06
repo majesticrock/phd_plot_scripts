@@ -8,8 +8,8 @@ from scipy.interpolate import interp1d
 import current_density_time as cdt
 import current_density_fourier as cdf
 
-import __path_appender
-__path_appender.append()
+import path_appender
+path_appender.append()
 from get_data import *
 from legend import *
 

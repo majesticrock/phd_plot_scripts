@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 import get_data
-from create_figure import *
+from mrock_centralized_scripts.create_figure import *
 
 N=10000
 U=0.0

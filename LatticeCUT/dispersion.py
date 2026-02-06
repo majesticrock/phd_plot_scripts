@@ -1,5 +1,5 @@
 import numpy as np
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
 import matplotlib.pyplot as plt

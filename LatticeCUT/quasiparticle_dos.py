@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
 from scipy.interpolate import CubicSpline
 import numpy as np
 from find_roots import *
-from create_figure import *
+from mrock_centralized_scripts.create_figure import *
 
 
 N       = 16000

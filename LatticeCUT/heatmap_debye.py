@@ -1,7 +1,7 @@
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
-import HeatmapPlotter as hp
+import mrock_centralized_scripts.LatticeHeatmapPlotter as hp
 from legend import *
 import matplotlib.pyplot as plt
 

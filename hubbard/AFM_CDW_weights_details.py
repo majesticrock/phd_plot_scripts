@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import __path_appender as __ap
+import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from iterate_containers import naming_scheme
 from extract_key import *
