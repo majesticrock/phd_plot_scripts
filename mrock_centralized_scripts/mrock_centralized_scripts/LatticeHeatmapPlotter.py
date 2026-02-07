@@ -398,13 +398,16 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                 cmap='inferno', 
                 energy_range=None, 
                 fig=None, axes=None, 
-                cf_ignore=BaseCFIgnore(),):
+                cf_ignore=BaseCFIgnore(),
+                figure_generator=None):
     if energy_range is None:
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
         assert(axes is None)
         __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.6}
-        fig, axes = create_large_figure(**__figkwargs) if len(tasks) > 2 else create_normal_figure(**__figkwargs)
+        if figure_generator is None:
+            figure_generator = create_large_figure if len(tasks) > 2 else create_normal_figure
+        fig, axes = figure_generator(**__figkwargs)
         fig.subplots_adjust(wspace=0.05, hspace=0.05)
     
     plotters = []
