@@ -64,12 +64,12 @@ class FullDiagPurger:
         correct_amplitude_indices.sort()
         correct_phase_indices.sort()
         
-        self.amplitude_eigenvalues        = np.array([ temp_amplitude_evs[i]     for i in correct_amplitude_indices ])
-        self.amplitude_weights            = np.array([ temp_amplitude_weights[i] for i in correct_amplitude_indices ])
+        self.amplitude_eigenvalues  = np.array([ temp_amplitude_evs[i]     for i in correct_amplitude_indices ])
+        self.amplitude_weights      = np.array([ temp_amplitude_weights[i] for i in correct_amplitude_indices ])
         self.amplitude_eigenvectors = np.array([ temp_amplitude_vectors[i] for i in correct_amplitude_indices ])
         
-        self.phase_eigenvalues        = np.array([ temp_phase_evs[i]     for i in correct_phase_indices ])
-        self.phase_weights            = np.array([ temp_phase_weights[i] for i in correct_phase_indices ])
+        self.phase_eigenvalues  = np.array([ temp_phase_evs[i]     for i in correct_phase_indices ])
+        self.phase_weights      = np.array([ temp_phase_weights[i] for i in correct_phase_indices ])
         self.phase_eigenvectors = np.array([ temp_phase_vectors[i] for i in correct_phase_indices ])
         
         for i in range(len(self.amplitude_eigenvectors)):
@@ -84,12 +84,12 @@ class FullDiagPurger:
         glimmering_amplitude_indices.sort()
         glimmering_phase_indices.sort()
         
-        self.glimmering_amplitude_eigenvalues        = np.array([ temp_amplitude_evs[i]     for i in glimmering_amplitude_indices ])
-        self.glimmering_amplitude_weights            = np.array([ temp_amplitude_weights[i] for i in glimmering_amplitude_indices ])
+        self.glimmering_amplitude_eigenvalues  = np.array([ temp_amplitude_evs[i]     for i in glimmering_amplitude_indices ])
+        self.glimmering_amplitude_weights      = np.array([ temp_amplitude_weights[i] for i in glimmering_amplitude_indices ])
         self.glimmering_amplitude_eigenvectors = np.array([ temp_amplitude_vectors[i] for i in glimmering_amplitude_indices ])
         
-        self.glimmering_phase_eigenvalues        = np.array([ temp_phase_evs[i]     for i in glimmering_phase_indices ])
-        self.glimmering_phase_weights            = np.array([ temp_phase_weights[i] for i in glimmering_phase_indices ]) 
+        self.glimmering_phase_eigenvalues  = np.array([ temp_phase_evs[i]     for i in glimmering_phase_indices ])
+        self.glimmering_phase_weights      = np.array([ temp_phase_weights[i] for i in glimmering_phase_indices ]) 
         self.glimmering_phase_eigenvectors = np.array([ temp_phase_vectors[i] for i in glimmering_phase_indices ])
         
         for i in range(len(self.glimmering_amplitude_eigenvectors)):
@@ -158,8 +158,10 @@ class FullDiagPurger:
         
     def integral_amplitude(self, which):
         if which < len(self.amplitude_eigenvectors):
-            pc = np.sqrt(np.sum(self.amplitude_eigenvectors[which][:self.N // 2]**2)          )
-            n  = np.sqrt(np.sum(self.amplitude_eigenvectors[which][self.N:3 * self.N // 2]**2))
+            pc = np.sum(self.amplitude_eigenvectors[which][:self.N]**2)
+            n  = np.sum(self.amplitude_eigenvectors[which][self.N:]**2)
             #print(f"Pair creation integral: {pc}\nOccupation integral: {n}")
             #print(f"Combined: {pc + n}")
             return pc, n
+        else:
+            raise ValueError(f"Requested integral for amplitude mode {which}, but only {len(self.amplitude_eigenvectors)} available.")

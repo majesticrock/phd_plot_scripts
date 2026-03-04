@@ -6,12 +6,12 @@ from get_data import *
 
 fig, ax = plt.subplots()
 
-SYSTEM = 'single_peak20'
-main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "gap.json.gz",
-                    **lattice_cut_params(N=10000, 
-                                         g=2,
+SYSTEM = 'sc'
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=1.4,
                                          U=0, 
-                                         E_F=-0.5,
+                                         E_F=0,
                                          omega_D=0.02))
 
 energy_space = main_df['energies']
