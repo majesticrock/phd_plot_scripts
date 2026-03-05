@@ -7,6 +7,7 @@ from get_data import *
 N = 200
 K_Z = 0.
 SYSTEM = 'bcc'
+E_F = -0.5
 
 def dispersion(x, y, z):
     if SYSTEM == 'sc':
@@ -20,13 +21,13 @@ base_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
                     **lattice_cut_params(N=16000, 
                                          g=1.5,
                                          U=0, 
-                                         E_F=-0.5,
+                                         E_F=E_F,
                                          omega_D=0.02))
 main_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
                     **lattice_cut_params(N=16000, 
                                          g=2,
                                          U=0, 
-                                         E_F=-0.5,
+                                         E_F=E_F,
                                          omega_D=0.02))
 from scipy.interpolate import interp1d
 base_gaps = interp1d(base_df['energies'], base_df['Delta'], assume_sorted=True, fill_value='extrapolate', bounds_error=False)
@@ -34,24 +35,29 @@ enh_gaps  = interp1d(main_df['energies'], main_df['Delta'], assume_sorted=True, 
 
 X, Y = np.meshgrid(np.linspace(-2, 2, N), np.linspace(-2, 2, N))
 
-fig, axes = plt.subplots(nrows=2, sharex=True, sharey=True, figsize=(6.4, 9.6))
+fig, axes = plt.subplots(nrows=2, sharex=True, sharey=True, figsize=(6.4, 9.6), layout="constrained")
 Z = enh_gaps(dispersion(X, Y, K_Z))
 levels = np.linspace(np.min(main_df["Delta"]), np.max(main_df["Delta"]), 61)
-cont = axes[1].contourf(X, Y, Z, cmap="viridis", levels=levels)
+cont = axes[1].contourf(X, Y, Z, cmap="afmhot_r", levels=levels)
 
 Z = base_gaps(dispersion(X, Y, K_Z))
-axes[0].contourf(X, Y, Z, cmap="viridis", levels=levels)
+axes[0].contourf(X, Y, Z, cmap="afmhot_r", levels=levels)
+
+for ax in axes:
+    ax.plot([-2, 0, 2, 0, -2], [0, -2, 0, 2, 0], c="k", ls="--")
 
 cbar = fig.colorbar(cont, ax=axes)
 cbar.set_label("$\\Delta / W$")
-axes[0].set_xlabel("$k_x / \\pi$")
+cbar.set_ticks([0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16])
+
+axes[1].set_xlabel("$k_x / \\pi$")
 axes[0].set_ylabel("$g=1.5$\n$k_y / \\pi$")
 axes[1].set_ylabel("$g=2$\n$k_y / \\pi$")
 
 
 ############# high symmetry
 def qp_dispersion(epsilons, gaps):
-    return np.sqrt(epsilons**2 + gaps(epsilons)**2)
+    return np.sqrt((epsilons - E_F)**2 + gaps(epsilons)**2)
 
 
 GAMMA = np.array([0, 0, 0])
@@ -80,7 +86,7 @@ ax_hs.set_xticks([0,1,2,3,4], [r"$\Gamma$", r"$N$", r"$H$", r"$\Gamma$", r"$P$"]
 ax_hs.set_ylabel(r"$E / W$")
 ax_hs.set_xlabel(r"$k$")
 
-
+ax_hs.set_ylim(0, None)
 
 
 main_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',

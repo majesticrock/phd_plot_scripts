@@ -28,14 +28,15 @@ for j, system in enumerate(systems):
                                     omega_D=0.02)
         main_df = load_panda("lattice_cut", f"./{system}", "full_diagonalization.json.gz", print_date=False, **params)
         purger = fdp.FullDiagPurger(main_df, epsilon)
-        print(f"System: {system}, g: {g}")
         pair_creation_integrals[j, i], occupation_integrals[j, i] = purger.integral_amplitude(0)
 
+markers = ["o", "s", "D"]
 for i in range(3):
     norms = pair_creation_integrals[i] + occupation_integrals[i]
-    ax.plot(Gs, pair_creation_integrals[i] / norms, c=f"C{i}")
-    ax.plot(Gs, occupation_integrals[i]    / norms, c=f"C{i}", ls="--")
-
+    ax.plot(Gs, pair_creation_integrals[i] / norms, c=f"C{i}", marker=markers[i], markevery=(0. if i !=1 else 0.1, 0.2), markersize=8)
+    ax.plot(Gs, occupation_integrals[i]    / norms, c=f"C{i}", marker=markers[i], markevery=(0. if i !=1 else 0.1, 0.2), markersize=8, ls="--")
+    
+ax.set_ylim(0, 1)
 ax.set_xlabel("$g$")
 ax.set_ylabel("Total contribution")
 from color_and_linestyle_legends import color_and_linestyle_legends
