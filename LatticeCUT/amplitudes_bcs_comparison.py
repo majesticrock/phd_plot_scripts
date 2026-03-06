@@ -20,6 +20,8 @@ params = lattice_cut_params(N=N,
 main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
 gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
 
+print(gap_df["Delta"].max())
+
 fig, all_axes = plt.subplots(nrows=3, ncols=2, sharex=True)
 axes, axes_bcs = all_axes.T
 fig.subplots_adjust(hspace=0)
@@ -30,7 +32,7 @@ axes[-1].set_xlabel(r"$\varepsilon - E_\mathrm{F}$")
 axes[0].set_xlim(-0.05, 0.05)
 
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - E_F)
-purger.plot_amplitude(axes[:2], label="Result")
+purger.plot_amplitude(axes[:2], label="Result", combined_norm=False)
 purger.plot_phase(axes[2]     , label="Result")
 
 eps = np.linspace(-1, 1, N) - E_F
@@ -54,7 +56,7 @@ gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
 
 
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - E_F)
-purger.plot_amplitude(axes_bcs[:2], label="Result")
+purger.plot_amplitude(axes_bcs[:2], label="Result", combined_norm=False)
 purger.plot_phase(axes_bcs[2]     , label="Result")
 
 eps = np.linspace(-1, 1, N) - E_F
