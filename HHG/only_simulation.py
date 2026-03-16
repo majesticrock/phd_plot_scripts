@@ -12,15 +12,15 @@ FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 HBAR = 0.6582119569509065
 
 params = {
-    "DIR": "test",
+    "DIR": "cascade_16",
     "MODEL": "PiFlux",
-    "v_F": 1e5,
-    "W": 200,
+    "v_F": 2e6,
+    "W": 600,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 10,
-    "T_AVE":  50
+    "TAU_DIAG": 5,
+    "T_AVE":  28
 }
 
 

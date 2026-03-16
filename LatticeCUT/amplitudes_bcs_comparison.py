@@ -72,6 +72,17 @@ test_num = -Delta**2 / (eps * E)
 test_num /= np.max(test_num)
 axes_bcs[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k \varepsilon_k)$")
 
+###########################################################################
+test_pc = (Delta * eps**2 / E**3)
+test_pc /= np.max(test_pc)
+axes_bcs[0].plot(eps, test_pc, c="k", ls=":", label=r"$\Delta_k \varepsilon^2 / E_k^3$")
+axes_bcs[2].plot(eps, test_pc, c="k", ls=":")
+
+#test_num = -Delta**2 / (eps * E)
+#test_num /= np.max(test_num)
+#axes_bcs[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k \varepsilon_k)$")
+###########################################################################
+
 axes_bcs[0].set_title("BCS")
 axes_bcs[0].legend(loc="upper right")
 axes_bcs[1].legend(loc="upper right")
