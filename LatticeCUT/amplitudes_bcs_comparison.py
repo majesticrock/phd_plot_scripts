@@ -10,7 +10,7 @@ SYSTEM = 'sc'
 N=16000
 E_F=0.0
 OMEGA_D = 0.02
-G = 0.3
+G = 1
 DIR = f"./{SYSTEM}"
 params = lattice_cut_params(N=N, 
                             g=G,
@@ -19,8 +19,6 @@ params = lattice_cut_params(N=N,
                             omega_D=OMEGA_D)
 main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
 gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
-
-print(gap_df["Delta"].max())
 
 fig, all_axes = plt.subplots(nrows=3, ncols=2, sharex=True)
 axes, axes_bcs = all_axes.T
@@ -31,6 +29,7 @@ axes[2].set_ylabel("Phase")
 axes[-1].set_xlabel(r"$\varepsilon - E_\mathrm{F}$")
 axes[0].set_xlim(-0.05, 0.05)
 
+print("CUT")
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - E_F)
 purger.plot_amplitude(axes[:2], label="Result", combined_norm=False)
 purger.plot_phase(axes[2]     , label="Result")
@@ -44,12 +43,13 @@ test_pc /= np.max(test_pc)
 axes[0].plot(eps, test_pc, c="k", ls="--", label=r"$\Delta_k^2 / E_k^2$")
 axes[2].plot(eps, test_pc, c="k", ls="--")
 
-test_num = -Delta**2 / (eps * E)
+test_num = -Delta**2 / (eps * E**2)
 test_num /= np.max(test_num)
-axes[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k \varepsilon_k)$")
+axes[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
 axes[0].set_title("CUT")
 
 ###########################################################################
+print("BCS")
 DIR = f"bcs/{SYSTEM}"
 main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
 gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
@@ -68,19 +68,10 @@ test_pc /= np.max(test_pc)
 axes_bcs[0].plot(eps, test_pc, c="k", ls="--", label=r"$\Delta_k^2 / E_k^2$")
 axes_bcs[2].plot(eps, test_pc, c="k", ls="--")
 
-test_num = -Delta**2 / (eps * E)
+test_num = -Delta**2 / (eps * E**2)
 test_num /= np.max(test_num)
-axes_bcs[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k \varepsilon_k)$")
+axes_bcs[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
 
-###########################################################################
-test_pc = (Delta * eps**2 / E**3)
-test_pc /= np.max(test_pc)
-axes_bcs[0].plot(eps, test_pc, c="k", ls=":", label=r"$\Delta_k \varepsilon^2 / E_k^3$")
-axes_bcs[2].plot(eps, test_pc, c="k", ls=":")
-
-#test_num = -Delta**2 / (eps * E)
-#test_num /= np.max(test_num)
-#axes_bcs[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k \varepsilon_k)$")
 ###########################################################################
 
 axes_bcs[0].set_title("BCS")
