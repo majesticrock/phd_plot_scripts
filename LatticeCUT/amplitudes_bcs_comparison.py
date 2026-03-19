@@ -30,9 +30,10 @@ axes[-1].set_xlabel(r"$\varepsilon - E_\mathrm{F}$")
 axes[0].set_xlim(-0.05, 0.05)
 
 print("CUT")
+axes[0].set_title("CUT")
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - E_F)
-purger.plot_amplitude(axes[:2], label="Result", combined_norm=False)
-purger.plot_phase(axes[2]     , label="Result")
+purger.plot_amplitude(axes[:2], label="Result", combined_norm=False, which=0)
+purger.plot_phase(axes[2]     , label="Result", which=0)
 
 eps = np.linspace(-1, 1, N) - E_F
 Delta = gap_df["Delta"]
@@ -45,11 +46,20 @@ axes[2].plot(eps, test_pc, c="k", ls="--")
 
 test_num = -Delta**2 / (eps * E**2)
 test_num /= np.max(test_num)
-axes[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
-axes[0].set_title("CUT")
+axes[1].plot(eps, test_num, c="k", ls="--", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
+
+
+test_pc = -purger.amplitude_eigenvectors[0][N:] * eps / np.where(Delta != 0, Delta, np.inf)
+test_pc /= np.max(np.abs(test_pc))
+axes[0].plot(eps, test_pc, c="C1", ls="-.", label=r"Anderson")
+
+test_num = -purger.amplitude_eigenvectors[0][:N] * Delta / np.where(eps != 0, eps, np.inf)
+test_num /= np.max(np.abs(test_num))
+axes[1].plot(eps, test_num, c="C1", ls="-.", label=r"Anderson")
 
 ###########################################################################
 print("BCS")
+axes_bcs[0].set_title("BCS")
 DIR = f"bcs/{SYSTEM}"
 main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
 gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
@@ -70,11 +80,20 @@ axes_bcs[2].plot(eps, test_pc, c="k", ls="--")
 
 test_num = -Delta**2 / (eps * E**2)
 test_num /= np.max(test_num)
-axes_bcs[1].plot(eps, test_num, c="k", ls="-.", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
+axes_bcs[1].plot(eps, test_num, c="k", ls="--", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
+
+
+test_pc = -purger.amplitude_eigenvectors[0][N:] * eps / np.where(Delta != 0, Delta, np.inf)
+test_pc /= np.max(np.abs(test_pc))
+axes_bcs[0].plot(eps, test_pc, c="C1", ls="-.", label=r"Anderson")
+
+test_num = -purger.amplitude_eigenvectors[0][:N] * Delta / np.where(eps != 0, eps, np.inf)
+test_num /= np.max(np.abs(test_num))
+axes_bcs[1].plot(eps, test_num, c="C1", ls="-.", label=r"Anderson")
 
 ###########################################################################
 
-axes_bcs[0].set_title("BCS")
+
 axes_bcs[0].legend(loc="upper right")
 axes_bcs[1].legend(loc="upper right")
 plt.show()
