@@ -24,7 +24,7 @@ FFT_TMAX = 9.0
 
 # === Choose sweep parameter here ===
 sweep_param = "v_F"
-sweep_values = [1e6, 1.5e6, 2e6, 3e6]
+sweep_values = [ 2e6, 1e6, 1.5e6, 3e6]
 
 # Default parameters in one place
 PARAMS = {
@@ -50,7 +50,7 @@ def sech_distrubution(x, mu, gamma):
 def cos_dist(N):
     return (1. - np.cos(np.pi * np.linspace(0., 2., N, endpoint=True))) / 2
 
-def run_and_plot(ax, ax_fft, params, color, label=None):
+def run_and_plot(ax, ax_fft, params, color, label=None, data_norm=None):
     """Run one simulation with given params and plot results with a given color."""
 
     df_A = load_panda("HHG", f"{params['DIR']}/expA_laser/{params['MODEL']}", "current_density.json.gz", 
@@ -122,9 +122,12 @@ def run_and_plot(ax, ax_fft, params, color, label=None):
 
     fftplot = np.abs(rfft(signal_AB_u - plot_data_combined, n))**2
     label = f"{sweep_param}={params[sweep_param]}" if label is None else label
-    ax_fft.plot(freqs_scipy, fftplot[mask] / np.max(fftplot), color=color, label=label)
     
-    return main_df
+    if data_norm is None:
+        data_norm = np.max(fftplot)
+    ax_fft.plot(freqs_scipy, fftplot[mask] / data_norm, color=color, label=label)
+    
+    return main_df, data_norm
 
 
 # --- Figure setup ---
@@ -147,7 +150,10 @@ for i, val in enumerate(sweep_values):
     params = PARAMS.copy()
     params[sweep_param] = val  # override chosen parameter
     color = cmap(norm(val))
-    main_df = run_and_plot(ax, ax_fft, params, f"C{i}", f"amp={val / 2e6}")#, color)
+    if i == 0:
+        main_df, data_norm = run_and_plot(ax, ax_fft, params, f"black", f"amp={val / 2e6}")#, color)
+    else:
+        run_and_plot(ax, ax_fft, params, f"C{i - 1}", f"amp={val / 2e6}", data_norm=data_norm)
 
 times = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
 laser = np.gradient(main_df["laser_function"])

@@ -47,7 +47,7 @@ def create_frame(nrows=1, ylabel_list=None, **kwargs):
         ax.set_yscale("log")
         ax.set_xlabel(legend(r"\omega / \omega_\mathrm{L}"))
         if ylabel_list is None:
-            ax.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
+            ax.set_ylabel(legend(r"|\omega j(\omega)|^2", "normalized"))
         else:
             ax.set_ylabel(ylabel_list)
     else:
@@ -55,7 +55,7 @@ def create_frame(nrows=1, ylabel_list=None, **kwargs):
         for i, a in enumerate(ax):
             a.set_yscale("log")
             if ylabel_list is None:
-                a.set_ylabel(legend(r"|\omega j(\omega)|", "normalized"))
+                a.set_ylabel(legend(r"|\omega j(\omega)|^2", "normalized"))
             else:
                 a.set_ylabel(ylabel_list[i])
     fig.tight_layout()

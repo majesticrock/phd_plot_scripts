@@ -63,7 +63,7 @@ signal_A  = -np.gradient(np.convolve(df_A["current_density_time"], __kernel, mod
 signal_B  = -np.gradient(np.convolve(df_B["current_density_time"], __kernel, mode='same'))
 
 
-def plot_t0(ax, t0):
+def plot_t0(ax, t0, fft_norm=None, **plot_kwargs):
     main_df = load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MODEL']}", "current_density.json.gz", 
                          **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                       field_amplitude=1., photon_energy=1., 
@@ -104,18 +104,21 @@ def plot_t0(ax, t0):
     # --- Frequency-domain plots ---
     n = len(uniform_t_sim) * 8
     fftplot = np.abs(rfft(non_linear_signal, n))**2
-    fftplot /= np.max(fftplot)
+    if fft_norm is None:
+        fft_norm = np.max(fftplot)
     freqs = rfftfreq(n, dt_sim)
     
-    ax.plot(freqs, fftplot, label=f"${t0}$ fs")
+    ax.plot(freqs, fftplot / fft_norm, label=f"${t0}$ ps", **plot_kwargs)
+    return fft_norm
 
 # --- Figure setup ---
 fig, ax = cdf.create_frame(figsize=(8,8))
 for i in range(1, MAX_FREQ, 2):
     ax.axvline(i, color="gray", ls="--")
 
-for t0 in [0, 0.07, 0.14, 0.21, 0.28]:
-    plot_t0(ax, t0)
+fft_norm = plot_t0(ax, 0.0, c="black")
+for t0 in [0.07, 0.14, 0.21, 0.28]:
+    plot_t0(ax, t0, fft_norm)
 
 ax.legend(loc="upper right")
 ax.set_yscale("log")
