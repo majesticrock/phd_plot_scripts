@@ -34,20 +34,20 @@ for axes, G in zip(axes_2d, [0.3, 3.0]):
                                     U=0.0, 
                                     E_F=E_F,
                                     omega_D=0.02)
-        main_df = load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params)
+        main_df = load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params, print_date=False)
         purger = fdp.FullDiagPurger(main_df, epsilon)
 
-        gap_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz", **params)
+        gap_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz", **params, print_date=False)
         Delta = gap_df["Delta"]
 
         for PICK in range(min(len(purger.amplitude_eigenvalues), 4)):
             alpha = purger.amplitude_eigenvectors[PICK][:N]
-
-            ax.plot(epsilon, alpha / np.max(np.abs(alpha)), color=colors[PICK], label=f"{PICK+1}")
+            norm = np.max(np.abs(alpha))
+            ax.plot(epsilon, alpha / norm, color=colors[PICK], label=f"{PICK+1}")
 
             nu = purger.amplitude_eigenvectors[PICK][N:]
             anderson = -nu * epsilon / np.where(Delta != 0, Delta, np.inf)
-            ax.plot(epsilon, anderson / np.max(np.abs(anderson)), dashes=[3.5, 3.5], c="#009100", label=r"$-\nu \varepsilon / \Delta$" if PICK+1 == min(len(purger.amplitude_eigenvalues), 4) else None)
+            ax.plot(epsilon, anderson / norm, dashes=[3.5, 3.5], c="#009100", label=r"$-\nu \varepsilon / \Delta$" if PICK+1 == min(len(purger.amplitude_eigenvalues), 4) else None)
 
 axes_2d[-1,-1].legend(loc="lower right")
 axes_2d[0,0].set_xlim(-0.05, 0.05)
