@@ -48,6 +48,16 @@ for axes, G in zip(axes_2d, [0.3, 3.0]):
             nu = purger.amplitude_eigenvectors[PICK][N:]
             anderson = -nu * epsilon / np.where(Delta != 0, Delta, np.inf)
             ax.plot(epsilon, anderson / norm, dashes=[3.5, 3.5], c="#009100", label=r"$-\nu \varepsilon / \Delta$" if PICK+1 == min(len(purger.amplitude_eigenvalues), 4) else None)
+        
+        
+        if len(purger.phase_eigenvalues) > 1:
+            primary_phase = purger.phase_eigenvectors[0]
+            norm = np.sum(primary_phase*primary_phase)
+            
+            for PICK in range(1, len(purger.phase_eigenvalues)):
+                integral = np.sum(primary_phase * purger.phase_eigenvectors[PICK]) / norm
+                print(f"{SYSTEM}: (0-{PICK})\t = {integral}")
+
 
 axes_2d[-1,-1].legend(loc="lower right")
 axes_2d[0,0].set_xlim(-0.05, 0.05)
