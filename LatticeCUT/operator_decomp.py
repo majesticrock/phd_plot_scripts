@@ -12,7 +12,7 @@ OMEGA_D = 0.02
 OMEGA_D_UNIT = 2 * OMEGA_D
 epsilon = np.linspace(-1, 1, N) - E_F
 
-BCS = True
+BCS = False
 
 colors = [
     "#000000",
@@ -34,8 +34,8 @@ for ax in axes_2d_q.ravel():
 epsilon = np.linspace(-1, 1, N) - E_F
 
 def G_unit(g, dos, epsilon):
-    rho_tilde = np.sum(dos[np.abs(epsilon <= OMEGA_D_UNIT)]) / (2 * OMEGA_D_UNIT)
-    return g / (2 * rho_tilde)
+    rho_tilde = np.sum(dos[np.abs(epsilon) <= OMEGA_D_UNIT]) / (2 * OMEGA_D_UNIT)
+    return -g / (2 * rho_tilde)
 
 def get_mask(epsilon, epsilon_k):
     if BCS:
@@ -63,7 +63,7 @@ def C_plus_minus(omega, alpha, nu, epsilon, Delta, q_sum):
     _pc = pair_creation_part(alpha, nu, epsilon, Delta, q_sum)
     return (omega * alpha + _pc, omega * alpha - _pc)
 
-for axes, axes_q, G in zip(axes_2d, axes_2d_q, [0.3]):#, 3.0
+for axes, axes_q, G in zip(axes_2d, axes_2d_q, [1]):#, 3.0
     axes[0].set_ylabel(f"$g={G}$\n$\\alpha_j^{{(n)}}$")
     axes_q[0].set_ylabel(f"$g={G}$\n$q$-sums")
     for ax, ax_q, SYSTEM in zip(axes, axes_q, ["sc"]):#, "bcc", "fcc"
@@ -80,7 +80,7 @@ for axes, axes_q, G in zip(axes_2d, axes_2d_q, [0.3]):#, 3.0
 
         gap_df = load_panda("lattice_cut", f"{'bcs' if BCS else '.'}/{SYSTEM}", "gap.json.gz", **params, print_date=False)
         Delta = gap_df["Delta"]
-        dos = gap_df["dos"]
+        dos = gap_df["dos"] * (epsilon[1] - epsilon[0])
         E = np.sqrt(epsilon**2 + Delta**2)
 
         g_unit = G_unit(G, dos, epsilon)
@@ -102,7 +102,7 @@ for axes, axes_q, G in zip(axes_2d, axes_2d_q, [0.3]):#, 3.0
             #ax_q.plot(epsilon, nu, color=colors[PICK+1])
             #ax_q.plot(epsilon, 2 * Delta * (-2*alpha*epsilon + 2*Delta*nu)  / omega**2 , color=colors[PICK+2], dashes=(4,4))
             #ax_q.plot(epsilon, -4 * Delta * q_sum / omega**2 , color=colors[PICK+3])
-            ax_q.plot(epsilon, check_n , color=colors[PICK], ls="-.")
+            ax_q.plot(epsilon, check_n, color=colors[PICK], dashes=(4,4))
             
             C_plus_sum = g_unit * np.array([
                 g_sum(k, epsilon * C_plus / E) for k in epsilon
@@ -112,20 +112,24 @@ for axes, axes_q, G in zip(axes_2d, axes_2d_q, [0.3]):#, 3.0
             ])
             
             check_plus = (C_plus - (2 * epsilon * C_plus + C_plus_sum) / omega + (2 * Delta * nu + nu_sum)) / omega
-            ax.plot(epsilon, check_plus, color=colors[PICK])
+            ax_q.plot(epsilon, check_plus, color=colors[PICK])
             
-            C_minus_sum = g_unit * np.array([
-                g_sum(k, epsilon * C_minus / E) for k in epsilon
-            ])
-            check_minus = (C_minus + (2 * epsilon * C_minus + C_minus_sum) / omega - (2 * Delta * nu + nu_sum)) / omega
-            ax.plot(epsilon, check_minus, color=colors[PICK], dashes=(4,4))
+            ax.plot(epsilon, nu, color=colors[PICK], label=f"{PICK+1}", dashes=(3.5, 3.5))
+            ax.plot(epsilon, C_plus / omega, color=colors[PICK])
+            
+            
+            #C_minus_sum = g_unit * np.array([
+            #    g_sum(k, epsilon * C_minus / E) for k in epsilon
+            #])
+            #check_minus = (C_minus + (2 * epsilon * C_minus + C_minus_sum) / omega - (2 * Delta * nu + nu_sum)) / omega
+            #ax_q.plot(epsilon, check_minus, color=colors[PICK], dashes=(4,4))
 
 axes_2d[-1,-1].legend(loc="lower right")
-axes_2d[0,0].set_xlim(-0.05, 0.05)
+axes_2d[0,0].set_xlim(-0.25, 0.25)
 axes_2d[-1,0].set_xlim(-0.25, 0.25)
 
 axes_2d_q[-1,-1].legend(loc="lower right")
-axes_2d_q[0,0].set_xlim(-0.05, 0.05)
+axes_2d_q[0,0].set_xlim(-0.25, 0.25)
 axes_2d_q[-1,0].set_xlim(-0.25, 0.25)
 
 plt.show()
