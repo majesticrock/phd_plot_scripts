@@ -23,21 +23,24 @@ FFT_TMIN = 1.0
 FFT_TMAX = 9.0
 
 # === Choose sweep parameter here ===
-sweep_param = "v_F"
-sweep_values = [ 2e6, 1e6, 1.5e6, 3e6]
+sweep_param = "field_amplitude"
+sweep_values = [ 0.1, 0.2, 0.5, 0.7, 1.0]
 
 # Default parameters in one place
 PARAMS = {
     "DIR": "cascade_16",
     "MODEL": "PiFlux",
-    "v_F": 1.5e6,
+    "v_F": 2e6,
     "W": 600,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
     "TAU_DIAG": 5,
-    "T_AVE": 28
+    "T_AVE": 28,
+    "field_amplitude": 1
 }
+
+T_DELAY = 0.21
 
 def gaussian(x, mu, gamma):
     return (1 / (gamma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * gamma**2))
@@ -55,18 +58,18 @@ def run_and_plot(ax, ax_fft, params, color, label=None, data_norm=None):
 
     df_A = load_panda("HHG", f"{params['DIR']}/expA_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
-                                   field_amplitude=1., photon_energy=1., 
+                                   field_amplitude=params['field_amplitude'], photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
     df_B = load_panda("HHG", f"{params['DIR']}/expB_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
-                                   field_amplitude=1., photon_energy=1., 
+                                   field_amplitude=params['field_amplitude'], photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
     main_df = load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MODEL']}", "current_density.json.gz", 
                          **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
-                                      field_amplitude=1., photon_energy=1., 
-                                      tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
+                                      field_amplitude=params['field_amplitude'], photon_energy=1., 
+                                      tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=T_DELAY))
 
     times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
     sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
@@ -88,7 +91,7 @@ def run_and_plot(ax, ax_fft, params, color, label=None, data_norm=None):
             B = inter_B(t)
         return A + B
 
-    t0_unitless = 0 * main_df["photon_energy"] / TIME_TO_UNITLESS
+    t0_unitless = T_DELAY * main_df["photon_energy"] / TIME_TO_UNITLESS
     # --- Restrict to FFT interval and resample to uniform grids ---
     tmin, tmax = FFT_TMIN, FFT_TMAX
     sim_mask = (times >= tmin) & (times <= tmax)

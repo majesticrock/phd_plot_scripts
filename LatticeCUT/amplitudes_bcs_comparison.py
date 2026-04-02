@@ -10,7 +10,7 @@ SYSTEM = 'sc'
 N=16000
 E_F=0.0
 OMEGA_D = 0.02
-G = 1
+G = 0.3
 DIR = f"./{SYSTEM}"
 params = lattice_cut_params(N=N, 
                             g=G,
@@ -44,9 +44,9 @@ test_pc /= np.max(test_pc)
 axes[0].plot(eps, test_pc, c="k", ls="--", label=r"$\Delta_k^2 / E_k^2$")
 axes[2].plot(eps, test_pc, c="k", ls="--")
 
-test_num = -Delta**2 / (eps * E**2)
+test_num = -Delta**3 / (eps * E**2)
 test_num /= np.max(test_num)
-axes[1].plot(eps, test_num, c="k", ls="--", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
+axes[1].plot(eps, test_num, c="k", ls="--", label=r"$\Delta_k^3 / (E_k^2 \varepsilon_k)$")
 
 
 test_pc = -purger.amplitude_eigenvectors[0][N:] * eps / np.where(Delta != 0, Delta, np.inf)
@@ -78,9 +78,9 @@ test_pc /= np.max(test_pc)
 axes_bcs[0].plot(eps, test_pc, c="k", ls="--", label=r"$\Delta_k^2 / E_k^2$")
 axes_bcs[2].plot(eps, test_pc, c="k", ls="--")
 
-test_num = -Delta**2 / (eps * E**2)
+test_num = -Delta**3 / (eps * E**2)
 test_num /= np.max(test_num)
-axes_bcs[1].plot(eps, test_num, c="k", ls="--", label=r"$\Delta_k^2 / (E_k^2 \varepsilon_k)$")
+axes_bcs[1].plot(eps, test_num, c="k", ls="--", label=r"$\Delta_k^3 / (E_k^2 \varepsilon_k)$")
 
 
 test_pc = -purger.amplitude_eigenvectors[0][N:] * eps / np.where(Delta != 0, Delta, np.inf)

@@ -355,7 +355,7 @@ class HeatmapPlotter:
                 spectral_functions[mask, i] += summand[mask]
         
                 
-        levels = np.power(10, np.linspace(CUT_OFF_EXP, 3, 51, endpoint=True))
+        levels = np.power(10, np.linspace(CUT_OFF_EXP, 3, 255, endpoint=True))
         spectral_functions = np.where(spectral_functions <= 1e-10, 1e-10, spectral_functions)
         
         contour = ax.contourf(self.x, self.y, spectral_functions, cmap=cmap, 
