@@ -156,6 +156,7 @@ class FullDiagPurger:
         self.__plot_impl__(axes, self.glimmering_amplitude_eigenvectors, self.glimmering_amplitude_eigenvalues, which, 
                            label_energy, combined_norm, **plot_kwargs)
         
+    # returns a tuple (sum_k alpha_k^2, sum_k nu_k^2)
     def integral_amplitude(self, which):
         if which < len(self.amplitude_eigenvectors):
             pc = np.sum(self.amplitude_eigenvectors[which][:self.N]**2)
