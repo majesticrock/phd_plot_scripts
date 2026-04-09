@@ -13,7 +13,8 @@ from matplotlib import ticker
 from .create_figure import create_normal_figure, create_large_figure
 from make_panels_touch import make_panels_touch
 
-CUT_OFF_EXP = -2
+MAX_EXP = 2.5
+CUT_OFF_EXP = -1.5
 CUT_OFF = 10**CUT_OFF_EXP
 
 # Settings the importer
@@ -355,11 +356,19 @@ class HeatmapPlotter:
                 spectral_functions[mask, i] += summand[mask]
         
                 
-        levels = np.power(10, np.linspace(CUT_OFF_EXP, 3, 255, endpoint=True))
+        levels = np.power(10, np.linspace(CUT_OFF_EXP, MAX_EXP, 255, endpoint=True))
         spectral_functions = np.where(spectral_functions <= 1e-10, 1e-10, spectral_functions)
         
+        #cbar_max = 200
+        #CBAR_EXP = 10
+        #levels = np.linspace(0, (1.01 * cbar_max)**(1./CBAR_EXP), 101, endpoint=True)**CBAR_EXP
+        #import matplotlib.colors as mcolors
+        #cnorm = mcolors.PowerNorm(gamma=1/CBAR_EXP, vmin=0, vmax=1.01 * cbar_max)
+        
         contour = ax.contourf(self.x, self.y, spectral_functions, cmap=cmap, 
-                              locator=ticker.LogLocator(), levels=levels, extend='both', zorder=-20)
+                              locator=ticker.LogLocator(), 
+                              #norm=cnorm,
+                              levels=levels, extend='both', zorder=-20)
         contour.set_edgecolor('face')
         
         if not self.scale_energy_by_gaps:
@@ -447,8 +456,8 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
         ax.set_ylim(energy_range[0] + 1e-8, energy_range[1])
         ax.set_xlim(0, G_MAX_PLOT)
     
-    cbar.locator = ticker.LogLocator(10)
-    cbar.set_ticks(cbar.locator.tick_values(10 * CUT_OFF, 1e2))
+    #cbar.locator = ticker.LogLocator(10)
+    #cbar.set_ticks(cbar.locator.tick_values(10 * CUT_OFF, 1e2))
     cbar.minorticks_off()
     cbar.set_label(legend(r'\mathcal{A}(\omega) / W^{-1}'))
     
