@@ -13,13 +13,12 @@ from matplotlib import ticker
 from .create_figure import create_normal_figure, create_large_figure
 from make_panels_touch import make_panels_touch
 
-MAX_EXP = 2.5
+MAX_EXP = 2.1
 CUT_OFF_EXP = -1.5
 CUT_OFF = 10**CUT_OFF_EXP
 
 # Settings the importer
 G_MAX_LOAD = 3
-G_MAX_PLOT = 2.49
 
 __BEGIN_OFFSET__ = 2e-3
 __RANGE__ = 2e-3
@@ -413,7 +412,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
         assert(axes is None)
-        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.6}
+        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.55}
         if figure_generator is None:
             figure_generator = create_large_figure if len(tasks) > 2 else create_normal_figure
         fig, axes = figure_generator(**__figkwargs)
@@ -452,13 +451,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
         cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), 
                             orientation='vertical', fraction=0.1, pad=0.025, extend='max')
     
-    for ax in axes.ravel().tolist():
-        ax.set_ylim(energy_range[0] + 1e-8, energy_range[1])
-        ax.set_xlim(0, G_MAX_PLOT)
-    
-    #cbar.locator = ticker.LogLocator(10)
-    #cbar.set_ticks(cbar.locator.tick_values(10 * CUT_OFF, 1e2))
-    cbar.minorticks_off()
+    cbar.locator = ticker.LogLocator(10)
     cbar.set_label(legend(r'\mathcal{A}(\omega) / W^{-1}'))
     
     if hasattr(axes[0], "__len__"):

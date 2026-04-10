@@ -20,7 +20,7 @@ axes[2].set_ylabel("Phase")
 axes[-1].set_xlabel(r"$\varepsilon - E_\mathrm{F}$")
 axes[0].set_xlim(-0.05, 0.05)
 
-Ns = np.array([4000, 8000, 16000])
+Ns = np.array([4000, 6000, 8000, 16000, 20000, 24000])
 C_alphas = np.zeros_like(Ns, dtype=float)
 
 for i, N in enumerate(Ns):

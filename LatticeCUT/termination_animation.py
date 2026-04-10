@@ -9,15 +9,15 @@ import continued_fraction_pandas as cf
 from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
 SYSTEM = "bcc"
-G   = 0.95
+G   = 1.3
 E_F = 0
 OMEGA_D = 0.02
 N = 16000
 
 cmap = plt.get_cmap("jet")
-step = 4
-shift_range = np.arange(-10, 200, step)
-init = 200
+step = 2
+shift_range = np.arange(-10, 240, step)
+init = 100
 
 FWHM = 15. / step
 sigma = FWHM / (2.0 * np.sqrt(2.0 * np.log(2.0)))

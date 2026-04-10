@@ -21,16 +21,23 @@ tasks = [
 import mrock_colormaps as mcm
 import colorspacious as cs
 #Ls = [90, 70, 50, 30, 10, 20, 40, 60, 80]
-Ls = [80,  60,  40,  20]
-dH = -40
+Ls = [90, 80, 70, 60, 50, 40, 30, 20, 10]
+dH = -23
 
 colors = [ (1,1,1) ]
 for h, L in enumerate(Ls):
-    colors.append(cs.cspace_convert((L, 140, 40 + h * dH), "CIELCh", "sRGB1") )
+    colors.append(cs.cspace_convert((L, 100, 100 + h * dH), "CIELCh", "sRGB1") )
 colors.append((0,0,0))
+colors.reverse()
 cmap = mcm.perceptual_colormap(colors)
 
-fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(260, 280), cmap=cmap)
+cmap = mcm.colormap_dL_dh((10, 80, 300), 90, 160, fade_to_black=256//10, fade_to_white=256//10)
+
+cmap = mcm.colormap_dL_dh((0, 100, 280), 100, -200, 
+                          chroma_curve  = np.sin(np.linspace(0, np.pi, 256))**0.66, 
+                          fade_to_black = 0, fade_to_white=0)
+
+fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(250, 260), cmap=cmap)
     
 #for plotter in plotters:
 #    plotter.HiggsModes.to_pickle(f"phd_plot_scripts/LatticeCUT/modes/higgs_{n_mode}.pkl")

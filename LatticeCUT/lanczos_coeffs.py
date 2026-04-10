@@ -5,10 +5,10 @@ __ap.append()
 
 from get_data import *
 fig, ax = plt.subplots()
-SYSTEM = 'sc'
-main_df = load_panda("lattice_cut", f"test2/{SYSTEM}", "resolvents.json.gz",
-                    **lattice_cut_params(N=4000, 
-                                         g=1.5, 
+SYSTEM = 'bcc'
+main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
+                    **lattice_cut_params(N=16000, 
+                                         g=2.45, 
                                          U=0., 
                                          E_F=0,
                                          omega_D=0.02))
