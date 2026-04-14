@@ -49,7 +49,6 @@ for i, N in enumerate(Ns):
     C1 /= norm
     C_alphas[i] = C1
 
-print(C_alphas)
 fig_i, ax_i = plt.subplots()
 from ez_fit import ez_linear_fit
 ez_linear_fit(1./Ns, C_alphas, ax_i, np.linspace(0, 1.1/Ns[0], 100))

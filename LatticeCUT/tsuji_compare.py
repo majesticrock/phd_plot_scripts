@@ -39,6 +39,7 @@ for axes, G in zip(axes_2d, [0.3, 3.0]):
 
         gap_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz", **params, print_date=False)
         Delta = gap_df["Delta"]
+        dos = gap_df["dos"]
 
         for PICK in range(min(len(purger.amplitude_eigenvalues), 4)):
             alpha = purger.amplitude_eigenvectors[PICK][:N]
@@ -55,8 +56,17 @@ for axes, G in zip(axes_2d, [0.3, 3.0]):
             norm = np.sum(primary_phase*primary_phase)
             
             for PICK in range(1, len(purger.phase_eigenvalues)):
-                integral = np.sum(primary_phase * purger.phase_eigenvectors[PICK]) / norm
+                integral = np.dot(primary_phase, purger.phase_eigenvectors[PICK]) / norm
+                
                 print(f"{SYSTEM}: (0-{PICK})\t = {integral}")
+        
+        #if len(purger.amplitude_eigenvalues) > 1:
+        #    primary_amplitude = purger.amplitude_eigenvectors[0]
+        #    norm = np.sum(primary_amplitude*primary_amplitude)
+        #    
+        #    for PICK in range(1, len(purger.amplitude_eigenvalues)):
+        #        integral = np.sum(primary_amplitude * purger.amplitude_eigenvectors[PICK]) / norm
+        #        print(f"{SYSTEM}: (0-{PICK})\t = {integral}")
 
 
 axes_2d[-1,-1].legend(loc="lower right")
