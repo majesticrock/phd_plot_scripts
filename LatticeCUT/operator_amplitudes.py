@@ -22,6 +22,7 @@ axes[0].set_xlim(-0.05, 0.05)
 
 Ns = np.array([4000, 6000, 8000, 16000, 20000, 24000])
 C_alphas = np.zeros_like(Ns, dtype=float)
+eigenvalue_distance = np.zeros_like(Ns, dtype=float)
 
 for i, N in enumerate(Ns):
     params = lattice_cut_params(N=N, 
@@ -33,6 +34,7 @@ for i, N in enumerate(Ns):
     gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", print_date=False, **params)
 
     purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - E_F)
+    eigenvalue_distance[i] = main_df["continuum_boundaries"][0] - purger.amplitude_eigenvalues[0]
     
     alpha = purger.amplitude_eigenvectors[0,:N]
     norm = np.max(np.abs(alpha))
@@ -55,6 +57,21 @@ ez_linear_fit(1./Ns, C_alphas, ax_i, np.linspace(0, 1.1/Ns[0], 100))
 ax_i.plot(1./Ns, C_alphas, "o", markersize=8)
 ax_i.set_xlabel(r"$1/N$")
 ax_i.set_ylabel(r"$C_\alpha$")
+
+
+
+fig_d, ax_d = plt.subplots()
+from ez_fit import ez_general_fit
+def square_func(x, a, b, c):
+    return a*x**2 + b*x + c
+
+print(ez_general_fit(1./Ns, eigenvalue_distance, plotter=ax_d, x_space=np.linspace(0, 1.1/Ns[0], 100), func=square_func))
+ax_d.plot(1./Ns, eigenvalue_distance, "o", markersize=8)
+ax_d.set_xlabel(r"$1/N$")
+ax_d.set_ylabel(r"$2 \Delta_\mathrm{true} - \omega_\mathrm{Higgs}^{(1)}$")
+
+
+
 
 eps = np.linspace(-1, 1, N) - E_F
 Delta = gap_df["Delta"]

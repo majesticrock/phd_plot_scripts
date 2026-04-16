@@ -377,6 +377,8 @@ class HeatmapPlotter:
         ax.set_yscale(self.yscale)
         
         self.data_dict[f"spectral_functions_{'higgs' if which == 'amplitude_SC' else 'phase'}"] = spectral_functions
+        if "continuum_edge" not in self.data_dict:
+            self.data_dict["continuum_edge"] = self.true_gaps
         
         return contour
 
