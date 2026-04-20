@@ -304,7 +304,7 @@ class HeatmapPlotter:
             for i in range(self.N_data):
                 spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
 
-    def plot_one(self, ax, cmap, which="amplitude_SC"):
+    def plot_one(self, ax, cmap, which="amplitude_SC", continuum_color="cyan"):
         spectral_functions = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, which) for __i, res in enumerate(self.resolvents)]).transpose()
 
         if which == "amplitude_SC":
@@ -370,8 +370,8 @@ class HeatmapPlotter:
                               levels=levels, extend='both', zorder=-20)
         contour.set_edgecolor('face')
         
-        if not self.scale_energy_by_gaps:
-            ax.plot(self.x, self.true_gaps, color="cyan", ls=":")
+        if not self.scale_energy_by_gaps and continuum_color is not None:
+            ax.plot(self.x, self.true_gaps, color=continuum_color, ls=":")
         ax.set_rasterization_zorder(-10)
         ax.set_xscale(self.xscale)
         ax.set_yscale(self.yscale)
