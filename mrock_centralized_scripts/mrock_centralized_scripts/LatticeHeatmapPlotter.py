@@ -82,7 +82,31 @@ class BracketCFIgnore(BaseCFIgnore):
         return int(self.firsts[self.get_bracket_index(g)])
     def get_last(self, g):
         return int(self.lasts[self.get_bracket_index(g)])
+
+def merge_data_dicts(dicts, distinguishers, same_omega=True, same_g=False, has_higgs=True, has_phase=True):
+    """Merges the data_dicts created by instances of Heatmaplotter.
+    dicts: the data_dicts
+    distinguishers: string appended to distinguish the data, e.g., g -> g_bcc."""
+    
+    merged = {}
+    if same_omega:
+        merged["omega"] = dicts[0]["omega"]
+    if same_g:
+        merged["g"] = dicts[0]["g"]
+    for data, distinguish in zip(dicts, distinguishers):
+        merged[f"continuum_edge_{distinguish}"] = data["continuum_edge"]
+        if has_higgs:
+            merged[f"spectral_functions_higgs_{distinguish}"] = data["spectral_functions_higgs"]
+        if has_phase:
+            merged[f"spectral_functions_phase_{distinguish}"] = data["spectral_functions_phase"]
         
+        if not same_omega:
+            merged[f"omega_{distinguish}"] = data["omega"]
+        if not same_g:
+            merged[f"g_{distinguish}"] = data["g"]
+    
+    return merged
+
 class HeatmapPlotter:
     def __init__(self, data_frame_param, parameter_name, xlabel, zlabel=r'$\mathcal{A}(\omega) / W^{-1}$', xscale="linear", yscale="linear",
                  energy_range=(1e-10, 2.5), scale_energy_by_gaps=False, cf_ignore=BaseCFIgnore()):

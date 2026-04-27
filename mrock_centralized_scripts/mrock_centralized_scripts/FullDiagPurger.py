@@ -166,3 +166,11 @@ class FullDiagPurger:
             return pc, n
         else:
             raise ValueError(f"Requested integral for amplitude mode {which}, but only {len(self.amplitude_eigenvectors)} available.")
+        
+    def to_dict(self, suffix):
+        return { 
+                f"energies_higgs_{suffix}" : self.amplitude_eigenvalues,
+                f"energies_phase_{suffix}" : self.phase_eigenvalues,
+                f"amplitudes_higgs_{suffix}" : self.amplitude_eigenvectors,
+                f"amplitudes_phase_{suffix}" : self.phase_eigenvectors
+            }
