@@ -18,8 +18,6 @@ Gs = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
 
 occupation_integrals = np.zeros((3, len(Gs)))
 pair_creation_integrals = np.zeros((3, len(Gs)))
-distances_to_continuum = np.zeros((3, len(Gs)))
-
 systems = ['sc', 'bcc', 'fcc']
 
 for j, system in enumerate(systems):
@@ -31,16 +29,15 @@ for j, system in enumerate(systems):
                                     omega_D=0.02)
         main_df = load_panda("lattice_cut", f"./{system}", "full_diagonalization.json.gz", print_date=False, **params)
         purger = fdp.FullDiagPurger(main_df, epsilon)
-        pair_creation_integrals[j, i], occupation_integrals[j, i] = purger.integral_amplitude(0)
-        distances_to_continuum[j, i] = main_df["continuum_boundaries"][0]# - purger.amplitude_eigenvalues[0]
+        if len(purger.amplitude_eigenvalues) > 1:
+            pair_creation_integrals[j, i], occupation_integrals[j, i] = purger.integral_amplitude(1)
 
 markers = ["o", "s", "D"]
 for i in range(3):
     norms = pair_creation_integrals[i] + occupation_integrals[i]
-    ax.plot(Gs, pair_creation_integrals[i] / norms, c=f"C{i}", marker=markers[i], markevery=(0. if i !=1 else 0.1, 0.2), markersize=8)
-    ax.plot(Gs, occupation_integrals[i]    / norms, c=f"C{i}", marker=markers[i], markevery=(0. if i !=1 else 0.1, 0.2), markersize=8, ls="--")
-
-ax.set_xscale("log")
+    ax.plot(Gs, pair_creation_integrals[i] / norms, c=f"C{i}")
+    ax.plot(Gs, occupation_integrals[i]    / norms, c=f"C{i}", ls="--")
+    
 ax.set_ylim(0, 1)
 ax.set_xlabel("$g$")
 ax.set_ylabel("Total contribution")

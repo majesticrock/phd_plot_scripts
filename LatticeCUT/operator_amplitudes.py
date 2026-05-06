@@ -6,10 +6,10 @@ from get_data import *
 
 import mrock_centralized_scripts.FullDiagPurger as fdp
 
-SYSTEM = 'fcc'
-E_F=-0.5
+SYSTEM = 'bcc'
+E_F=0
 OMEGA_D = 0.02
-G = 3.0
+G = 1
 DIR = f"./{SYSTEM}"
 N=16000
 
@@ -31,8 +31,8 @@ main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", print_d
 gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", print_date=False, **params)
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - main_df["chemical_potential"])
 
-purger.plot_amplitude(axes[:2], combined_norm=False, which=2)
-purger.plot_glimmering_phase(axes[2], label="Result")
+purger.plot_amplitude(axes[:2], combined_norm=True)
+purger.plot_phase(axes[2], label="Result")
 
 for ax in axes:
     ax.axhline(0, c="k", ls=":")

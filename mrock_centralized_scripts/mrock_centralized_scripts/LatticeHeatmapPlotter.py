@@ -486,3 +486,61 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
         make_panels_touch(fig, axes, touch_x=True, touch_y=False)
     
     return fig, axes, plotters, cbar
+
+
+def create_reduced_plot(tasks, xscale="linear", 
+                        which='Higgs',
+                        scale_energy_by_gaps=False, 
+                        cmap='inferno', 
+                        energy_range=None, 
+                        fig=None, axes=None, 
+                        cf_ignore=BaseCFIgnore(),
+                        figure_generator=None):
+    if energy_range is None:
+        energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
+    if fig is None:
+        assert(axes is None)
+        __figkwargs = {"ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.3}
+        if figure_generator is None:
+            figure_generator = create_large_figure# if len(tasks) > 2 else create_normal_figure
+        fig, axes_raw = figure_generator(**__figkwargs)
+        axes = np.asarray(axes_raw)
+        fig.subplots_adjust(wspace=0.05, hspace=0.05)
+    
+    if which == "Higgs":
+        which_internal = "amplitude_SC"
+    elif which == "Phase":
+        which_internal = "phase_SC"
+    else:
+        raise ValueError(f"which = {which} --- not recognized. Choose 'Higgs' or 'Phase'.")
+    
+    plotters = []
+
+    if len(axes) > 1:
+        for i, ax in enumerate(axes):
+            ax.annotate(
+                f"({string.ascii_lowercase[i]})",
+                xy=(0, 1), xycoords='axes fraction', xytext=(+0.5, -0.5), textcoords='offset fontsize', 
+                verticalalignment='top', color="white", weight="bold")
+        
+    for i, (data_query, x_column, xlabel) in enumerate(tasks):
+        plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
+                                       energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, 
+                                       cf_ignore=__get_cf_ignore__(cf_ignore, i)))
+        contour_for_colorbar = plotters[-1].plot_one(axes[i], cmap=cmap, which=which_internal)
+        axes[i].set_xlabel(xlabel)
+        
+    if scale_energy_by_gaps:
+        axes[0].set_ylabel(f"{which}\n " + legend(r"\omega / (2 \Delta_\mathrm{max})"))
+    else:
+        axes[0].set_ylabel(f"{which}\n " + legend(r"\omega / W"))
+    
+    cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel(), 
+                        orientation='vertical', aspect=15, pad=0.025, extend='max')
+    
+    cbar.locator = ticker.LogLocator(10)
+    cbar.set_label(legend(r'\mathcal{A}(\omega) / W^{-1}'))
+    
+    make_panels_touch(fig, axes)
+    
+    return fig, axes, plotters, cbar
