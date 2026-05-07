@@ -6,9 +6,10 @@ from get_data import *
 
 fig, ax = plt.subplots()
 
-SYSTEM = 'sc'
+N=16000
+SYSTEM = 'fcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
-                    **lattice_cut_params(N=8000, 
+                    **lattice_cut_params(N=N, 
                                          g=0.3,
                                          U=0, 
                                          E_F=0,
@@ -23,7 +24,7 @@ rho_ax.tick_params(axis='y', colors='red')
 rho_ax.yaxis.label.set_color('red')
 rho_ax.set_ylabel(r'$\rho(\epsilon)$')
 
-print(np.sum(main_df['Delta'] - main_df['Delta'][::-1]))
+print(2 * np.sum(main_df['dos']) / N)
 
 ax.set_xlabel(r'$\epsilon - \mu$')
 ax.set_ylabel(r'$\Delta$')

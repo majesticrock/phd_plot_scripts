@@ -9,7 +9,7 @@ import mrock_centralized_scripts.FullDiagPurger as fdp
 SYSTEM = 'bcc'
 E_F=0
 OMEGA_D = 0.02
-G = 1
+G = 1.2
 DIR = f"./{SYSTEM}"
 N=16000
 
