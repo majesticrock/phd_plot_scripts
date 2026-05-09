@@ -7,20 +7,24 @@ def __fill_temps__(eigenvalues, weights, first_eigenvectors, continuum_edge):
     temp_weights = []
     temp_vectors = []
     for ev, weight, vector in zip(eigenvalues, weights, first_eigenvectors):
-        if ev >= continuum_edge or weight < 1e-8:
+        # if the weight is less than machine epsilon, it's an artifact
+        if ev >= continuum_edge or weight < 1e-16:
             continue
         if len(temp_evs) == 0:
             temp_evs.append(ev)
             temp_weights.append(weight)
             temp_vectors.append(vector)
-        elif abs(ev - temp_evs[-1]) > PEAK_DIFF_TOL:
-            temp_evs.append(ev)
-            temp_weights.append(weight)
-            temp_vectors.append(vector)
-        elif weight > temp_weights[-1]:
-            temp_evs[-1] = ev
-            temp_weights[-1] = weight
-            temp_vectors[-1] = vector
+        else:
+            if weight < 1e-8:
+                continue
+            if abs(ev - temp_evs[-1]) > PEAK_DIFF_TOL:
+                temp_evs.append(ev)
+                temp_weights.append(weight)
+                temp_vectors.append(vector)
+            elif weight > temp_weights[-1]:
+                temp_evs[-1] = ev
+                temp_weights[-1] = weight
+                temp_vectors[-1] = vector
     return temp_evs, temp_weights, temp_vectors
 
 class FullDiagPurger:
@@ -31,7 +35,6 @@ class FullDiagPurger:
             system_data["amplitude.first_eigenvectors"],
             system_data["continuum_boundaries"][0]
         )
-
         temp_phase_evs, temp_phase_weights, temp_phase_vectors = __fill_temps__(
             system_data["phase.eigenvalues"], 
             system_data["phase.weights"][0], 

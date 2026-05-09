@@ -12,31 +12,26 @@ E_F = 0
 
 epsilon = np.linspace(-1, 1, N)
 fig, ax = plt.subplots()
-Gs = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 
-      1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
-      2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0]
 
-occupation_integrals = np.zeros((3, len(Gs)))
-pair_creation_integrals = np.zeros((3, len(Gs)))
 systems = ['sc', 'bcc', 'fcc']
+markers = ["o", "s", "D"]
 
 for j, system in enumerate(systems):
-    for i, g in enumerate(Gs):
-        params = lattice_cut_params(N=N, 
-                                    g=g, 
-                                    U=0.0, 
-                                    E_F=E_F,
-                                    omega_D=0.02)
-        main_df = load_panda("lattice_cut", f"./{system}", "full_diagonalization.json.gz", print_date=False, **params)
-        purger = fdp.FullDiagPurger(main_df, epsilon)
+    main_df = load_pickle(f"lattice_cut/{system}/N={N}", "full_diagonalizations.pkl").query(
+        f"E_F=={E_F} & omega_D==0.02 & U==0"
+    ).sort_values("g").reset_index(drop=True)
+    Gs = main_df["g"]
+    occupation_integrals = np.zeros(len(Gs))
+    pair_creation_integrals = np.zeros(len(Gs))
+    
+    for i, row in main_df.iterrows():
+        purger = fdp.FullDiagPurger(row, epsilon)
         if len(purger.amplitude_eigenvalues) > 1:
-            pair_creation_integrals[j, i], occupation_integrals[j, i] = purger.integral_amplitude(1)
+            pair_creation_integrals[i], occupation_integrals[i] = purger.integral_amplitude(1)
 
-markers = ["o", "s", "D"]
-for i in range(3):
-    norms = pair_creation_integrals[i] + occupation_integrals[i]
-    ax.plot(Gs, pair_creation_integrals[i] / norms, c=f"C{i}")
-    ax.plot(Gs, occupation_integrals[i]    / norms, c=f"C{i}", ls="--")
+    norms = pair_creation_integrals + occupation_integrals
+    ax.plot(Gs, pair_creation_integrals / np.where(norms > 0, norms, np.nan), c=f"C{j}")
+    ax.plot(Gs, occupation_integrals    / np.where(norms > 0, norms, np.nan), c=f"C{j}", ls="--")
     
 ax.set_ylim(0, 1)
 ax.set_xlabel("$g$")

@@ -9,7 +9,7 @@ import mrock_centralized_scripts.FullDiagPurger as fdp
 SYSTEM = 'bcc'
 E_F=0
 OMEGA_D = 0.02
-G = 1.2
+G = 0.9
 DIR = f"./{SYSTEM}"
 N=16000
 
@@ -33,6 +33,8 @@ purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - main_df["chemical_p
 
 purger.plot_amplitude(axes[:2], combined_norm=True)
 purger.plot_phase(axes[2], label="Result")
+
+print(purger.amplitude_eigenvalues, purger.phase_eigenvalues)
 
 for ax in axes:
     ax.axhline(0, c="k", ls=":")

@@ -9,16 +9,16 @@ from scipy.signal import find_peaks
 SYSTEM = 'bcc'
 N=16000
 params = lattice_cut_params(N=N, 
-                            g=1.025,
-                            U=0., 
-                            E_F=0,
+                            g=2.375,
+                            U=0.05, 
+                            E_F=-0.5,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz", **params)
 
 import continued_fraction_pandas as cf
 import plot_settings as ps
 
-resolvents = cf.ContinuedFraction(main_df, ignore_first=130, ignore_last=160)
+resolvents = cf.ContinuedFraction(main_df, ignore_first=150, ignore_last=200)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
