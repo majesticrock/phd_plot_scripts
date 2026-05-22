@@ -6,15 +6,14 @@ from get_data import *
 from scipy.interpolate import CubicSpline
 import numpy as np
 from find_roots import *
-from mrock_centralized_scripts.create_figure import *
 
 
 N       = 16000
 OMEGA_D = 0.02
-G       = 1.6
+G       = 1.5
 U       = 0
-E_F     = 0
-SYSTEM  = 'bcc_bisect'
+E_F     = -0.5
+SYSTEM  = 'fcc'
 
 energies = np.linspace(-1, 1, N)
 
@@ -29,7 +28,7 @@ def compute_qp_dos(mu, gaps, sp_dos, max_E=None, plot_min=None):
     if plot_min is None:
         plot_min = -(max(quasiparticle_energies[N - 1 - np.argmax(np.abs(gaps[::-1]) > 1e-6)], quasiparticle_energies[0]) + 0.05)
 
-    omegas = np.linspace(true_gap + (10. / N), max_E, 2000)
+    omegas = np.linspace(true_gap + (1. / N), max_E, 2000)
     func = [ CubicSpline(energies, quasiparticle_energies - omega) for omega in omegas ]
     qp_dos_pos = np.zeros_like(func)
     qp_dos_neg = np.zeros_like(func)
@@ -74,12 +73,24 @@ def create_qpdos_plot(ax, G, E_F, U, OMEGA_D, max_E=None):
     if max_E is None:
         omegas_plot, qp_dos_plot, max_E, plot_min = compute_qp_dos(mu, gaps, sp_dos)
     else:
-        omegas_plot, qp_dos_plot, _, __ = compute_qp_dos(mu, gaps, sp_dos, max_E, plot_min)
+        omegas_plot, qp_dos_plot, _, __ = compute_qp_dos(mu, gaps, sp_dos, max_E, -max_E)
         
     ax.plot(omegas_plot, qp_dos_plot)
     ax.set_xlabel(r"$E / W$")
+    
+    res_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
+                        **lattice_cut_params(N=N, 
+                                             g=G,
+                                             U=U, 
+                                             E_F=E_F,
+                                             omega_D=OMEGA_D))
+    ax.axvline(res_df["Delta_max"], c="k", ls="--")
+    ax.axvline(res_df["continuum_boundaries"][0] * 0.5, c="k", ls=":")
+    ax.axvline(-res_df["Delta_max"], c="k", ls="--")
+    ax.axvline(-res_df["continuum_boundaries"][0] * 0.5, c="k", ls=":")
+    
 
 fig, ax = plt.subplots()
 ax.set_ylabel(r"$\rho_\mathrm{qp}(E) / W^{-1}$")
-create_qpdos_plot(ax, G, E_F, U, OMEGA_D)
+create_qpdos_plot(ax, G, E_F, U, OMEGA_D, 0.5)
 plt.show()
