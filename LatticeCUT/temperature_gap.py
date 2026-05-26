@@ -5,7 +5,7 @@ import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from get_data import *
 
-SYSTEM = 'single_peak20'
+SYSTEM = 'bcc'
 DIR = '.'
 N=10000
 U=0.0
