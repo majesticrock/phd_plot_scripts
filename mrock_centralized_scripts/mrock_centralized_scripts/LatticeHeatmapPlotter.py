@@ -12,6 +12,7 @@ from matplotlib import ticker
 
 from .create_figure import create_normal_figure, create_large_figure
 from make_panels_touch import make_panels_touch
+from label_axes import label_axes
 
 MAX_EXP = 2.1
 CUT_OFF_EXP = -1.5
@@ -433,7 +434,8 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                 energy_range=None, 
                 fig=None, axes=None, 
                 cf_ignore=BaseCFIgnore(),
-                figure_generator=None):
+                figure_generator=None,
+                special_labels=[]):
     if energy_range is None:
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
@@ -446,12 +448,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
     
     plotters = []
     if len(tasks) > 1:
-        for i, axs in enumerate(axes):
-            for j, ax in enumerate(axs):
-                ax.annotate(
-                    f"({string.ascii_lowercase[i]}.{j+1})",
-                    xy=(0, 1), xycoords='axes fraction', xytext=(+0.5, -0.5), textcoords='offset fontsize', 
-                    verticalalignment='top', color="white", weight="bold")
+        label_axes(axes, color="white", weight="bold", special_labels=special_labels)
 
         for i, (data_query, x_column, xlabel) in enumerate(tasks):
             plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
@@ -495,7 +492,8 @@ def create_reduced_plot(tasks, xscale="linear",
                         energy_range=None, 
                         fig=None, axes=None, 
                         cf_ignore=BaseCFIgnore(),
-                        figure_generator=None):
+                        figure_generator=None,
+                        special_labels=[]):
     if energy_range is None:
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
@@ -517,11 +515,7 @@ def create_reduced_plot(tasks, xscale="linear",
     plotters = []
 
     if len(axes) > 1:
-        for i, ax in enumerate(axes):
-            ax.annotate(
-                f"({string.ascii_lowercase[i]})",
-                xy=(0, 1), xycoords='axes fraction', xytext=(+0.5, -0.5), textcoords='offset fontsize', 
-                verticalalignment='top', color="white", weight="bold")
+        label_axes(axes, color="white", weight="bold", special_labels=special_labels)
         
     for i, (data_query, x_column, xlabel) in enumerate(tasks):
         plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
@@ -531,9 +525,9 @@ def create_reduced_plot(tasks, xscale="linear",
         axes[i].set_xlabel(xlabel)
         
     if scale_energy_by_gaps:
-        axes[0].set_ylabel(f"{which}\n " + legend(r"\omega / (2 \Delta_\mathrm{max})"))
+        axes[0].set_ylabel(legend(r"\omega / (2 \Delta_\mathrm{max})"))
     else:
-        axes[0].set_ylabel(f"{which}\n " + legend(r"\omega / W"))
+        axes[0].set_ylabel(legend(r"\omega / W"))
     
     cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel(), 
                         orientation='vertical', aspect=15, pad=0.025, extend='max')
