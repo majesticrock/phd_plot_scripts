@@ -10,8 +10,8 @@ def linear_model(T, m, b):
 
 fig, (ax, ax_ratio) = plt.subplots(nrows=2, sharex=True)
 
-SYSTEM = 'single_peak30'
-OMEGA_D=0.02
+SYSTEM = 'bcc'
+OMEGA_D=0.05
 N=10000
 U=0.0
 E_F=-0.5

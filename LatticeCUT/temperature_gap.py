@@ -10,9 +10,9 @@ DIR = '.'
 N=10000
 U=0.0
 params = lattice_cut_params(N=N, 
-                            g=2.0,
+                            g=1.95,
                             U=U, 
-                            E_F=-0.5,
+                            E_F=-0.2,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "T_C.json.gz", **params)
 gap_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "all_gaps.json.gz", **params)
