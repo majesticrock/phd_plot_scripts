@@ -455,9 +455,6 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                                            energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, 
                                            cf_ignore=__get_cf_ignore__(cf_ignore, i)))
             contour_for_colorbar = plotters[-1].plot(axes[:, i], labels=not bool(i), cmap=cmap)
-            
-        cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), 
-                            orientation='vertical', fraction=0.1, pad=0.025, extend='max')
     else:
         for i, ax in enumerate(axes):
             ax.annotate(
@@ -471,8 +468,8 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                                            cf_ignore=__get_cf_ignore__(cf_ignore, i)))
             contour_for_colorbar = plotters[-1].plot(axes[:], labels=not bool(i), cmap=cmap)
 
-        cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), 
-                            orientation='vertical', fraction=0.1, pad=0.025, extend='max')
+    cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), 
+                        orientation='vertical', fraction=0.1, pad=0.025, extend='max')
     
     cbar.locator = ticker.LogLocator(10)
     cbar.set_label(legend(r'\mathcal{A}(\omega) / W^{-1}'))

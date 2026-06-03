@@ -20,26 +20,24 @@ def fermi_function(x, beta):
 def quasiparticle_dispersion(epsilons, deltas, E_F):
     return np.sqrt((epsilons - E_F)**2 + deltas**2)
 
-def compute_internal_energy(epsilons, deltas, dos, beta, E_F):
-    mask = np.abs(deltas) > 0
-    E = quasiparticle_dispersion(epsilons, deltas, E_F)
-    # number part = 2 * sum_k E_k
+def compute_normal_state_internal_energy(epsilons, dos, beta, mu):
+    return np.sum(dos * (epsilons - mu) * fermi_function(epsilons - mu, beta)) * 2. / len(epsilons) # Delta epsilon = 2 / N
+
+def compute_internal_energy(epsilons, delta, dos, beta, E_F):
+    mask = np.abs(delta) > 0
+    E = quasiparticle_dispersion(epsilons, delta, E_F)
     qp_part = 2 * np.sum(E[mask] * fermi_function(E[mask], beta) * dos[mask])
-    # single-particle part = sum_k epsilon_k - E_k
     single_particle_part = np.sum(dos[mask] * (epsilons[mask] - E_F - E[mask]))
     single_particle_part += 2 * np.sum(dos[~mask] * (epsilons[~mask] - E_F) * fermi_function(epsilons[~mask] - E_F, beta))
-    # BCS-part
     if beta < 0:
-        bcs_part = np.sum(0.5 * dos[mask] * deltas[mask]**2 / E[mask])
+        bcs_part = np.sum(0.5 * dos[mask] * delta[mask]**2 / E[mask])
     else:
-        bcs_part = np.sum(0.5 * dos[mask] * deltas[mask]**2 / E[mask] * np.tanh(0.5 * beta * E[mask]))
-    
+        bcs_part = np.sum(0.5 * dos[mask] * delta[mask]**2 / E[mask] * np.tanh(0.5 * beta * E[mask]))
     total = qp_part + single_particle_part + bcs_part
     check = 2 * np.sum(dos * (epsilons - E_F) * fermi_function(epsilons - E_F, beta))
     if (total - check > 0 and beta < 0):
-        #raise ValueError(f"Violated energy; should be negative but is not: {total - check}")
         print(total, check)
-    return total / (0.5 * len(epsilons))
+    return total / (0.5 * len(epsilons)) # Delta epsilon = 2 / N
 
 def compute_heat_capacity(internal_energies, temperatures):
     return np.gradient(internal_energies, temperatures)

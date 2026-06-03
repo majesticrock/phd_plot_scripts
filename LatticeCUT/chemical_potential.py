@@ -6,7 +6,7 @@ from get_data import *
 from scipy.optimize import minimize_scalar
 import matplotlib.colors as cm
 
-__LAST_MU__ = 0.0
+__LAST_MU__ = None
 
 def fermi_function(x, beta):
     if np.isscalar(beta) and beta < 0:
