@@ -382,16 +382,9 @@ class HeatmapPlotter:
                 
         levels = np.power(10, np.linspace(CUT_OFF_EXP, MAX_EXP, 255, endpoint=True))
         spectral_functions = np.where(spectral_functions <= 1e-10, 1e-10, spectral_functions)
-        
-        #cbar_max = 200
-        #CBAR_EXP = 10
-        #levels = np.linspace(0, (1.01 * cbar_max)**(1./CBAR_EXP), 101, endpoint=True)**CBAR_EXP
-        #import matplotlib.colors as mcolors
-        #cnorm = mcolors.PowerNorm(gamma=1/CBAR_EXP, vmin=0, vmax=1.01 * cbar_max)
-        
+
         contour = ax.contourf(self.x, self.y, spectral_functions, cmap=cmap, 
                               locator=ticker.LogLocator(), 
-                              #norm=cnorm,
                               levels=levels, extend='both', zorder=-20)
         contour.set_edgecolor('face')
         
