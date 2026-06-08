@@ -35,11 +35,12 @@ fig, ax = plt.subplots()
 N=10000
 SYSTEM = 'bcc'
 E_F=-0.5
-G=1.874
+G=2.2
 OMEGA_D=0.02
+U=0.5
 params = lattice_cut_params(N=N, 
                             g=G,
-                            U=0., 
+                            U=U, 
                             E_F=E_F,
                             omega_D=OMEGA_D)
 
@@ -61,10 +62,10 @@ internal_energies = np.array([
                     for delta, T, mu in zip(deltas, Ts, mus_sc)
             ])
 heat_capacities = compute_heat_capacity(internal_energies, Ts)
-ax.plot(Ts / T_C, heat_capacities, label=f"g={main_df['g']:.2f}")
+ax.plot(Ts / T_C, heat_capacities, label="Superconducting")
 
-ax2 = ax.twinx()
-ax2.plot(Ts/T_C, tc_df["max_gaps"], ls=":", c="k")
+#ax2 = ax.twinx()
+#ax2.plot(Ts/T_C, tc_df["max_gaps"], ls=":", c="k")
 
 Ts_ns = np.concatenate([np.linspace(0.0, 0.99 * T_C, 100), np.linspace(T_C, 1.5 * T_C, 20)])
 deltas_ns = np.zeros((len(Ts_ns), N))
@@ -90,10 +91,11 @@ ax.plot(
     ls="--"
 )
 
-ax.plot(Ts_ns / T_C, heat_capacities_ns, ls="--")
-    
+ax.plot(Ts_ns / T_C, heat_capacities_ns, ls="--", label="Normal state")
 
+ax.legend()
 ax.set_xlabel(r"$T / T_c$")
 ax.set_ylabel(r"$C_V$")
+ax.set_ylim(0, None)
 
 plt.show()

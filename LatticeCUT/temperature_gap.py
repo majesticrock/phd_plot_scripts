@@ -8,11 +8,11 @@ from get_data import *
 SYSTEM = 'bcc'
 DIR = '.'
 N=10000
-U=0.0
+U=0.5
 params = lattice_cut_params(N=N, 
-                            g=1.95,
+                            g=2.2,
                             U=U, 
-                            E_F=-0.2,
+                            E_F=-0.5,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "T_C.json.gz", **params)
 gap_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "all_gaps.json.gz", **params)
