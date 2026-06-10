@@ -16,6 +16,9 @@ xi  = main_df['energies'] - E_F
 rho = main_df['dos']
 rho_F = 2*rho[np.argmin(np.abs(xi))] # factor 2 because of the spins
 
+import time
+start_time = time.process_time()
+
 a = 1.0
 N = 150
 beta = 30
@@ -123,8 +126,11 @@ if q_dependence:
 
     for o, omega in enumerate([0., 0.1, 0.5]):
         chi_vals = np.array([chi(q, omega) for q in q_path])
-        x = np.arange(len(chi_vals))
+        
+        if o==0:
+            print("Time for a single omega:", (time.process_time() - start_time) * 1e3, "[ms]")
 
+        x = np.arange(len(chi_vals))
         ax.plot(x, np.real(chi_vals), label=f"$\\omega={omega}$", c=f"C{o}", ls="-")
 
     ax.axhline(rho_F, ls=":", c="k", label=r"$\rho_F$")
