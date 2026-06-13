@@ -428,12 +428,13 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                 fig=None, axes=None, 
                 cf_ignore=BaseCFIgnore(),
                 figure_generator=None,
+                height_to_width_ratio=0.55,
                 special_labels=[]):
     if energy_range is None:
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
         assert(axes is None)
-        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": 0.55}
+        __figkwargs = {"nrows": 2, "ncols": len(tasks), "sharex": True, "sharey": True, "height_to_width_ratio": height_to_width_ratio}
         if figure_generator is None:
             figure_generator = create_large_figure if len(tasks) > 2 else create_normal_figure
         fig, axes = figure_generator(**__figkwargs)

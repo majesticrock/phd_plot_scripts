@@ -7,12 +7,12 @@ from get_data import *
 fig, ax = plt.subplots()
 
 N=16000
-SYSTEM = 'fcc'
+SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
                     **lattice_cut_params(N=N, 
-                                         g=0.3,
-                                         U=0, 
-                                         E_F=0,
+                                         g=1.955,
+                                         U=0.01, 
+                                         E_F=-0.5,
                                          omega_D=0.02))
 
 energy_space = main_df['energies']

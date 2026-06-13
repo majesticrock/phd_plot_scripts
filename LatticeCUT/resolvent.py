@@ -9,8 +9,8 @@ from scipy.signal import find_peaks
 SYSTEM = 'bcc'
 N=16000
 params = lattice_cut_params(N=N, 
-                            g=2.375,
-                            U=0.05, 
+                            g=2.625,
+                            U=0.01, 
                             E_F=-0.5,
                             omega_D=0.02)
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz", **params)

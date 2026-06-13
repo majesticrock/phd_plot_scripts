@@ -46,7 +46,7 @@ params = lattice_cut_params(N=N,
 
 tc_df   = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
 main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "all_gaps.json.gz", **params)
-dos_df  = load_panda("lattice_cut", f"./old_bcc", "gap.json.gz",
+dos_df  = load_panda("lattice_cut", f"./bcc", "gap.json.gz",
                     **lattice_cut_params(N=N,  g=0., U=0.,  E_F=0., omega_D=0.02))
 
 

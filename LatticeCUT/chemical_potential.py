@@ -50,7 +50,7 @@ if __name__ == "__main__":
     norm_below = cm.Normalize(Gs[0] - 0.4, G_ENH)
     norm_above = cm.Normalize(G_ENH - 0.2, Gs[-1] + 0.05)
     
-    dos_df  = load_panda("lattice_cut", f"./old_bcc", "gap.json.gz",
+    dos_df  = load_panda("lattice_cut", f"./bcc", "gap.json.gz",
                             **lattice_cut_params(N=N,  g=0., U=0.,  E_F=0., omega_D=0.02))
     
     for i, G in enumerate(Gs):

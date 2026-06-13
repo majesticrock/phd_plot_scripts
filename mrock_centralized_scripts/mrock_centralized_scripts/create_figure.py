@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 
 __GOLDEN_RATIO__ = (5.**.5 - 1.) / 2.
-__DEFAULT_RATIO__ = 4.8 / 6.4
+__DEFAULT_RATIO__ = 0.75
 
 __NORMAL_TEXT_WIDTH_FRACTION__ = 0.5
 __LARGE_TEXT_WIDTH_FRACTION__ = 0.99
-
+__OVERSIZED_WIDTH_FRACTION__ = 1.5
 
 def _load_text_width():
     import sys
@@ -57,3 +57,6 @@ def create_normal_figure(height_to_width_ratio=__DEFAULT_RATIO__, generator=plt.
 
 def create_large_figure(height_to_width_ratio=.5 * __DEFAULT_RATIO__, generator=plt.subplots, **kwargs):
     return create_figure(__LARGE_TEXT_WIDTH_FRACTION__, height_to_width_ratio, generator, **kwargs)
+
+def create_oversized_figure(height_to_width_ratio=.33 * __DEFAULT_RATIO__, generator=plt.subplots, **kwargs):
+    return create_figure(__OVERSIZED_WIDTH_FRACTION__, height_to_width_ratio, generator, **kwargs)
