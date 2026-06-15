@@ -26,9 +26,9 @@ alpha = 180.951282 / a**3
 rho_F = rho[np.argmin(np.abs(xi))] / W
 screening = 2 * rho_F * alpha
 
-b1 = (2*np.pi/a) * np.array([ 1, 1,-1])
-b2 = (2*np.pi/a) * np.array([ 1,-1, 1])
-b3 = (2*np.pi/a) * np.array([-1, 1, 1])
+b1 = (2*np.pi/a) * np.array([1, 1, 0])
+b2 = (2*np.pi/a) * np.array([1, 0, 1])
+b3 = (2*np.pi/a) * np.array([0, 1, 1])
 
 total = 0.
 for i in range(N_k):
