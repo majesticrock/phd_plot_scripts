@@ -45,7 +45,7 @@ def compute_heat_capacity(internal_energies, temperatures):
 fig, ax = plt.subplots()
 N=10000
 E_F=-0.5
-U=0.0
+U=0.5
 OMEGA_D=0.02
 SYSTEM = 'bcc'
 main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "all_gaps.json.gz", condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
@@ -56,9 +56,11 @@ dos_df  = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
 from matplotlib import cm
 g_values = main_df['g'].to_numpy()
 norm = plt.Normalize(vmin=np.min(g_values), vmax=np.max(g_values))
-cmap = cm.gist_rainbow
+cmap = cm.jet
 
 for (i, row), (_, row_tc) in zip(main_df.iterrows(), tc_df.iterrows()):
+    if i % 5 != 0:
+        continue
     Ts = row_tc["temperatures"]
     deltas = row["finite_gaps"]
     T_C = Ts[-1]

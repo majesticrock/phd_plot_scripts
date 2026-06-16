@@ -7,13 +7,14 @@ from get_data import *
 SYSTEM = 'bcc'
 DIR = '.'
 N=10000
+Us = [0, 0.01, 0.1, 0.5]
 
-fig, axes = plt.subplots(ncols=3, sharex=True, sharey=True, constrained_layout=True)
+fig, axes = plt.subplots(ncols=len(Us), sharex=True, sharey=True, constrained_layout=True, figsize=(10, 5))
 axes[-1].set_xlabel("$T / W$")
 axes[0].set_ylabel(r"$\Delta / W$")
 
-for j, (ax, U) in enumerate(zip(axes, [0, 0.01, 0.1])):
-    for i, G in enumerate([1.5, 2.0]):
+for j, (ax, U) in enumerate(zip(axes, Us)):
+    for i, G in enumerate([1.5, 2.5]):
         params = lattice_cut_params(N=N, 
                                     g=G,
                                     U=U, 

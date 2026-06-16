@@ -10,8 +10,8 @@ N=16000
 SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
                     **lattice_cut_params(N=N, 
-                                         g=1.955,
-                                         U=0.01, 
+                                         g=0.425,
+                                         U=0.5, 
                                          E_F=-0.5,
                                          omega_D=0.02))
 
