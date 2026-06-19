@@ -14,9 +14,8 @@ from .create_figure import create_normal_figure, create_large_figure
 from make_panels_touch import make_panels_touch
 from label_axes import label_axes
 
-MAX_EXP = 2.1
-CUT_OFF_EXP = -1.5
-CUT_OFF = 10**CUT_OFF_EXP
+#MAX_EXP = 2.1
+#CUT_OFF_EXP = -1.5
 
 # Settings the importer
 G_MAX_LOAD = 3
@@ -329,7 +328,7 @@ class HeatmapPlotter:
             for i in range(self.N_data):
                 spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
 
-    def plot_one(self, ax, cmap, which="amplitude_SC", continuum_color="cyan"):
+    def plot_one(self, ax, cmap, which="amplitude_SC", continuum_color="cyan", min_exp=-1.5, max_exp=2.1):
         spectral_functions = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, which) for __i, res in enumerate(self.resolvents)]).transpose()
 
         if which == "amplitude_SC":
@@ -376,11 +375,9 @@ class HeatmapPlotter:
                     summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
                 else:
                     summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
-                mask = summand > 1e-6
-                spectral_functions[mask, i] += summand[mask]
-        
-                
-        levels = np.power(10, np.linspace(CUT_OFF_EXP, MAX_EXP, 255, endpoint=True))
+                spectral_functions[:, i] += summand
+             
+        levels = np.power(10, np.linspace(min_exp, max_exp, 255, endpoint=True))
         spectral_functions = np.where(spectral_functions <= 1e-10, 1e-10, spectral_functions)
 
         contour = ax.contourf(self.x, self.y, spectral_functions, cmap=cmap, 
@@ -400,9 +397,9 @@ class HeatmapPlotter:
         
         return contour
 
-    def plot(self, axes, cmap, labels=True):
-        contour_higgs = self.plot_one(axes[0], cmap, "amplitude_SC")
-        self.plot_one(axes[1], cmap, "phase_SC")
+    def plot(self, axes, cmap, labels=True, min_exp=-1.5, max_exp=2.1):
+        contour_higgs = self.plot_one(axes[0], cmap, "amplitude_SC", min_exp=min_exp, max_exp=max_exp) 
+        self.plot_one(axes[1], cmap, "phase_SC", min_exp=min_exp, max_exp=max_exp)
         
         if labels:
             if self.scale_energy_by_gaps:
@@ -429,7 +426,9 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
                 cf_ignore=BaseCFIgnore(),
                 figure_generator=None,
                 height_to_width_ratio=0.55,
-                special_labels=[]):
+                special_labels=[],
+                min_exp=-1.5,
+                max_exp=2.1):
     if energy_range is None:
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
@@ -448,7 +447,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
             plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
                                            energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, 
                                            cf_ignore=__get_cf_ignore__(cf_ignore, i)))
-            contour_for_colorbar = plotters[-1].plot(axes[:, i], labels=not bool(i), cmap=cmap)
+            contour_for_colorbar = plotters[-1].plot(axes[:, i], labels=not bool(i), cmap=cmap, min_exp=min_exp, max_exp=max_exp)
     else:
         for i, ax in enumerate(axes):
             ax.annotate(
@@ -460,7 +459,7 @@ def create_plot(tasks, xscale="linear", scale_energy_by_gaps=False,
             plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
                                            energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, 
                                            cf_ignore=__get_cf_ignore__(cf_ignore, i)))
-            contour_for_colorbar = plotters[-1].plot(axes[:], labels=not bool(i), cmap=cmap)
+            contour_for_colorbar = plotters[-1].plot(axes[:], labels=not bool(i), cmap=cmap, min_exp=min_exp, max_exp=max_exp)
 
     cbar = fig.colorbar(contour_for_colorbar, ax=axes.ravel().tolist(), 
                         orientation='vertical', fraction=0.1, pad=0.025, extend='max')
@@ -484,7 +483,9 @@ def create_reduced_plot(tasks, xscale="linear",
                         fig=None, axes=None, 
                         cf_ignore=BaseCFIgnore(),
                         figure_generator=None,
-                        special_labels=[]):
+                        special_labels=[],
+                        min_exp=-1.5,
+                        max_exp=2.1):
     if energy_range is None:
         energy_range = (1e-10, 0.29) if not scale_energy_by_gaps else (1e-10, 1.95)
     if fig is None:
@@ -512,7 +513,7 @@ def create_reduced_plot(tasks, xscale="linear",
         plotters.append(HeatmapPlotter(data_query, x_column, xlabel=xlabel, xscale=xscale, 
                                        energy_range=energy_range, scale_energy_by_gaps=scale_energy_by_gaps, 
                                        cf_ignore=__get_cf_ignore__(cf_ignore, i)))
-        contour_for_colorbar = plotters[-1].plot_one(axes[i], cmap=cmap, which=which_internal)
+        contour_for_colorbar = plotters[-1].plot_one(axes[i], cmap=cmap, which=which_internal, min_exp=min_exp, max_exp=max_exp)
         axes[i].set_xlabel(xlabel)
         
     if scale_energy_by_gaps:

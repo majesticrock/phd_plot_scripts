@@ -9,8 +9,7 @@ N=16000
 OMEGA_D=0.02
 E_F=-0.5
 DOS="bcc"
-U=0.01
-n_mode = 0
+U=0.1
 
 all_data = load_pickle(f"lattice_cut/{DOS}/N={N}", "resolvents.pkl")
 
@@ -19,6 +18,10 @@ tasks = [
 ]
 
 import mrock_colormaps as mcm
-fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(250, 260), cmap=mcm.blackidis_white_r)
+fig, axes, plotters, cbar = hp.create_plot(tasks, cf_ignore=(250, 260), 
+                                           cmap=mcm.blackidis_white_r, 
+                                           energy_range=(0., 1.),
+                                           min_exp=-3,
+                                           max_exp=2.1)
 
 plt.show()

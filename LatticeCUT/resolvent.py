@@ -4,7 +4,6 @@ import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-from scipy.signal import find_peaks
 
 SYSTEM = 'bcc'
 N=16000
@@ -22,8 +21,8 @@ resolvents = cf.ContinuedFraction(main_df, ignore_first=200, ignore_last=280)
 print("Delta_true = ", resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
-ax.set_xlabel(r"$\omega [\mathrm{meV}]$")
-ax.set_ylabel(r"$\mathcal{A} (\omega) [\mathrm{eV}^{-1}]$")
+ax.set_xlabel(r"$\omega / W$")
+ax.set_ylabel(r"$\mathcal{A} (\omega) / W^{-1}$")
 
 plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
@@ -43,8 +42,6 @@ ax.set_ylim(-0.05, 50)
 #plotter.plot(w_lin.real, np.arctan((denom)))
 
 resolvents.mark_continuum(ax)
-
-
 
 ax.set_xlim(np.min(w_lin.real), np.max(w_lin.real))
 ax.legend()
