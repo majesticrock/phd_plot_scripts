@@ -10,24 +10,19 @@ N=16000
 SYSTEM = 'bcc'
 main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
                     **lattice_cut_params(N=N, 
-                                         g=2.5,
-                                         U=3., 
+                                         g=1.89,
+                                         U=0.01, 
                                          E_F=-0.5,
                                          omega_D=0.02))
 
 energy_space = main_df['energies']
-ax.plot(energy_space, main_df['Delta'], 'k-')
-
-rho_ax = ax.twinx()
-rho_ax.plot(energy_space, main_df['dos'], c='red', ls='--')
-rho_ax.tick_params(axis='y', colors='red')
-rho_ax.yaxis.label.set_color('red')
-rho_ax.set_ylabel(r'$\rho(\epsilon)$')
-
-print(2 * np.sum(main_df['dos']) / N)
+delta = main_df['Delta']
+ax.plot(energy_space, delta, 'k-')
 
 ax.set_xlabel(r'$\epsilon - \mu$')
 ax.set_ylabel(r'$\Delta$')
+
+ax.text(0.8, 0.8, f"Max={np.max(delta):.5f}\nMin={np.min(delta):.5f}", transform=ax.transAxes, ha="right")
 
 fig.tight_layout()
 

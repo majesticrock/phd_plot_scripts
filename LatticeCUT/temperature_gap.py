@@ -8,9 +8,9 @@ from get_data import *
 SYSTEM = 'bcc'
 DIR = '.'
 N=10000
-U=0.5
+U=0.01
 params = lattice_cut_params(N=N, 
-                            g=2.2,
+                            g=1.9,
                             U=U, 
                             E_F=-0.5,
                             omega_D=0.02)
@@ -20,6 +20,8 @@ fig, ax = plt.subplots()
 
 X, Y = np.meshgrid(np.linspace(-1, 1, N, endpoint=True), main_df["temperatures"])
 Z = gap_df["finite_gaps"]
+mask = Z[-1] > 0
+Z[-1,mask] *= -1
 
 min_max = np.max(np.abs(Z))
 if U!=0.0:

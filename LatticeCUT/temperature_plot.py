@@ -7,14 +7,14 @@ from get_data import *
 SYSTEM = 'bcc'
 DIR = '.'
 N=10000
-Us = [0, 0.01, 0.1, 0.5, 2.0]
+Us = [0, 0.01]
+Gs = [1.86, 1.866, 1.876]
 
-fig, axes = plt.subplots(ncols=len(Us), sharex=True, sharey=True, constrained_layout=True, figsize=(10, 5))
-axes[-1].set_xlabel("$T / W$")
-axes[0].set_ylabel(r"$\Delta / W$")
+fig, axes = plt.subplots(ncols=len(Gs), nrows=len(Us), sharex="row", sharey="col", 
+                         constrained_layout=True, figsize=(10, 5))
 
-for j, (ax, U) in enumerate(zip(axes, Us)):
-    for i, G in enumerate([2.5]):
+for j, (axs, U) in enumerate(zip(axes, Us)):
+    for i, (ax, G) in enumerate(zip(axs, Gs)):
         params = lattice_cut_params(N=N, 
                                     g=G,
                                     U=U, 
@@ -26,6 +26,5 @@ for j, (ax, U) in enumerate(zip(axes, Us)):
         ax.plot(main_df["temperatures"], main_df["true_gaps"], ls="--", c=f"C{i}")
 
     ax.set_ylim(0, None)
-axes[0].legend()
 
 plt.show()

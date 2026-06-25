@@ -11,9 +11,9 @@ def linear_model(T, m, b):
 fig, (ax, ax_ratio) = plt.subplots(nrows=2, sharex=True)
 
 SYSTEM = 'bcc'
-OMEGA_D=0.02
+OMEGA_D=0.03
 N=10000
-U=0.01
+U=0.
 E_F=-0.5
 
 main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", 
@@ -21,13 +21,7 @@ main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz",
 mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 10)
 
 main_df = main_df[mask].reset_index(drop=True)
-interactions = main_df["g"].to_numpy(dtype=np.float64) - U
-
-main_df["time"] = pd.to_datetime(main_df["time"], format="%d-%m-%Y %H:%M:%S")
-#cutoff = pd.to_datetime(main_df["time"].dt.year.astype(str) + "-11-21")
-#result = main_df[main_df["time"] < cutoff]
-#for _, xresult in result.iterrows():
-#    print(xresult["g"])
+interactions = main_df["g"].to_numpy(dtype=np.float64)
 
 max_gaps = main_df["max_gaps"]
 true_gaps = main_df["true_gaps"]
@@ -46,19 +40,19 @@ for i, (_Ts, _deltas) in enumerate(zip(main_df["temperatures"], max_gaps)):
     m, b = popt
     TCs[i] = b / (-m)
     
-ax.plot(interactions, TCs)
+ax.plot(interactions, np.gradient(TCs, interactions))
 
-max_gaps_at_zero = np.array([delta[0] for delta in max_gaps])
-true_gaps_at_zero = np.array([delta[0] for delta in true_gaps])
-ax_ratio.plot(interactions, max_gaps_at_zero / TCs, label=r"$\Delta_\mathrm{max}$")
-ax_ratio.plot(interactions, true_gaps_at_zero / TCs, label=r"$\Delta_\mathrm{true}$")
+max_gaps_at_zero  = np.gradient(np.array([delta[0] for delta in max_gaps])  / TCs, interactions) 
+true_gaps_at_zero = np.gradient(np.array([delta[0] for delta in true_gaps]) / TCs, interactions) 
+ax_ratio.plot(interactions, max_gaps_at_zero , label=r"$\Delta_\mathrm{max}$")
+ax_ratio.plot(interactions, true_gaps_at_zero, label=r"$\Delta_\mathrm{true}$")
     
 ax_ratio.axhline(1.764, color="k", ls=":", label="BCS")
 ax.set_ylabel(r'$T_C$')
 ax.set_ylim(0, ax.get_ylim()[1])
 
 ax_ratio.legend()
-ax_ratio.set_xlabel(r'$g-U$')
+ax_ratio.set_xlabel(r'$g$')
 ax_ratio.set_ylabel(r"$\Delta_0 / T_c$")
 
 fig.tight_layout()
