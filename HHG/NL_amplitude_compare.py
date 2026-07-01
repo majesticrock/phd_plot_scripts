@@ -14,13 +14,13 @@ ap.append()
 from get_data import *
 from legend import *
 
-MAX_FREQ = 20
+MAX_FREQ = 14.9
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # FFT window (unitless time)
-FFT_TMIN = 1.0
-FFT_TMAX = 9.0
+FFT_TMIN = 3.0
+FFT_TMAX = 7.0
 
 # === Choose sweep parameter here ===
 sweep_param = "field_amplitude"
@@ -135,12 +135,12 @@ def run_and_plot(ax, ax_fft, params, color, label=None, data_norm=None):
 
 # --- Figure setup ---
 fig, ax = cdt.create_frame()
-fig_fft, ax_fft = cdf.create_frame()
+fig_fft, ax_fft = cdf.create_frame(figsize=(7,4.8))
 
 ax_fft.set_yscale("log")
 ax_fft.set_xlim(0, MAX_FREQ)
 
-for i in range(1, MAX_FREQ, 2):
+for i in range(1, int(MAX_FREQ), 2):
     ax_fft.axvline(i, color="gray", ls="--")
 
 # Colormap setup

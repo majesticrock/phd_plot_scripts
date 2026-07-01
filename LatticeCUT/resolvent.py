@@ -5,14 +5,14 @@ __ap.append()
 from create_zoom import *
 from get_data import *
 
-SYSTEM = 'bcc'
-N=16000
+SYSTEM = 'sc'
+N=2000
 params = lattice_cut_params(N=N, 
-                            g=1.5,
-                            U=0.5, 
-                            E_F=-0.5,
+                            g=1.,
+                            U=0., 
+                            E_F=0,
                             omega_D=0.02)
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz", **params)
+main_df = load_panda("lattice_cut", f"test/{SYSTEM}", "resolvents.json.gz", **params)
 
 import continued_fraction_pandas as cf
 import plot_settings as ps

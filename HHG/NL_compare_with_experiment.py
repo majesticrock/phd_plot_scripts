@@ -26,6 +26,9 @@ FFT_TMAX = 9.0
 sweep_param = "field_amplitude"
 sweep_values = [ 0.1, 0.2, 0.5, 0.7, 1.0]
 
+sweep_param = "W"
+sweep_values = [ 500, 600, 700 ]
+
 # Default parameters in one place
 PARAMS = {
     "DIR": "cascade_16",
@@ -40,7 +43,7 @@ PARAMS = {
     "field_amplitude": 1
 }
 
-T_DELAY = 0.21
+T_DELAY = 0.0
 
 def gaussian(x, mu, gamma):
     return (1 / (gamma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * gamma**2))
@@ -154,9 +157,9 @@ for i, val in enumerate(sweep_values):
     params[sweep_param] = val  # override chosen parameter
     color = cmap(norm(val))
     if i == 0:
-        main_df, data_norm = run_and_plot(ax, ax_fft, params, f"black", f"amp={val / 2e6}")#, color)
+        main_df, data_norm = run_and_plot(ax, ax_fft, params, color)
     else:
-        run_and_plot(ax, ax_fft, params, f"C{i - 1}", f"amp={val / 2e6}", data_norm=data_norm)
+        run_and_plot(ax, ax_fft, params, color, data_norm=data_norm)
 
 times = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
 laser = np.gradient(main_df["laser_function"])

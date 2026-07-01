@@ -13,10 +13,10 @@ from legend import *
 from scipy.fft import rfft, rfftfreq
 
 MAX_FREQ = 20
-DIR = "cascade"
+DIR = "cascade_16"
 MODEL = "PiFlux"
-v_F = 1.5e6
-W = 450
+v_F = 2e6
+W = 600
 T = 300
 E_F = 118
 TAU_OFFDIAG=-1
@@ -24,13 +24,14 @@ TAU_DIAG=5
 
 gamma = 25e-3
 
-FFT_CUTS = [1.7, 6.5]
+FFT_CUTS = [1.7, 4.5]
+T_DELAY=0.21
 
 fig, axes = cdt.create_frame(nrows=3, figsize=(8.4, 10), 
                              ylabel_list=[legend(r"j_\mathrm{lin}(t)", "a.b."), 
                                           legend(r"j_\mathrm{sim}(t)", "a.b."), 
                                           legend(r"j_\mathrm{sim}(t) - j_\mathrm{lin}(t)", "a.b.")])
-axes[0].set_xlim(1.7, 6.5)
+axes[0].set_xlim(*FFT_CUTS)
 
 fig_fft, axes_fft = cdf.create_frame(nrows=3, figsize=(8.4, 10), 
                              ylabel_list=[legend(r"j_\mathrm{lin}(t)", "a.b."), 
@@ -54,7 +55,7 @@ df_B = load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz",
 main_df = load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz", 
                      **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W, 
                                   field_amplitude=1., photon_energy=1., 
-                                  tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
+                                  tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=T_DELAY))
 
 exp_laser_t_max =  15.3335961194029835 * 1.5 / 2.#15.3335961194029835 if not new_t else
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) * exp_laser_t_max / df_A["t_end"]
@@ -86,8 +87,7 @@ def combined_inter(t, t0):
         B = inter_B(t)
     return A + B
 
-t0 = 0
-plot_data_combined = combined_inter(times, t0)
+plot_data_combined = combined_inter(times, T_DELAY)
 
 simulation_data = -np.convolve(np.gradient(main_df["current_density_time"]), __kernel, mode='same')
 

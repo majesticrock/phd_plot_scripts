@@ -34,17 +34,17 @@ def compute_normal_state_mu(epsilons, dos, beta, filling, guess=0.0, guess_tol=0
 if __name__ == "__main__":
     N=10000
     SYSTEM = 'bcc'
-    E_F=-0.5
-    U=0.2
+    E_F=-0.3
+    U=0.
     OMEGA_D=0.02
     
-    G_ENH = 1.88 if U==0 else 1.95
+    G_ENH = 1.866 if U==0 else 1.95
     
     fig, ax = plt.subplots()
     ax.set_xlabel(r'$T / W$')
     ax.set_ylabel(r'$(\mu - E_\mathrm{F}) / W$')
     
-    Gs = np.array([1.9, 1.925, 1.95, 1.975, 2.0, 2.025, 2.05, 2.075])
+    Gs = np.array([1.6, 1.8, 1.82, 1.9, 1.95, 1.975])
     cmap_below = plt.get_cmap("YlGnBu")
     cmap_above = plt.get_cmap("hot_r")
     norm_below = cm.Normalize(Gs[0] - 0.4, G_ENH)

@@ -20,7 +20,7 @@ FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # FFT window (unitless time)
 FFT_TMIN = 3.0
-FFT_TMAX = 7.0
+FFT_TMAX = 7
 
 # Default parameters in one place
 params = {
@@ -35,6 +35,7 @@ params = {
     "T_AVE": 28
 }
 
+T_DELAY = 0.21
 
 def gaussian(x, mu, gamma):
     return (1 / (gamma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * gamma**2))
@@ -58,7 +59,7 @@ df_B = load_panda("HHG", f"{params['DIR']}/expB_laser/{params['MODEL']}", "curre
 main_df = load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MODEL']}", "current_density.json.gz", 
                      **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                   field_amplitude=1., photon_energy=1., 
-                                  tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
+                                  tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=T_DELAY))
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
 sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
 __kernel = gaussian(times, times[len(times)//2], sigma)
@@ -77,7 +78,7 @@ def combined_inter(t, t0):
         A = inter_A(t + t0)
         B = inter_B(t)
     return A + B
-t0_unitless = 0 * main_df["photon_energy"] / TIME_TO_UNITLESS
+t0_unitless = T_DELAY * main_df["photon_energy"] / TIME_TO_UNITLESS
 # --- Restrict to FFT interval and resample to uniform grids ---
 tmin, tmax = FFT_TMIN, FFT_TMAX
 sim_mask = (times >= tmin) & (times <= tmax)
@@ -104,46 +105,53 @@ fftplot /= np.max(fftplot)
 freqs = rfftfreq(n, dt_sim)
 
 # --- Figure setup ---
-fig, ax = cdf.create_frame(figsize=(8,8))
-#for i in range(1, MAX_FREQ, 2):
-#    ax.axvline(i, color="gray", ls="--")
-
+fig, ax = cdf.create_frame(figsize=(7,4.8))
 # --- Experimental data ---
-EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
-EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domain.dat").transpose()
-exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / TIME_TO_UNITLESS
+if T_DELAY == 0:
+    EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
+    EXPERIMENTAL_DATA = np.loadtxt(EXP_PATH + "HHG/emitted_signals_in_the_time_domain.dat").transpose()
+    exp_times = (15 * 0.03318960199004975 + EXPERIMENTAL_DATA[0]) * main_df["photon_energy"] / TIME_TO_UNITLESS
 
-# Resample experimental signals onto a uniform grid inside FFT window and compute FFTs
-exp_mask = (exp_times >= FFT_TMIN) & (exp_times <= FFT_TMAX)
-if np.sum(exp_mask) < 2:
-    exp_mask = np.ones_like(exp_times, dtype=bool)
+    # Resample experimental signals onto a uniform grid inside FFT window and compute FFTs
+    exp_mask = (exp_times >= FFT_TMIN) & (exp_times <= FFT_TMAX)
+    if np.sum(exp_mask) < 2:
+        exp_mask = np.ones_like(exp_times, dtype=bool)
 
-exp_dts = np.diff(exp_times[exp_mask])
-if len(exp_dts) > 0:
-    dt_exp = np.min(exp_dts)
-else:
-    dt_exp = exp_times[1] - exp_times[0]
+    exp_dts = np.diff(exp_times[exp_mask])
+    if len(exp_dts) > 0:
+        dt_exp = np.min(exp_dts)
+    else:
+        dt_exp = exp_times[1] - exp_times[0]
 
-uniform_t_exp = np.arange(FFT_TMIN, FFT_TMAX, dt_exp)
+    uniform_t_exp = np.arange(FFT_TMIN, FFT_TMAX, dt_exp)
 
-# interpolate experimental signal onto uniform grid for FFT
-interp_exp = interp1d(exp_times, EXPERIMENTAL_DATA[4], fill_value=0.0, bounds_error=False)
-exp_sig_u = interp_exp(uniform_t_exp)
-n_exp = len(uniform_t_exp) * 4
-exp_freqs = rfftfreq(n_exp, dt_exp)
-exp_fft = np.abs(rfft(exp_sig_u, n_exp))**2
-exp_fft /= np.max(exp_fft)
-
+    # interpolate experimental signal onto uniform grid for FFT
+    interp_exp = interp1d(exp_times, EXPERIMENTAL_DATA[4], fill_value=0.0, bounds_error=False)
+    exp_sig_u = interp_exp(uniform_t_exp)
+    n_exp = len(uniform_t_exp) * 4
+    exp_freqs = rfftfreq(n_exp, dt_exp)
+    exp_fft = np.abs(rfft(exp_sig_u, n_exp))**2
+    exp_fft /= np.max(exp_fft)
+    ax.plot(exp_freqs, exp_fft , label="Experiment", ls="--", color="k")
+    
 ax.plot(freqs, fftplot, label="Simulation")
-ax.plot(exp_freqs, exp_fft , label="Experiment", ls="--", color="k")
 
-#N_AVG = 35
-#fftplot_avg = np.convolve(fftplot, np.ones(N_AVG)/N_AVG, mode='same')
-#ax.plot(freqs, fftplot_avg, label="Average", ls="--")
-
-peaks = [1, 2.67, 4.2, 5.6, 6.85, 8.3, 9.25]
-for peak in peaks:
+if T_DELAY == 0:
+    peaks = [1, 2.67, 4.2, 5.6, 6.85, 8.3, 9.25]
+else:
+    peaks = [1, 2.82, 4.73, 7.06, 8.7, 9.5, 11.3]
+    
+for i, peak in enumerate(peaks, start=1):
     ax.axvline(peak, ls="--", c="gray")
+    ax.text(
+        peak,
+        0.3,
+        f"$({i}): {peak} \\omega_\\mathrm{{L}}$",
+        rotation=90,
+        va="top",
+        ha="right",
+        transform=ax.get_xaxis_transform()
+    )
 
 ax.legend(loc="upper right")
 ax.set_yscale("log")
@@ -155,6 +163,7 @@ fig.tight_layout()
 
 fig_time, ax_time = cdt.create_frame(ylabel_list=r"$\partial_t j_\mathrm{NL}(t)$")
 ax_time.plot(uniform_t_sim, non_linear_signal / np.max(np.abs(non_linear_signal)))
-ax_time.plot(exp_times[exp_mask], EXPERIMENTAL_DATA[4][exp_mask] / np.max(np.abs(EXPERIMENTAL_DATA[4])), ls="--", c="k")
+if T_DELAY==0:
+    ax_time.plot(exp_times[exp_mask], EXPERIMENTAL_DATA[4][exp_mask] / np.max(np.abs(EXPERIMENTAL_DATA[4])), ls="--", c="k")
 
 plt.show()
