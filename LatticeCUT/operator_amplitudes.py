@@ -28,7 +28,6 @@ params = lattice_cut_params(N=N,
                             E_F=E_F,
                             omega_D=OMEGA_D)
 main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", print_date=False, **params)
-gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", print_date=False, **params)
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - main_df["chemical_potential"])
 
 purger.plot_amplitude(axes[:2], combined_norm=True)
