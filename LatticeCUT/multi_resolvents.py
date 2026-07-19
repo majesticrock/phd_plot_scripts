@@ -4,7 +4,7 @@ import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 import os
 
 figs = []
@@ -32,8 +32,8 @@ for system in systems:
         w_lin = np.linspace(-0.005 * main_df["continuum_boundaries"][1], 0.45 * main_df["continuum_boundaries"][1], 15000, dtype=complex)
         w_lin += 1e-4j
         
-        ax[i].plot(w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True), label=f"Phase $g={g}$", c=f"C{i}", ls="-")
-        ax[i].plot(w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True), label=f"Higgs $g={g}$", c=f"C{i}", ls=":")
+        ax[i].plot(w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     with_terminator=True), label=f"Phase $g={g}$", c=f"C{i}", ls="-")
+        ax[i].plot(w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", with_terminator=True), label=f"Higgs $g={g}$", c=f"C{i}", ls=":")
 
         resolvents.mark_continuum(ax[i], label=None)
         ax[i].set_ylim(-0.05, 1)

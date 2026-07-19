@@ -2,10 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction as cf
+import legacy_continued_fraction as cf
 from iterate_containers import naming_scheme
-from extract_key import *
-# Calculates the resolvent in w^2
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
 colors = prop_cycle.by_key()['color']
@@ -35,7 +33,7 @@ counter = 0
 for name in naming_scheme(Ts, Us, Vs):
     data, data_real, w_lin, res = cf.resolvent_data(f"{folder}{name}", name_suffix, 0, number_of_values=20000, imaginary_offset=1e-6, xp_basis=True, messages=False)
     
-    peak_positions[counter] = w_lin[np.argmax(data)] #/ extract_key(f"{folder}{name}/resolvent_{name_suffix}.dat.gz", "Total Gap")
+    peak_positions[counter] = w_lin[np.argmax(data)] 
     counter += 1
 
 fig, ax = plt.subplots()

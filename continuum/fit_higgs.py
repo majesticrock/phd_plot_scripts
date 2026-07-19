@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 from get_data import load_panda, continuum_params
 from legend import *
 from ez_fit import ez_linear_fit

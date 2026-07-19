@@ -6,7 +6,7 @@ __ap.append()
 from get_data import load_panda, hubbard_params
 pd_data = load_panda("hubbard/cube", "test", "resolvents.json.gz", **hubbard_params(0.0, -2.5, -0.1))
 
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 import plot_settings as ps
 
 resolvents = cf.ContinuedFraction(pd_data)

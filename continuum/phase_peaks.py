@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 
 from get_data import *
 

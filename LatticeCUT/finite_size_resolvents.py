@@ -4,7 +4,7 @@ import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 
 SYSTEM = "bcc"
 G   = 2
@@ -26,8 +26,8 @@ for N in Ns:
                                              E_F=E_F,
                                              omega_D=OMEGA_D))
     resolvents = cf.ContinuedFraction(main_df, ignore_first=100, ignore_last=130)
-    axes[0].plot(w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True), label=f"$N={N}$")
-    axes[1].plot(w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     withTerminator=True), label=f"$N={N}$")
+    axes[0].plot(w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", with_terminator=True), label=f"$N={N}$")
+    axes[1].plot(w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     with_terminator=True), label=f"$N={N}$")
     
 
 for ax in axes:

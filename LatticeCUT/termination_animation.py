@@ -5,7 +5,7 @@ import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
 SYSTEM = "bcc"
@@ -53,10 +53,10 @@ import time
 begin = time.time()
 # --- Precompute spectra ---
 all_higgs = resolvents.spectral_density_varied_depth(
-    w_lin, "amplitude_SC", shift_range, withTerminator=True
+    w_lin, "amplitude_SC", shift_range, with_terminator=True
 )
 all_phase = resolvents.spectral_density_varied_depth(
-    w_lin, "phase_SC", shift_range, withTerminator=True
+    w_lin, "phase_SC", shift_range, with_terminator=True
 )
 end = time.time()
 print("Duration:", end-begin)

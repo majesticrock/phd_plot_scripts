@@ -5,7 +5,7 @@ from scipy.signal import find_peaks
 
 from . import path_appender as __ap
 __ap.append()
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 import spectral_peak_analyzer as spa
 from legend import *
 from matplotlib import ticker

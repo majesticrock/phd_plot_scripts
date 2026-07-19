@@ -4,7 +4,7 @@ import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 from create_zoom import *
 from get_data import *
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 
 SYSTEM = "bcc"
 G   = 1.4

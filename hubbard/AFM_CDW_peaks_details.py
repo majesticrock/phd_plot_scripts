@@ -4,10 +4,7 @@ import matplotlib.pyplot as plt
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 
-import continued_fraction as cf
 from iterate_containers import naming_scheme
-from extract_key import *
-import scipy.optimize as opt
 import resolvent_peak as rp
 # Calculates the resolvent in w^2
 

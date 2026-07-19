@@ -3,7 +3,7 @@ __ap.append()
 from get_data import *
 from legend import *
 import matplotlib.pyplot as plt
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 import matplotlib as mpl
 
 N=16000
@@ -33,7 +33,7 @@ ax.set_ylabel(r"$\mathcal{A} (\omega) / W^{-1}$")
 
 for i, row in main_df.iterrows():
     resolvents = cf.ContinuedFraction(row, ignore_first=260, ignore_last=280)
-    A_higgs = resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True)
+    A_higgs = resolvents.spectral_density(w_lin, "amplitude_SC", with_terminator=True)
     ax.plot(w_lin.real, row["U"]**2 * A_higgs, c=cmap(i / n_lines))
     
 sm = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)

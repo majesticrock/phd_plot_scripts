@@ -4,7 +4,7 @@ import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 
 from get_data import load_panda, continuum_params
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 import plot_settings as ps
 
 screenings = [1e-4, 1e-2, 0.1, 0.25, 0.5, 0.75, 1., 1.5, 10., 50., 100., r"\lambda"]
@@ -35,8 +35,8 @@ for i in range(n_plots):
     w_lin = np.linspace(0., 0.080, 15000, dtype=complex)
     w_lin += 1e-5j
 
-    plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "phase_SC", withTerminator=True), label="Phase")
-    plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", withTerminator=True), label="Higgs")
+    plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "phase_SC", with_terminator=True), label="Phase")
+    plotter.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "amplitude_SC", with_terminator=True), label="Higgs")
     resolvents.mark_continuum(axs[i], scale_factor=1e3)
 
     axs[n_plots - 1].set_xlabel(r"$\omega [\mathrm{meV}]$")

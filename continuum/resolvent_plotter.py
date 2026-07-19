@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 from matplotlib import colors
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 
 BUILD_DIR = "python/continuum/build/"
 FILE_ENDING = ".pdf"

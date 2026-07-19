@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction as cf
+import legacy_continued_fraction as cf
 from iterate_containers import naming_scheme
 import plot_settings as ps
 # Calculates the resolvent in w^2
@@ -35,7 +35,7 @@ plot_upper_lim = 10
 name_suffix = "phase_SC"
 for name in naming_scheme(Ts, Us, Vs):
     data, data_real, w_lin, res = cf.resolvent_data(f"{folder}{name}", name_suffix, plot_lower_lim, plot_upper_lim, 
-                                                    number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5, withTerminator=True)
+                                                    number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5, with_terminator=True)
     plotter.plot(w_lin, data, label="Phase")
 
 name_suffix = "higgs_SC"

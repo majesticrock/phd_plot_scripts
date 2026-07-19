@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 import spectral_peak_analyzer as spa
 from get_data import *
 from scipy.signal import find_peaks
@@ -30,7 +30,7 @@ w_lin = np.linspace(0, main_df["continuum_boundaries"][0], 15000, dtype=complex)
 w_lin += 1e-5j
 
 
-spectral = resolvents.spectral_density(w_lin, MODE_TYPE, withTerminator=True)
+spectral = resolvents.spectral_density(w_lin, MODE_TYPE, with_terminator=True)
 
 find_peaks_result = find_peaks(spectral, prominence=0.5)
 spectral_indizes = find_peaks_result[0]
@@ -38,8 +38,8 @@ spectral_positions = np.array([w_lin[i].real for i in spectral_indizes])
 print("Prominences:", find_peaks_result[1]["prominences"])
 print("Positions:", spectral_positions)
 
-spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, withTerminator=True).real
-spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, withTerminator=True).imag
+spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, with_terminator=True).real
+spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, with_terminator=True).imag
 
 if is_phase_peak(spectral_positions[FIT_PEAK_N]):
     begin_offset = spectral_positions[FIT_PEAK_N] + 5e-3

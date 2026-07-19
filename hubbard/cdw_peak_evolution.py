@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
 
-import continued_fraction as cf
+import legacy_continued_fraction as cf
 from iterate_containers import *
-from extract_key import *
+
 import resolvent_peak as rp
 import plot_settings as ps
 

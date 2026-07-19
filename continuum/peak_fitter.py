@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction_pandas as cf
+import continued_fraction as cf
 import spectral_peak_analyzer as spa
 from get_data import load_panda, continuum_params
 from scipy.signal import find_peaks
@@ -26,13 +26,13 @@ ax.set_ylabel(r"$\ln (\Re [G] (\omega) \cdot \mathrm{eV})]$")
 w_lin = np.linspace(0, pd_data["continuum_boundaries"][0], 150000, dtype=complex)
 w_lin += 1e-8j
 
-spectral = resolvents.spectral_density(w_lin, MODE_TYPE, withTerminator=True)
+spectral = resolvents.spectral_density(w_lin, MODE_TYPE, with_terminator=True)
 
 spectral_indizes = find_peaks(spectral)[0]
 spectral_positions = np.array([w_lin[i].real for i in spectral_indizes])
 
-spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, withTerminator=True).real
-spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, withTerminator=True).imag
+spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, with_terminator=True).real
+spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, with_terminator=True).imag
 
 if is_phase_peak(spectral_positions[FIT_PEAK_N]):
     begin_offset = min(1, 5e2 * resolvents.continuum_edges()[0])

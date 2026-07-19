@@ -5,7 +5,7 @@ from gftool import sc_dos
 
 import mrock_centralized_scripts.path_appender as __ap
 __ap.append()
-import continued_fraction as cf
+import legacy_continued_fraction as cf
 
 GAP = 0.410618
 T = 0.0
