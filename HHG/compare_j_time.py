@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 import current_density_time as cdt
 import laser_function as lf
@@ -12,7 +13,7 @@ import laser_function as lf
 fig, ax = cdt.create_frame()
 
 for i, tau in enumerate([30, 1000]):
-    main_df = load_panda("HHG", "test/quench_laser/PiFlux", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", "test/quench_laser/PiFlux", "current_density.json.gz", 
                      **hhg_params(T=300, 
                                   E_F=118, 
                                   v_F=1.5e5, 
@@ -25,7 +26,7 @@ for i, tau in enumerate([30, 1000]):
     label_tau = f"{tau}" if tau > 0 else r"\infty"
     cdt.add_current_density_to_plot(main_df, ax, f"$\\tau_{{\mathrm{{diag}}}}={label_tau},\\tau_{{\mathrm{{offdiag}}}}=30$")
     
-    main_df = load_panda("HHG", "test/quench_laser/PiFlux", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", "test/quench_laser/PiFlux", "current_density.json.gz", 
                      **hhg_params(T=300, 
                                   E_F=118, 
                                   v_F=1.5e5, 

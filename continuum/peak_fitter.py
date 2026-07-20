@@ -1,29 +1,28 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import continued_fraction as cf
-import spectral_peak_analyzer as spa
-from get_data import load_panda, continuum_params
+import mrock.continued_fraction as cf
+import mrock_centralized_scripts.spectral_peak_analyzer as spa
+from mrock.get_data import *
+data_loader = DataLoader()
 from scipy.signal import find_peaks
 
-FIT_PEAK_N = 0
+FIT_PEAK_N = 1
 MODE_TYPE = "amplitude_SC"
 
-__INV_MEV__ = 1e-3
-__MEV__ = 1e3
+INV_MEV = 1e-3
+MEV = 1e3
 def is_phase_peak(peak):
-    return abs(peak) < __INV_MEV__
+    return abs(peak) < INV_MEV
 
-pd_data = load_panda("continuum", "offset_10", "resolvents.json.gz",
-                    **continuum_params(N_k=20000, T=0, coulomb_scaling=0, screening=1, k_F=4.25, g=0.6, omega_D=10))
+pd_data = data_loader.load_panda("continuum", "offset_10", "resolvents.json.gz",
+                    **continuum_params(N_k=20000, T=0, coulomb_scaling=0, screening=1, k_F=4.25, g=1.6, omega_D=10))
 resolvents = cf.ContinuedFraction(pd_data, ignore_first=80, ignore_last=90)
 
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$\ln (\omega / \mathrm{meV})$")
 ax.set_ylabel(r"$\ln (\Re [G] (\omega) \cdot \mathrm{eV})]$")
 
-w_lin = np.linspace(0, pd_data["continuum_boundaries"][0], 150000, dtype=complex)
+w_lin = np.linspace(0, pd_data["continuum_boundaries"][0], 5000, dtype=complex)
 w_lin += 1e-8j
 
 spectral = resolvents.spectral_density(w_lin, MODE_TYPE, with_terminator=True)
@@ -47,15 +46,15 @@ peak_data = spa.analyze_peak(spectral_real, spectral_imag,
                              reversed=False,
                              range=range,
                              begin_offset=begin_offset,
-                             scaling=__INV_MEV__, # so we can give the range in meV rather than eV
+                             scaling=INV_MEV, # so we can give the range in meV rather than eV
                              improve_peak_position=True,#not is_phase_peak(spectral_positions[FIT_PEAK_N]),
                              plotter=ax)
 
 ax2 = ax.twinx().twiny()
-ax2.plot(__MEV__ * w_lin.real, spectral_imag(w_lin), color="red")
-ax2.plot(__MEV__ * w_lin.real, spectral_real(w_lin), color="blue")
-ax2.axvline(__MEV__ * peak_data.position, color="k", linestyle=":")
-ax2.axvline(__MEV__ * spectral_positions[FIT_PEAK_N], color="k", linestyle="--")
+ax2.plot(MEV * w_lin.real, spectral_imag(w_lin), color="red")
+ax2.plot(MEV * w_lin.real, spectral_real(w_lin), color="blue")
+ax2.axvline(MEV * peak_data.position, color="k", linestyle=":")
+ax2.axvline(MEV * spectral_positions[FIT_PEAK_N], color="k", linestyle="--")
 ax2.set_xlabel("$\\omega$ [meV]")
 ax2.set_ylabel("$\\mathcal{A} (\\omega)$ [1/meV]")
 ax2.set_ylim(-5, 5)

@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import continued_fraction as cf
-from get_data import load_panda, continuum_params
-from legend import *
-from ez_fit import ez_linear_fit
+import mrock.continued_fraction as cf
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
+from mrock_centralized_scripts.ez_fit import  ez_linear_fit
 from uncertainties import ufloat
 
-pd_data = load_panda("continuum", "offset_10", "resolvents.json.gz", 
+pd_data = data_loader.load_panda("continuum", "offset_10", "resolvents.json.gz", 
                     **continuum_params(N_k=20000, T=0, coulomb_scaling=1, screening=1e-4, k_F=4.25, g=1, omega_D=10))
 resolvents = cf.ContinuedFraction(pd_data, ignore_first=70, ignore_last=90)
 

@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 def gaussian(x, mu, sigma):
     return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * sigma**2))
@@ -64,10 +65,10 @@ def plot_j(df):
 
 if __name__ == '__main__':
     fig, ax = create_frame()
-    main_df = load_panda("HHG", "cascade_new/exp_laser/PiFlux", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", "cascade_new/exp_laser/PiFlux", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=200, field_amplitude=1, photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
     add_current_density_to_plot(main_df, ax, f"Fine grid")
-    main_df = load_panda("HHG", "cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", "cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=200, field_amplitude=1, photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
     add_current_density_to_plot(main_df, ax, f"Coarse grid", ls="--")
     

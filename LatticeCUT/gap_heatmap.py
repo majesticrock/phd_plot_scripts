@@ -1,7 +1,6 @@
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from mrock_centralized_scripts.create_figure import *
 
 import matplotlib.pyplot as plt
@@ -15,8 +14,8 @@ Us = [0,  0.01, 0.05, 0.1, 0.5]
 
 sweep_ef = False
 
-fig, axes = plt.subplots(ncols=len(E_Fs) if sweep_ef else len(Us), figsize=(12, 6))
-main_df = load_pickle(f"lattice_cut/bcc/N=16000/", "gaps.pkl")
+fig, axes = plt.subplots(ncols=len(E_Fs) if sweep_ef else len(Us), figsize=(12, 6), layout="constrained", sharey=True)
+main_df = data_loader.load_pickle(f"lattice_cut", "bcc/N=16000/", "gaps.pkl")
 
 for ax, sweep in zip(axes, (E_Fs if sweep_ef else Us)):
     if sweep_ef:

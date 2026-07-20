@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from scipy.optimize import minimize_scalar
 import matplotlib.colors as cm
 
@@ -50,7 +49,7 @@ if __name__ == "__main__":
     norm_below = cm.Normalize(Gs[0] - 0.4, G_ENH)
     norm_above = cm.Normalize(G_ENH - 0.2, Gs[-1] + 0.05)
     
-    dos_df  = load_panda("lattice_cut", f"./bcc", "gap.json.gz",
+    dos_df  = data_loader.load_panda("lattice_cut", f"./bcc", "gap.json.gz",
                             **lattice_cut_params(N=N,  g=0., U=0.,  E_F=0., omega_D=0.02))
     
     for i, G in enumerate(Gs):
@@ -59,7 +58,7 @@ if __name__ == "__main__":
                                     U=U, 
                                     E_F=E_F,
                                     omega_D=OMEGA_D)
-        tc_df   = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
+        tc_df   = data_loader.load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
         temps = tc_df['temperatures']
         chemical_potentials = np.array(tc_df['chemical_potentials']) - E_F
 

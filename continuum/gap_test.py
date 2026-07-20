@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 fig, ax = plt.subplots()
 
-main_df = load_panda("continuum", "offset_20", "gap.json.gz",
+main_df = data_loader.load_panda("continuum", "offset_20", "gap.json.gz",
                     **continuum_params(N_k=20000, T=0, coulomb_scaling=1, screening=1, k_F=4.25, g=2., omega_D=10))
 pd_data = main_df["data"]
 pd_data["ks"] /= main_df["k_F"]

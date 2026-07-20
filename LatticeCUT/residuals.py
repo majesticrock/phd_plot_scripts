@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 SYSTEM = 'fcc'
 N=4000
@@ -12,9 +11,9 @@ params = lattice_cut_params(N=N,
                             E_F=-0.5,
                             omega_D=0.02)
 
-main_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "residuals.json.gz", **params, numpy_conversion=False)
-gap_df  = load_panda("lattice_cut", f"./test/{SYSTEM}", "gap.json.gz", **params)
-resolvent_df = load_panda("lattice_cut", f"./test/{SYSTEM}", "resolvents.json.gz", **params)
+main_df = data_loader.load_panda("lattice_cut", f"./test/{SYSTEM}", "residuals.json.gz", **params, numpy_conversion=False)
+gap_df  = data_loader.load_panda("lattice_cut", f"./test/{SYSTEM}", "gap.json.gz", **params)
+resolvent_df = data_loader.load_panda("lattice_cut", f"./test/{SYSTEM}", "resolvents.json.gz", **params)
 epsilon = np.linspace(-1, 1, N)
 
 omega_minus, _ = resolvent_df["continuum_boundaries"]

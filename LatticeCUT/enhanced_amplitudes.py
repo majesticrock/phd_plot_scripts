@@ -1,13 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 from mrock_centralized_scripts.create_figure import create_large_figure
-from make_panels_touch import make_panels_touch
-from label_axes import label_axes
+from mrock_centralized_scripts.make_panels_touch import make_panels_touch
+from mrock_centralized_scripts.label_axes import label_axes
 
 SYSTEM = 'bcc'
 N=16000
@@ -40,7 +39,7 @@ settings = {
 
 for i in range(len(settings["U"])):
     for j in range(2):
-        main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **lattice_cut_params(
+        main_df = data_loader.load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **lattice_cut_params(
                                     N=N, 
                                     g=Gs[j],
                                     U=settings["U"][i], 

@@ -10,8 +10,9 @@ import current_density_fourier as cdf
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 MAX_FREQ = 15
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
@@ -48,15 +49,15 @@ def sech_distrubution(x, mu, gamma):
 def cos_dist(N):
     return (1. - np.cos(np.pi * np.linspace(0., 2., N, endpoint=True))) / 2
 
-df_A = load_panda("HHG", f"{params['DIR']}/expA_laser/{params['MODEL']}", "current_density.json.gz", 
+df_A = data_loader.load_panda("HHG", f"{params['DIR']}/expA_laser/{params['MODEL']}", "current_density.json.gz", 
                   **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                field_amplitude=1., photon_energy=1., 
                                tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
-df_B = load_panda("HHG", f"{params['DIR']}/expB_laser/{params['MODEL']}", "current_density.json.gz", 
+df_B = data_loader.load_panda("HHG", f"{params['DIR']}/expB_laser/{params['MODEL']}", "current_density.json.gz", 
                   **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                field_amplitude=1., photon_energy=1., 
                                tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
-main_df = load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MODEL']}", "current_density.json.gz", 
+main_df = data_loader.load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MODEL']}", "current_density.json.gz", 
                      **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                   field_amplitude=1., photon_energy=1., 
                                   tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=T_DELAY))

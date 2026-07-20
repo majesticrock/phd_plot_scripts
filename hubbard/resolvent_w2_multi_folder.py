@@ -1,10 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import legacy_continued_fraction as cf
-import plot_settings as ps
-from iterate_containers import *
+import mrock_centralized_scripts.legacy_continued_fraction as cf
+from mrock_centralized_scripts.iterate_containers import *
+import mrock_centralized_scripts.plot_settings as ps
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
 colors = prop_cycle.by_key()['color']
@@ -16,15 +14,12 @@ Ts = np.array([0.0])
 Us = np.array([-2.5])
 Vs = np.array([4., 6., 8., 10., 15., 25., 50.])
 
-folder = "data/modes/cube/dos_3k/"
+folder = "data/pre_pandas/modes/cube/dos_6000/"
 fig, ax = plt.subplots()
 
 if realPart or both:
     ax.set_xscale("log")
     ax.set_yscale("symlog")
-#else:
-#    ax.set_yscale("log")
-
 
 plot_lower_lim = 20
 plot_upper_lim = 620
@@ -36,7 +31,6 @@ realPlotter.set_individual_colors("default")
 plotter = ps.CURVEFAMILY(total_size(Ts, Us, Vs), axis=ax, allow_cycle=True)
 plotter.set_individual_colors("default")
 plotter.set_individual_linestyles()
-#plotter.set_shared_linestyle("-")
 
 for T, U, V in iterate_containers(Ts, Us, Vs):
     name = f"T={T}/U={U}/V={V}"
@@ -54,13 +48,9 @@ for T, U, V in iterate_containers(Ts, Us, Vs):
     if not realPart or both:
         plotter.plot(w_lin, data, label=label)
 
-#res.mark_continuum(ax)
 legend = plt.legend(loc=8)
 
 ax.set_xlabel(r"$z / t$")
 ax.set_ylabel(r"Spectral density / a.u.")
-#fig.tight_layout()
 
-import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()

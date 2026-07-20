@@ -1,11 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from scipy.interpolate import CubicSpline
 import numpy as np
-from find_roots import *
+from mrock_centralized_scripts.find_roots import *
 
 
 N       = 16000
@@ -59,7 +58,7 @@ def compute_qp_dos(mu, gaps, sp_dos, max_E=None, plot_min=None):
     return omegas_plot, qp_dos_plot, max_E, plot_min
 
 def create_qpdos_plot(ax, G, E_F, U, OMEGA_D, max_E=None):
-    main_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
+    main_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
                         **lattice_cut_params(N=N, 
                                              g=G,
                                              U=U, 
@@ -78,7 +77,7 @@ def create_qpdos_plot(ax, G, E_F, U, OMEGA_D, max_E=None):
     ax.plot(omegas_plot, qp_dos_plot)
     ax.set_xlabel(r"$E / W$")
     
-    res_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
+    res_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                         **lattice_cut_params(N=N, 
                                              g=G,
                                              U=U, 

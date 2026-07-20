@@ -1,11 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import legacy_continued_fraction as cf
-from iterate_containers import naming_scheme
-import plot_settings as ps
+import mrock_centralized_scripts.legacy_continued_fraction as cf
+from mrock_centralized_scripts.iterate_containers import naming_scheme
+import mrock_centralized_scripts.plot_settings as ps
 # Calculates the resolvent in w^2
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
@@ -17,17 +15,14 @@ Vs = np.array([0.0])
 
 use_XP = True
 
-folder = "data/modes/square/dos_6000_SC/"
+folder = "data/pre_pandas/modes/square/dos_6000_SC/"
 fig, ax = plt.subplots()
 
-#ax.set_xscale("log")
-#ax.set_yscale("symlog")
 ax.set_ylim(-0.05, 1.)
 
 plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")
 plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
-#plotter.set_individual_dashes()
 
 plot_lower_lim = -0.05
 plot_upper_lim = 10
@@ -44,23 +39,17 @@ for name in naming_scheme(Ts, Us, Vs):
                                                     number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5)
     plotter.plot(w_lin, data, label="Higgs")
     
-#name_suffix = "CDW"
-#for name in naming_scheme(Ts, Us, Vs):
-#    data, data_real, w_lin, res = cf.resolvent_data(f"{folder}{name}", name_suffix, plot_lower_lim, plot_upper_lim, 
-#                                                    number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5)
-#    plotter.plot(w_lin, data, label=name_suffix)
-#
-#name_suffix = "AFM"
-#for name in naming_scheme(Ts, Us, Vs):
-#    data, data_real, w_lin, res = cf.resolvent_data(f"{folder}{name}", name_suffix, plot_lower_lim, plot_upper_lim, 
-#                                                    number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5)
-#    plotter.plot(w_lin, data, label=name_suffix)
-#
-#name_suffix = "amplitude_AFM_transversal"
-#for name in naming_scheme(Ts, Us, Vs):
-#    data, data_real, w_lin, res = cf.resolvent_data(f"{folder}{name}", name_suffix, plot_lower_lim, plot_upper_lim, 
-#                                                    number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5)
-#    plotter.plot(w_lin, data, label=name_suffix)
+name_suffix = "CDW"
+for name in naming_scheme(Ts, Us, Vs):
+    data, data_real, w_lin, res = cf.resolvent_data(f"{folder}{name}", name_suffix, plot_lower_lim, plot_upper_lim, 
+                                                    number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5)
+    plotter.plot(w_lin, data, label=name_suffix)
+
+name_suffix = "AFM"
+for name in naming_scheme(Ts, Us, Vs):
+    data, data_real, w_lin, res = cf.resolvent_data(f"{folder}{name}", name_suffix, plot_lower_lim, plot_upper_lim, 
+                                                    number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-6, ingore_first=5)
+    plotter.plot(w_lin, data, label=name_suffix)
 
 res.mark_continuum(ax)
 legend = plt.legend()

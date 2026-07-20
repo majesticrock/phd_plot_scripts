@@ -4,17 +4,18 @@ from matplotlib import cm
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 DIR = "test"
 
-main_df = load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "occupations.json.gz", 
+main_df = data_loader.load_panda("HHG", f"{DIR}/exp_laser/PiFlux", "occupations.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=275, 
                                   field_amplitude=1., photon_energy=1., 
                                   tau_diag=10, tau_offdiag=-1, t0=0))
 
-#main_df = load_panda("HHG", f"{DIR}/quench_laser/PiFlux", "occupations.json.gz", 
+#main_df = data_loader.load_panda("HHG", f"{DIR}/quench_laser/PiFlux", "occupations.json.gz", 
 #                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=275, 
 #                                  field_amplitude=1.6, photon_energy=5.25, 
 #                                  tau_diag=10, tau_offdiag=-1, t0=8))

@@ -10,8 +10,9 @@ import current_density_fourier as cdf
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 MAX_FREQ = 20
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
@@ -49,17 +50,17 @@ def cos_dist(N):
 def run_and_plot(axes, axes_fft, params, color):
     """Run one simulation with given params and plot results with a given color."""
 
-    df_A = load_panda("HHG", f"{params['DIR']}/dcosA_laser/{params['MODEL']}", "current_density.json.gz", 
+    df_A = data_loader.load_panda("HHG", f"{params['DIR']}/dcosA_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
-    df_B = load_panda("HHG", f"{params['DIR']}/dcosB_laser/{params['MODEL']}", "current_density.json.gz", 
+    df_B = data_loader.load_panda("HHG", f"{params['DIR']}/dcosB_laser/{params['MODEL']}", "current_density.json.gz", 
                       **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))
 
-    main_df = load_panda("HHG", f"{params['DIR']}/dcos_laser/{params['MODEL']}", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", f"{params['DIR']}/dcos_laser/{params['MODEL']}", "current_density.json.gz", 
                          **hhg_params(T=params["T"], E_F=params["E_F"], v_F=params["v_F"], band_width=params["W"], 
                                       field_amplitude=1., photon_energy=1., 
                                       tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=0))

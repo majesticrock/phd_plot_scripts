@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
-import os
+from mrock.get_data import *
+data_loader = DataLoader()
 
 fig, ax = plt.subplots()
 def energy(xi, delta):
@@ -14,7 +12,7 @@ SCREENING = 1e-4
 OFFS = 0.0001
 
 for g in GS:
-    main_df = load_panda("continuum", "offset_20", "gap.json.gz", print_date=True,
+    main_df = data_loader.load_panda("continuum", "offset_20", "gap.json.gz", print_date=True,
                         **continuum_params(N_k=20000, T=0, coulomb_scaling=int(SCREENING!=0), screening=SCREENING, k_F=4.25, g=g, omega_D=10))
     pd_data = main_df["data"]
     pd_data["ks"] /= main_df["k_F"]

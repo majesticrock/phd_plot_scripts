@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 def compute_current_density(main_df):
     frequencies = main_df["frequencies"]
@@ -76,7 +77,7 @@ def plot_j(main_df, max_freq=None):
     
     
 if __name__ == '__main__':
-    main_df = load_panda("HHG", "alt_current/dgauss_laser/PiFlux", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", "alt_current/dgauss_laser/PiFlux", "current_density.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=200, 
                                   field_amplitude=1, photon_energy=1, tau_diag=10, 
                                   tau_offdiag=-1, t0=0))

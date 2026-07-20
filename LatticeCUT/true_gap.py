@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 fig, ax = plt.subplots()
 
 N=16000
 SYSTEM = 'bcc'
-main_df = load_pickle(f"lattice_cut/{SYSTEM}/N={N}", "resolvents.pkl").query(
+main_df = data_loader.load_pickle(f"lattice_cut", f"{SYSTEM}/N={N}", "resolvents.pkl").query(
         f"E_F==-0.5 & omega_D==0.02 & U==0"
     ).sort_values('g', ignore_index=True)
 

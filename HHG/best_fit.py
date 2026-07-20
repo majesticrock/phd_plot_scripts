@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 # Fixed Parameters
 DIR = "cascade"
@@ -77,15 +78,15 @@ summed_diffs = np.zeros((len(W_values), len(TAU_DIAG_values), len(T_AVE_values))
 for i, W in enumerate(W_values):
     for j, TAU_DIAG in enumerate(TAU_DIAG_values):
         dfs = [
-                load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz",
+                data_loader.load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz",
                          **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                                       field_amplitude=1., photon_energy=1.,
                                       tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0), print_date=False),
-                load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz",
+                data_loader.load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz",
                       **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                                    field_amplitude=1., photon_energy=1.,
                                    tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0), print_date=False),
-                load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz",
+                data_loader.load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz",
                       **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                                    field_amplitude=1., photon_energy=1.,
                                    tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0), print_date=False)
@@ -118,15 +119,15 @@ print("Difference is", prev_min_value)
 
 fig, ax = plt.subplots()
 dfs = [
-        load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz",
+        data_loader.load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz",
                  **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                               field_amplitude=1., photon_energy=1.,
                               tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0)),
-        load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz",
+        data_loader.load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz",
               **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                            field_amplitude=1., photon_energy=1.,
                            tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0)),
-        load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz",
+        data_loader.load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz",
               **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W,
                            field_amplitude=1., photon_energy=1.,
                            tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))

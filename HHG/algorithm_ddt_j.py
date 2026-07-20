@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 HBAR = 0.6582119569509065
@@ -98,7 +99,7 @@ variants = [
 fft_results = []
 
 for data_prefix, label, method in variants:
-    main_df = load_panda(
+    main_df = data_loader.load_panda(
         "HHG",
         f"{data_prefix}/{params['MODEL']}",
         "current_density.json.gz",

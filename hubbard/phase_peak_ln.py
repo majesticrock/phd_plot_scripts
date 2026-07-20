@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import legacy_continued_fraction as cf
+import mrock_centralized_scripts.legacy_continued_fraction as cf
 
 T = 0.
 U = -2.5
@@ -10,7 +8,7 @@ V = 0.0
 name = f"T={T}/U={U}/V={V}"
 
 use_xp = True
-folder = "data/modes/square/dos_3k_SC/"
+folder = "data/pre_pandas/modes/square/dos_6000_SC/"
 name_suffix = "higgs_CDW"
 fig, ax = plt.subplots()
 

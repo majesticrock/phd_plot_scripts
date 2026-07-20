@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
-main_df = load_panda("HHG", "test/cosine_laser", "debug_data.json.gz", 
+main_df = data_loader.load_panda("HHG", "test/cosine_laser", "debug_data.json.gz", 
                      **hhg_params(T=0, E_F=0, v_F=1.5e3, band_width=25, field_amplitude=1.6, photon_energy=5.25))
 
 fig, axes = plt.subplots(ncols=2)

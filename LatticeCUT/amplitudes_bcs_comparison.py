@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 
 SYSTEM = 'sc'
 N=16000
@@ -17,8 +16,8 @@ params = lattice_cut_params(N=N,
                             U=0, 
                             E_F=E_F,
                             omega_D=OMEGA_D)
-main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
-gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
+main_df = data_loader.load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
+gap_df = data_loader.load_panda("lattice_cut", DIR, "gap.json.gz", **params)
 
 fig, all_axes = plt.subplots(nrows=3, ncols=2, sharex=True)
 axes, axes_bcs = all_axes.T
@@ -61,8 +60,8 @@ axes[1].plot(eps, test_num, c="C1", ls="-.", label=r"Anderson")
 print("BCS")
 axes_bcs[0].set_title("BCS")
 DIR = f"bcs/{SYSTEM}"
-main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
-gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", **params)
+main_df = data_loader.load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", **params)
+gap_df = data_loader.load_panda("lattice_cut", DIR, "gap.json.gz", **params)
 
 
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - E_F)

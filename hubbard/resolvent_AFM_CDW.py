@@ -1,10 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import legacy_continued_fraction as cf
-from iterate_containers import naming_scheme
-import plot_settings as ps
+import mrock_centralized_scripts.legacy_continued_fraction as cf
+from mrock_centralized_scripts.iterate_containers import naming_scheme
+import mrock_centralized_scripts.plot_settings as ps
 # Calculates the resolvent in w^2
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
@@ -16,7 +14,7 @@ Vs = np.array([1.2])
 
 use_XP = True
 
-folder = "data/modes/square/dos_900/"
+folder = "data/pre_pandas/modes/square/dos_6000/"
 fig, ax = plt.subplots()
 
 #ax.set_xscale("log")
@@ -59,6 +57,4 @@ ax.set_xlabel(r"$\omega [t]$")
 ax.set_ylabel(r"$\mathcal{A} (\omega) [t^{-1}]$")
 fig.tight_layout()
 
-import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()

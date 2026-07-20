@@ -1,16 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
 
-import continuum_boundaries as cb
+import mrock_centralized_scripts.continuum_boundaries as cb
 
 T = 0.
 U = -2.5
 V = -0.1
 
-from get_data import load_panda, hubbard_params
-pd_data = load_panda("hubbard/square", "test", "dispersions.json.gz", **hubbard_params(0.0, -2.5, 0.0))
+from mrock.get_data import *
+data_loader = DataLoader()
+pd_data = data_loader.load_panda("hubbard/square", "test", "dispersions.json.gz", **hubbard_params(0.0, -2.5, 0.0))
 
 kx = 20
 ky = 2

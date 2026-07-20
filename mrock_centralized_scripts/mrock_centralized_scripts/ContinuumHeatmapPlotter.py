@@ -4,16 +4,13 @@ import pandas as pd
 import string
 from scipy.signal import find_peaks
 
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import continued_fraction as cf
-import spectral_peak_analyzer as spa
-from legend import *
+import mrock.continued_fraction as cf
 
+from .spectral_peak_analyzer import analyze_peak
+from .legend import  *
 from .continuum_all_data_pickler import DATA_CUTS
-
-from mrock_centralized_scripts.create_figure import *
-from make_panels_touch import make_panels_touch
+from .create_figure import *
+from .make_panels_touch import make_panels_touch
 
 CBAR_MAX = 10
 CBAR_EXP = 3
@@ -23,30 +20,30 @@ BUILD_DIR = "plots/build/"
 G_MAX_LOAD = 4.2
 G_MAX_PLOT = 3.4
 
-__MEV__ = 1e3
-__INV_MEV__ = 1e-3
+MEV = 1e3
+INV_MEV = 1e-3
 
-__BEGIN_OFFSET__ = 1e-4
-__RANGE__ = 1e-4
-__SECOND_BEGIN__ = 1e-9
-__SECOND_RANGE__ = 1e-8
-__PEAK_PROMINCE__ = 1.
-__FIT_COMPLEX_SHIFT__ = 1e-8j
+BEGIN_OFFSET = 1e-4
+RANGE = 1e-4
+SECOND_BEGIN = 1e-9
+SECOND_RANGE = 1e-8
+PEAK_PROMINCE = 1.
+FIT_COMPLEX_SHIFT = 1e-8j
 
-__CONTINUUM_CUT_SHIFT__ = 1e-2
+CONTINUUM_CUT_SHIFT = 1e-2
 
-__sigma__ = 0.00025 #eV
+SIGMA = 0.00025 #eV
 
-def gaussian_bell(x, mu, sigma):
-    return np.exp(-0.5 * ((x - mu) / sigma)**2) / (sigma * np.sqrt(2 * np.pi))
+def gaussian_bell(x, mu):
+    return np.exp(-0.5 * ((x - mu) / SIGMA)**2) / (SIGMA * np.sqrt(2 * np.pi))
 
-def derivative_gaussian_bell(x, mu, sigma):
-    return -((x - mu) / sigma**2) * gaussian_bell(x, mu, sigma)
+def derivative_gaussian_bell(x, mu):
+    return -((x - mu) / SIGMA**2) * gaussian_bell(x, mu, SIGMA)
 
 def is_phase_peak(peak, coulomb):
     if coulomb:
         return False
-    return abs(peak) < 1.3e-1 * __INV_MEV__
+    return abs(peak) < 1.3e-1 * INV_MEV
 
 def extract_model_settings(ds):
     return f"g={ds['g']}  coulomb={ds['coulomb_scaling']}  screening={ds['lambda_screening']}"
@@ -61,7 +58,7 @@ class HeatmapPlotter:
         self.scale_energy_by_gaps = scale_energy_by_gaps
         self.resolvents = [cf.ContinuedFraction(pd_row, messages=False, ignore_first=80, ignore_last=88) for index, pd_row in self.data_frame.iterrows()]
         self.max_gaps   = np.array([2 * gap for gap in self.data_frame["Delta_max"]]) # meV
-        self.true_gaps  = np.array([__MEV__ * float(t_gap[0]) for t_gap in self.data_frame["continuum_boundaries"]]) # meV
+        self.true_gaps  = np.array([MEV * float(t_gap[0]) for t_gap in self.data_frame["continuum_boundaries"]]) # meV
         self.N_data = len(self.max_gaps)
         
         self.g_cuts = np.zeros(len(DATA_CUTS))
@@ -80,8 +77,8 @@ class HeatmapPlotter:
 
     def __to_eV__(self, x, i):
         if self.scale_energy_by_gaps:
-            return __INV_MEV__ * self.max_gaps[i] * x
-        return __INV_MEV__ * x
+            return INV_MEV * self.max_gaps[i] * x
+        return INV_MEV * x
 
     def uses_coulomb(self, i):
         return self.data_frame["coulomb_scaling"].iloc[i] != 0
@@ -92,7 +89,7 @@ class HeatmapPlotter:
             return np.array([])
         indizes = find_peaks(spectral)[0] #, distance=int(1 / (self.y[1] - self.y[0]))
         positions = np.array([self.__to_eV__(self.y[i], pos) for i in indizes])
-        positions = positions[__MEV__ * positions < self.true_gaps[pos] - __CONTINUUM_CUT_SHIFT__]
+        positions = positions[MEV * positions < self.true_gaps[pos] - CONTINUUM_CUT_SHIFT]
         positions[is_phase_peak(positions, self.uses_coulomb(pos))] = 0
         return positions
 
@@ -116,31 +113,31 @@ class HeatmapPlotter:
 
     # This function assumes that the quantities provided come in eV
     def __decide_if_to_reverse__(self, peak_idx, peaks, gap):
-        if len(peaks) > peak_idx and 1e3 * peaks[peak_idx] - __BEGIN_OFFSET__ - __INV_MEV__ * __RANGE__ <= 0:
+        if len(peaks) > peak_idx and 1e3 * peaks[peak_idx] - BEGIN_OFFSET - INV_MEV * RANGE <= 0:
             return False
         if len(peaks) > peak_idx + 1:
-            return abs(peaks[peak_idx + 1] - peaks[peak_idx]) < np.sqrt(__INV_MEV__ * __RANGE__)
+            return abs(peaks[peak_idx + 1] - peaks[peak_idx]) < np.sqrt(INV_MEV * RANGE)
         else:
             if len(peaks) > peak_idx:
-                return abs(peaks[peak_idx] - gap) < np.sqrt(__INV_MEV__ * __RANGE__)
+                return abs(peaks[peak_idx] - gap) < np.sqrt(INV_MEV * RANGE)
             else:
                 return False
 
     def try_to_fit(self, _real, _imag, _intial_positions, i, higgs):
-        __result = [ spa.analyze_peak(  _real, _imag, 
+        __result = [ analyze_peak(  _real, _imag, 
                                         peak_position         = peak_position, 
-                                        range                 = __RANGE__ if not is_phase_peak(peak_position, self.uses_coulomb(i)) else 1e5 * __RANGE__,
-                                        begin_offset          = __BEGIN_OFFSET__ if not is_phase_peak(peak_position, self.uses_coulomb(i)) else peak_position + 1e5 * __BEGIN_OFFSET__,
-                                        scaling               = __INV_MEV__,
-                                        reversed              = self.__decide_if_to_reverse__(__i, _intial_positions, __INV_MEV__ * self.true_gaps[i]),
-                                        lower_continuum_edge  = __INV_MEV__ * self.true_gaps[i],
+                                        range                 = RANGE if not is_phase_peak(peak_position, self.uses_coulomb(i)) else 1e5 * RANGE,
+                                        begin_offset          = BEGIN_OFFSET if not is_phase_peak(peak_position, self.uses_coulomb(i)) else peak_position + 1e5 * BEGIN_OFFSET,
+                                        scaling               = INV_MEV,
+                                        reversed              = self.__decide_if_to_reverse__(__i, _intial_positions, INV_MEV * self.true_gaps[i]),
+                                        lower_continuum_edge  = INV_MEV * self.true_gaps[i],
                                         peak_pos_range        = self.y[20] - self.y[0],
                                         improve_peak_position = not is_phase_peak(peak_position, self.uses_coulomb(i)))
                                 for __i, peak_position in enumerate(_intial_positions) ]
         
         for j in range(len(__result)):
-            current_range = __RANGE__
-            current_offset = __BEGIN_OFFSET__
+            current_range = RANGE
+            current_offset = BEGIN_OFFSET
             
             def break_condition():
                 if higgs or not is_phase_peak(__result[j].position, self.uses_coulomb(i)):
@@ -148,17 +145,17 @@ class HeatmapPlotter:
                 else:
                     return abs(__result[j].slope.nominal_value + 2) > 0.2
             
-            while break_condition() and (current_range >= __SECOND_RANGE__):
-                current_offset = __BEGIN_OFFSET__
-                while break_condition() and (current_offset >= __SECOND_BEGIN__):
+            while break_condition() and (current_range >= SECOND_RANGE):
+                current_offset = BEGIN_OFFSET
+                while break_condition() and (current_offset >= SECOND_BEGIN):
                     # Retry the fit with changed parameters
-                    __result[j] = spa.analyze_peak(_real, _imag, 
+                    __result[j] = analyze_peak(_real, _imag, 
                                                 peak_position         = __result[j].position, 
                                                 range                 = current_range if not is_phase_peak(__result[j].position, self.uses_coulomb(i)) else 1e5 * current_range,
                                                 begin_offset          = current_offset if not is_phase_peak(__result[j].position, self.uses_coulomb(i)) else __result[j].position + 1e5 * current_offset,
-                                                scaling               = __INV_MEV__,
-                                                reversed              = self.__decide_if_to_reverse__(j, _intial_positions, __INV_MEV__ * self.true_gaps[i]),
-                                                lower_continuum_edge  = __INV_MEV__ * self.true_gaps[i],
+                                                scaling               = INV_MEV,
+                                                reversed              = self.__decide_if_to_reverse__(j, _intial_positions, INV_MEV * self.true_gaps[i]),
+                                                lower_continuum_edge  = INV_MEV * self.true_gaps[i],
                                                 improve_peak_position = False)
                     current_offset *= 0.2
                 current_range *= 0.2
@@ -188,8 +185,8 @@ class HeatmapPlotter:
             __higgs__real = lambda x: res.continued_fraction(x, "amplitude_SC").real
             __phase__real = lambda x: res.continued_fraction(x, "phase_SC").real
             # Imaginary part needs an imaginary shift to resolve the delta peaks
-            __higgs__imag = lambda x: res.continued_fraction(x + __FIT_COMPLEX_SHIFT__, "amplitude_SC").imag
-            __phase__imag = lambda x: res.continued_fraction(x + __FIT_COMPLEX_SHIFT__, "phase_SC").imag
+            __higgs__imag = lambda x: res.continued_fraction(x + FIT_COMPLEX_SHIFT, "amplitude_SC").imag
+            __phase__imag = lambda x: res.continued_fraction(x + FIT_COMPLEX_SHIFT, "phase_SC").imag
             
             __higgs_result = self.try_to_fit(__higgs__real, __higgs__imag, __higgs_peak_positions[i], i, True)
             __phase_result = self.try_to_fit(__phase__real, __phase__imag, __phase_peak_positions[i], i, False)
@@ -210,10 +207,10 @@ class HeatmapPlotter:
     def __remove_data_below_continuum__(self, spectral_functions):
         if not self.scale_energy_by_gaps:
             for i in range(self.N_data):
-                spectral_functions[:, i][self.y < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
+                spectral_functions[:, i][self.y < self.true_gaps[i] - CONTINUUM_CUT_SHIFT] = 0
         else:
             for i in range(self.N_data):
-                spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
+                spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - CONTINUUM_CUT_SHIFT] = 0
 
     def plot(self, axes, cmap, cbar_max = CBAR_MAX, labels=True):
         spectral_functions_higgs = np.array([res.spectral_density(self.__to_eV__(self.y, __i) + 1e-4j, "amplitude_SC") for __i, res in enumerate(self.resolvents)]).transpose()
@@ -225,7 +222,7 @@ class HeatmapPlotter:
 
             self.HiggsModes = pd.DataFrame([ {
                     "resolvent_type": "Higgs",
-                    "energies": __MEV__ * __higgs_peak_positions[i],
+                    "energies": MEV * __higgs_peak_positions[i],
                     "weights": __higgs_peak_weights[i],
                     "Delta_max": self.data_frame["Delta_max"].iloc[i],
                     "true_gap": self.true_gaps[i],
@@ -242,7 +239,7 @@ class HeatmapPlotter:
                 } for i in range(self.N_data) ])
             self.PhaseModes = pd.DataFrame([ {
                     "resolvent_type": "Phase",
-                    "energies": __MEV__ * __phase_peak_positions[i],
+                    "energies": MEV * __phase_peak_positions[i],
                     "weights": __phase_peak_weights[i],
                     "Delta_max": self.data_frame["Delta_max"].iloc[i],
                     "true_gap": self.true_gaps[i],
@@ -266,16 +263,16 @@ class HeatmapPlotter:
             for i in range(self.N_data):
                 for peak_position, weight in zip(__higgs_peak_positions[i], __higgs_peak_weights[i]):
                     if is_phase_peak(peak_position, self.uses_coulomb(i)):
-                        summand = -weight * derivative_gaussian_bell(self.__to_eV__(self.y, i), 0, __sigma__)
+                        summand = -weight * derivative_gaussian_bell(self.__to_eV__(self.y, i), 0)
                     else:
-                        summand =  weight * gaussian_bell(self.__to_eV__(self.y, i), peak_position, __sigma__)
+                        summand =  weight * gaussian_bell(self.__to_eV__(self.y, i), peak_position)
                     #mask = summand > 1e-4
                     spectral_functions_higgs[:, i] += summand
                 for peak_position, weight in zip(__phase_peak_positions[i], __phase_peak_weights[i]):
                     if is_phase_peak(peak_position, self.uses_coulomb(i)):
-                        summand = -weight * derivative_gaussian_bell(self.__to_eV__(self.y, i), 0, __sigma__)
+                        summand = -weight * derivative_gaussian_bell(self.__to_eV__(self.y, i), 0)
                     else:
-                        summand =  weight * gaussian_bell(self.__to_eV__(self.y, i), peak_position, __sigma__)
+                        summand =  weight * gaussian_bell(self.__to_eV__(self.y, i), peak_position)
                     #mask = summand > 1e-4
                     spectral_functions_phase[:, i] += summand
         # endif not self.scale_energy_by_gaps

@@ -5,8 +5,9 @@ from scipy.fft import rfft, rfftfreq
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 import current_density_time as cdt
 import current_density_fourier as cdf
@@ -25,17 +26,17 @@ sigma = 50e-3
 gamma = 50e-3
 
 # Load split currents (dirac and non-dirac)
-main_df = load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "split_current.json.gz", 
+main_df = data_loader.load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "split_current.json.gz", 
                      **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W, 
                                   field_amplitude=1., photon_energy=1., 
                                   tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
 
-df_A = load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "split_current.json.gz", 
+df_A = data_loader.load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "split_current.json.gz", 
                   **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W, 
                                field_amplitude=1., photon_energy=1., 
                                tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
 
-df_B = load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "split_current.json.gz", 
+df_B = data_loader.load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "split_current.json.gz", 
                   **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W, 
                                field_amplitude=1., photon_energy=1., 
                                tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))

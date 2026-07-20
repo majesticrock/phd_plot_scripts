@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 SYSTEM = 'bcc'
 DIR = '.'
@@ -14,8 +13,8 @@ params = lattice_cut_params(N=N,
                             U=U, 
                             E_F=-0.5,
                             omega_D=0.02)
-main_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "T_C.json.gz", **params)
-gap_df = load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "all_gaps.json.gz", **params)
+main_df = data_loader.load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "T_C.json.gz", **params)
+gap_df = data_loader.load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "all_gaps.json.gz", **params)
 fig, ax = plt.subplots()
 
 X, Y = np.meshgrid(np.linspace(-1, 1, N, endpoint=True), main_df["temperatures"])

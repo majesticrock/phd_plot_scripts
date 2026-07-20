@@ -1,11 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from create_zoom import *
-from get_data import *
-import continued_fraction as cf
+from mrock_centralized_scripts.create_zoom import *
+from mrock.get_data import *
+data_loader = DataLoader()
+import mrock.continued_fraction as cf
 from scipy.ndimage import gaussian_filter1d, uniform_filter1d
 
 SYSTEM = "bcc"
@@ -26,7 +25,7 @@ W = int(FWHM)
 fig, axes = plt.subplots(nrows=2, sharex=True, sharey=True, figsize=(8, 6))
 fig.subplots_adjust(hspace=0, wspace=0)
 
-main_df = load_panda(
+main_df = data_loader.load_panda(
     "lattice_cut",
     f"./{SYSTEM}",
     "resolvents.json.gz",

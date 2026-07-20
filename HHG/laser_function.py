@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import legend
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  legend
 
 def create_frame(electric_field=False):
     fig, ax = plt.subplots()
@@ -42,14 +43,14 @@ if __name__ == '__main__':
     __PLOT_E_FIELD__ = True
     fig, ax = create_frame(__PLOT_E_FIELD__)
 
-    main_df = load_panda("HHG", "cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", "cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=1e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
     #add_laser_to_plot(main_df, ax, False, label="Vector potential")
     add_laser_to_plot(main_df, ax, True, label="Electric field", normalize=True)
     N_extra = 15
     T_SHIFT = N_extra * 0.03318960199004975 * main_df["photon_energy"] / TIME_TO_UNITLESS
     
-    #main_df = load_panda("HHG", "test/dcos_laser/PiFlux", "current_density.json.gz", 
+    #main_df = data_loader.load_panda("HHG", "test/dcos_laser/PiFlux", "current_density.json.gz", 
     #                **hhg_params(T=300, E_F=118, v_F=1e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
     #main_df["t_begin"] += T_SHIFT
     #main_df["t_end"] = T_SHIFT + main_df["t_end"] * 2 * np.pi

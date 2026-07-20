@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 from scipy.fft import rfft, rfftfreq
 
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     fig_fft, ax_fft = plt.subplots()
     
-    main_df = load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", 
+    main_df = data_loader.load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", 
                         "current_density.json.gz", 
                         **hhg_params(T=params["T"], E_F=params["E_F"], 
                                    v_F=1.5e6, band_width=params["W"], 
@@ -94,7 +95,7 @@ if __name__ == "__main__":
                                    tau_offdiag=params["TAU_OFFDIAG"], t0=0))
     plot_time_and_fft(main_df, ax, ax_fft, 0.001 * params["T_AVE"], label="$W = 200 \\hbar \\omega_L$", plot_j=False)
     
-    main_df = load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", 
+    main_df = data_loader.load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", 
                         "current_density.json.gz", 
                         **hhg_params(T=params["T"], E_F=params["E_F"], 
                                    v_F=1.5e6, band_width=1000, 
@@ -103,7 +104,7 @@ if __name__ == "__main__":
                                    tau_offdiag=params["TAU_OFFDIAG"], t0=0))
     plot_time_and_fft(main_df, ax, ax_fft, 0.001 * params["T_AVE"], label="$W = 1000 \\hbar \\omega_L$", plot_j=False)
     
-    main_df = load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", 
+    main_df = data_loader.load_panda("HHG", f"{params['DIR']}/dgaussA_laser/{params['MODEL']}", 
                         "current_density.json.gz", 
                         **hhg_params(T=params["T"], E_F=params["E_F"], 
                                    v_F=1.5e6, band_width=2000, 

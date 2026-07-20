@@ -1,15 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import get_data
+from mrock.get_data import *
+data_loader = DataLoader()
 from mrock_centralized_scripts.create_figure import *
 
 N=10000
 U=0.0
 E_F=-0.5
 omega_D=0.02
-main_df = get_data.load_pickle(f"lattice_cut/./T_C/bcc/", "all_gaps.pkl")
+main_df = data_loader.load_pickle(f"lattice_cut", "./T_C/bcc/", "all_gaps.pkl")
 
 fig, ax = plt.subplots()
 

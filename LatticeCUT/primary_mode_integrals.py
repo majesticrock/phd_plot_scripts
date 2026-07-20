@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from mrock_centralized_scripts.create_figure import *
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 
 PICK = 0
 N = 16000
@@ -29,7 +28,7 @@ for j, system in enumerate(systems):
                                     U=0.0, 
                                     E_F=E_F,
                                     omega_D=0.02)
-        main_df = load_panda("lattice_cut", f"./{system}", "full_diagonalization.json.gz", print_date=False, **params)
+        main_df = data_loader.load_panda("lattice_cut", f"./{system}", "full_diagonalization.json.gz", print_date=False, **params)
         purger = fdp.FullDiagPurger(main_df, epsilon)
         pair_creation_integrals[j, i], occupation_integrals[j, i] = purger.integral_amplitude(0)
         distances_to_continuum[j, i] = main_df["continuum_boundaries"][0]# - purger.amplitude_eigenvalues[0]
@@ -44,7 +43,7 @@ ax.set_xscale("log")
 ax.set_ylim(0, 1)
 ax.set_xlabel("$g$")
 ax.set_ylabel("Total contribution")
-from color_and_linestyle_legends import color_and_linestyle_legends
+from mrock_centralized_scripts.color_and_linestyle_legends import color_and_linestyle_legends
 color_and_linestyle_legends(ax, color_labels=systems, 
                             linestyle_labels=[r"$\sum_j |\alpha_j^{(1)}|^2$", r"$\sum_j |\nu_j^{(1)}|^2$"], 
                             linestyle_legend_loc="lower right")

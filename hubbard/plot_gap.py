@@ -6,11 +6,11 @@ import sys
 import gzip
 
 if(len(sys.argv) > 1):
-    data_folder = "data/" + sys.argv[1] + "/"
+    data_folder = "data/pre_pandas" + sys.argv[1] + "/"
     name = sys.argv[1]
 else:
     name = "dos_T0"
-    data_folder = f"data/phases/square/{name}/"
+    data_folder = f"data/pre_pandas/phases/square/{name}/"
 
 x_axis_is_first = True
 

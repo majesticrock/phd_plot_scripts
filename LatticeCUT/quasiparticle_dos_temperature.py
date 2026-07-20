@@ -1,11 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from scipy.interpolate import interp1d
 import numpy as np
-from find_roots import find_all_roots
+from mrock_centralized_scripts.find_roots import find_all_roots
 
 fig, ax = plt.subplots()
 
@@ -14,19 +13,19 @@ G=1.5
 E_F=-0.5
 U=0.
 N=10000
-main_df = load_panda("lattice_cut", f"T_C/{SYSTEM}", "all_gaps.json.gz",
+main_df = data_loader.load_panda("lattice_cut", f"T_C/{SYSTEM}", "all_gaps.json.gz",
                     **lattice_cut_params(N=N, 
                                          g=G,
                                          U=U, 
                                          E_F=E_F,
                                          omega_D=0.02))
-tc_df   = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz",
+tc_df   = data_loader.load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz",
                     **lattice_cut_params(N=N, 
                                          g=G,
                                          U=U, 
                                          E_F=E_F,
                                          omega_D=0.02))
-dos_df  = load_panda("lattice_cut", f"./bcc", "gap.json.gz",
+dos_df  = data_loader.load_panda("lattice_cut", f"./bcc", "gap.json.gz",
                     **lattice_cut_params(N=N, 
                                          g=0.,
                                          U=0., 

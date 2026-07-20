@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 N = 200
 K_Z = 0.
@@ -17,13 +16,13 @@ def dispersion(x, y, z):
     elif SYSTEM == 'fcc':
         return 0.5 - 0.5 * (np.cos(0.5 * np.pi * x) * np.cos(0.5 * np.pi * y) + np.cos(0.5 * np.pi * z) * np.cos(0.5 * np.pi * y) + np.cos(0.5 * np.pi * x) * np.cos(0.5 * np.pi * z))
 
-base_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
+base_df = data_loader.load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
                     **lattice_cut_params(N=16000, 
                                          g=1.5,
                                          U=0, 
                                          E_F=E_F,
                                          omega_D=0.02))
-main_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
+main_df = data_loader.load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
                     **lattice_cut_params(N=16000, 
                                          g=2,
                                          U=0, 
@@ -89,7 +88,7 @@ ax_hs.set_xlabel(r"$k$")
 ax_hs.set_ylim(0, None)
 
 
-main_df = load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
+main_df = data_loader.load_panda('lattice_cut', f'./{SYSTEM}', 'gap.json.gz',
                     **lattice_cut_params(N=16000, 
                                          g=1.5,
                                          U=0, 

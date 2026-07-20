@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from scipy.interpolate import interp1d
 from matplotlib.animation import FuncAnimation
 
@@ -28,7 +27,7 @@ def dispersion(x, y, z, system):
 
 EFs = [0, -0.5]
 SYSTEMS = ["sc", "bcc", "fcc"]
-dfs = [ [ load_panda('lattice_cut', f'./{system}', 'gap.json.gz',
+dfs = [ [ data_loader.load_panda('lattice_cut', f'./{system}', 'gap.json.gz',
                         **lattice_cut_params(N=16000,
                                              g=2.,
                                              U=0,

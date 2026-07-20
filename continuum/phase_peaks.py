@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import continued_fraction as cf
+import mrock.continued_fraction as cf
 
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
-main_df = load_all("continuum/offset_10/N_k=20000/T=0.0/coulomb_scaling=1.0", "resolvents.json.gz").query('g == 0.7 & k_F == 4.25 & omega_D == 10')
+main_df = data_loader.load_all("continuum/offset_10/N_k=20000/T=0.0/coulomb_scaling=1.0", "resolvents.json.gz").query(
+    'g == 0.7 & k_F == 4.25 & omega_D == 10')
 main_df.sort_values("lambda_screening", inplace=True)
 main_df.reset_index(inplace=True)
 
@@ -34,7 +34,7 @@ peak_positions = np.log(peak_positions / gaps)
 
 ax.plot(screenings, peak_positions, "o", label=r"$\omega_P$")
 
-from ez_fit import ez_linear_fit
+from mrock_centralized_scripts.ez_fit import  ez_linear_fit
 cut = slice(0, 45)
 popt, pcov, line = ez_linear_fit(screenings[cut], peak_positions[cut], ax, x_bounds=(min(screenings), max(screenings)), label=r"Fit $a \ln(\omega) + b$")
 ax.text(0.3, 0.9, f"$a = {popt[0]:1.5f} \pm {np.sqrt(pcov[0][0]):1.5f}$", transform=ax.transAxes)
@@ -46,5 +46,4 @@ ax.set_ylabel(r'$\ln (\omega / \Delta$)')
 ax.legend()
 
 fig.tight_layout()
-plt.savefig("python/continuum/build/phase_peaks.pdf")
 plt.show()

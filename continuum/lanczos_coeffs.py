@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
 
-from get_data import load_panda, continuum_params
-pd_data = load_panda("continuum", "offset_10", "resolvents.json.gz",
+from mrock.get_data import *
+data_loader = DataLoader()
+pd_data = data_loader.load_panda("continuum", "offset_10", "resolvents.json.gz",
                     **continuum_params(N_k=20000, T=0, coulomb_scaling=0, screening=1e-4, k_F=4.25, g=0.4, omega_D=24))
 
 a_inf = (pd_data["continuum_boundaries"][0]**2 + pd_data["continuum_boundaries"][1]**2) * 0.5
@@ -25,5 +24,4 @@ ax.set_ylabel("Lanczos coefficient")
 fig.tight_layout()
 
 import os
-#plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()

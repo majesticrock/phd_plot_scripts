@@ -30,9 +30,6 @@ with gzip.open(file, 'rt') as f_open:
     A = M[0]
     B = M[1]
 
-#from scipy.signal import find_peaks
-#first_artifact = find_peaks(B[1:], prominence=5e2, width=1)
-#print(first_artifact)
 
 fig, ax = plt.subplots()
 ax.plot(A, ls="-", marker='x', label="$a_i$")
@@ -42,9 +39,6 @@ ax.axhline(b_inf, linestyle="--", color="k", label="$b_\\infty$")
 ax.legend()
 ax.set_xlabel("Iteration $i$")
 ax.set_ylabel("Lanczos coefficient")
-#ax.set_ylim(13, 34)
 fig.tight_layout()
 
-import os
-#plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()

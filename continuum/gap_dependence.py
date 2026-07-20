@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
-from ez_fit import * 
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.ez_fit import * 
 
 k_F = 4.25
 screening_factor = 0.4107320221286488672 * np.sqrt(k_F)
@@ -26,13 +25,13 @@ def x_func(g, offset):
 
 dmax = 0.4
 
-ss = load_all("continuum/offset_5/N_k=20000/T=0.0/coulomb_scaling=1.0", "gap.json.gz", condition="screening=0.0001").query(
+ss = data_loader.load_all("continuum/offset_5/N_k=20000/T=0.0/coulomb_scaling=1.0", "gap.json.gz", condition="screening=0.0001").query(
     f"k_F == 4.25 & omega_D == 10 & Delta_max < {dmax} & Delta_max > 0.008"
     )
-ls = load_all("continuum/offset_5/N_k=20000/T=0.0/coulomb_scaling=1.0", "gap.json.gz", condition="screening=1.0").query(
+ls = data_loader.load_all("continuum/offset_5/N_k=20000/T=0.0/coulomb_scaling=1.0", "gap.json.gz", condition="screening=1.0").query(
     f"k_F == 4.25 & omega_D == 10 & Delta_max < {dmax} & Delta_max > 0.008"
     )
-nc = load_all("continuum/offset_5/N_k=20000/T=0.0/coulomb_scaling=0.0", "gap.json.gz").query(
+nc = data_loader.load_all("continuum/offset_5/N_k=20000/T=0.0/coulomb_scaling=0.0", "gap.json.gz").query(
     f"k_F == 4.25 & omega_D == 10 & Delta_max < {dmax} & Delta_max > 0.008"
     )
 

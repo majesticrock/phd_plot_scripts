@@ -48,11 +48,10 @@ class HeatmapPlotter:
         self.fig.savefig(filename)
 
 
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
-all_data = load_pickle("continuum/offset_10/", "gaps.pkl").query("discretization == 20000 & T == 0")
+all_data = data_loader.load_pickle("continuum", "offset_10/", "gaps.pkl").query("discretization == 20000 & T == 0")
 
 g_small_screening = HeatmapPlotter(all_data.query("coulomb_scaling == 1 & lambda_screening == 0.0001 & k_F == 4.25 & omega_D == 10"), "Delta_max", ylabel=r"$\Delta_{max}$ $(\mathrm{meV})$")
 g_large_screening = HeatmapPlotter(all_data.query("coulomb_scaling == 1 & lambda_screening == 1      & k_F == 4.25 & omega_D == 10"), "Delta_max", ylabel=r"$\Delta_{max}$ $(\mathrm{meV})$")

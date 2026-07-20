@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from mrock_centralized_scripts.create_figure import *
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 
 N = 16000
 E_F = 0
@@ -35,12 +34,12 @@ for axes, G in zip(axes_2d, [0.3, 3.0]):
                                     U=0.0, 
                                     E_F=E_F,
                                     omega_D=0.02)
-        main_df = load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params, print_date=False)
+        main_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params, print_date=False)
         xi = np.linspace(-1, 1, N) - main_df["chemical_potential"]
         
         purger = fdp.FullDiagPurger(main_df, xi)
         
-        gap_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz", **params, print_date=False)
+        gap_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz", **params, print_date=False)
         Delta = gap_df["Delta"]
 
         for PICK in range(min(len(purger.amplitude_eigenvalues), 4)):

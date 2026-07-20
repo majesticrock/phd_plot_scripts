@@ -6,7 +6,8 @@ import pandas as pd
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 import current_density_fourier
 import current_density_time
 import laser_function
@@ -239,7 +240,7 @@ class ParamSelector(tk.Tk):
         if self.frequency_fig is None:
             self.frequency_fig, self.frequency_ax = current_density_fourier.create_frame()
 
-        main_df = load_panda(
+        main_df = data_loader.load_panda(
             "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**self.__get_selected())
         )
@@ -250,7 +251,7 @@ class ParamSelector(tk.Tk):
         self.count_freq += 1
         
     def j_time(self):
-        main_df = load_panda(
+        main_df = data_loader.load_panda(
             "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**self.__get_selected())
         )
@@ -286,7 +287,7 @@ class ParamSelector(tk.Tk):
             self.count_time += 1
         
     def laser(self):
-        main_df = load_panda(
+        main_df = data_loader.load_panda(
             "HHG", self.name_type(), "current_density.json.gz",
             **hhg_params(**self.__get_selected())
         )

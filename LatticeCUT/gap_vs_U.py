@@ -1,16 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
-import color_and_linestyle_legends as cll
+from mrock.get_data import *
+data_loader = DataLoader()
+import mrock_centralized_scripts.color_and_linestyle_legends as cll
 
 fig, ax = plt.subplots()
 
 N=16000
 SYSTEM = 'bcc'
 
-main_df = load_pickle(f"lattice_cut/{SYSTEM}/N={N}", "resolvents.pkl").query(
+main_df = data_loader.load_pickle(f"lattice_cut", "{SYSTEM}/N={N}", "resolvents.pkl").query(
         f"E_F==-0.5 & omega_D==0.02"
     ).sort_values("U", ignore_index=True)
 

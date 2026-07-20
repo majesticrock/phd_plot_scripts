@@ -11,8 +11,9 @@ import current_density_fourier as cdf
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 from scipy.fft import rfft, rfftfreq
 
@@ -26,9 +27,9 @@ MAX_FREQ = 10
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 T_AVE = 50e-3
 
-df_A = load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz", 
+df_A = data_loader.load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., tau_diag=TAU_DIAG, tau_offdiag=-1, t0=0))
-df_B = load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz", 
+df_B = data_loader.load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz", 
                     **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., tau_diag=TAU_DIAG, tau_offdiag=-1, t0=0))
 
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
@@ -98,7 +99,7 @@ sm.set_array([])
 
 for i, t0 in enumerate(t0_values):
     color = cmap(norm(t0))
-    main_df = load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz", 
+    main_df = data_loader.load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz", 
                         **hhg_params(T=300, E_F=118, v_F=v_F, band_width=W, field_amplitude=1., photon_energy=1., tau_diag=TAU_DIAG, tau_offdiag=-1, t0=t0))
     times2 = np.linspace(0, main_df["t_end"] - main_df["t_begin"], len(main_df["current_density_time"])) / (2 * np.pi)
     

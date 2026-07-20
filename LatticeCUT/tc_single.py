@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from scipy.optimize import curve_fit
 
 SYSTEM = 'bcc'
@@ -12,7 +11,7 @@ params = lattice_cut_params(N=N,
                             U=4.0, 
                             E_F=-0.5,
                             omega_D=0.02)
-main_df = load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
+main_df = data_loader.load_panda("lattice_cut", f"./T_C/{SYSTEM}", "T_C.json.gz", **params)
 
 fig, ax = plt.subplots()
 

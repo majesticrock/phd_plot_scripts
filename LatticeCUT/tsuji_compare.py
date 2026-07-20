@@ -1,14 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from mrock_centralized_scripts.create_figure import *
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 
 N = 16000
 E_F = 0
-epsilon = np.linspace(-1, 1, N) - E_F
 
 colors = [
     "#000000",
@@ -22,8 +20,6 @@ fig.subplots_adjust(wspace=0)
 for ax in axes_2d.ravel():
     ax.set_xlabel(r"$\varepsilon / W$")
 
-epsilon = np.linspace(-1, 1, N) - E_F
-
 for axes, G in zip(axes_2d, [0.3, 3.0]):
     axes[0].set_ylabel(f"$g={G}$\n$\\alpha_j^{{(n)}}$")
     for ax, SYSTEM in zip(axes, ["sc", "bcc", "fcc"]):
@@ -34,10 +30,11 @@ for axes, G in zip(axes_2d, [0.3, 3.0]):
                                     U=0.0, 
                                     E_F=E_F,
                                     omega_D=0.02)
-        main_df = load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params, print_date=False)
+        main_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "full_diagonalization.json.gz", **params, print_date=False)
+        epsilon = np.linspace(-1, 1, N) - main_df["chemical_potential"]
         purger = fdp.FullDiagPurger(main_df, epsilon)
 
-        gap_df = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz", **params, print_date=False)
+        gap_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz", **params, print_date=False)
         Delta = gap_df["Delta"]
         dos = gap_df["dos"]
 
@@ -59,15 +56,6 @@ for axes, G in zip(axes_2d, [0.3, 3.0]):
                 integral = np.dot(primary_phase, purger.phase_eigenvectors[PICK]) / norm
                 
                 print(f"{SYSTEM}: (0-{PICK})\t = {integral}")
-        
-        #if len(purger.amplitude_eigenvalues) > 1:
-        #    primary_amplitude = purger.amplitude_eigenvectors[0]
-        #    norm = np.sum(primary_amplitude*primary_amplitude)
-        #    
-        #    for PICK in range(1, len(purger.amplitude_eigenvalues)):
-        #        integral = np.sum(primary_amplitude * purger.amplitude_eigenvectors[PICK]) / norm
-        #        print(f"{SYSTEM}: (0-{PICK})\t = {integral}")
-
 
 axes_2d[-1,-1].legend(loc="lower right")
 axes_2d[0,0].set_xlim(-0.05, 0.05)

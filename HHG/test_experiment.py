@@ -10,8 +10,9 @@ import current_density_fourier as cdf
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 from scipy.fft import rfft, rfftfreq
 
@@ -50,12 +51,12 @@ for tau_idx, TAU_DIAG in enumerate(tau_diag_values):
     color = colors[tau_idx]
     
     # Reload df_A and df_B with current TAU_DIAG
-    df_A = load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz", 
+    df_A = data_loader.load_panda("HHG", f"{DIR}/expA_laser/{MODEL}", "current_density.json.gz", 
                       **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W, 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
     
-    df_B = load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz", 
+    df_B = data_loader.load_panda("HHG", f"{DIR}/expB_laser/{MODEL}", "current_density.json.gz", 
                       **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W, 
                                    field_amplitude=1., photon_energy=1., 
                                    tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=0))
@@ -76,7 +77,7 @@ for tau_idx, TAU_DIAG in enumerate(tau_diag_values):
         return A + B
 
     for i, t0 in enumerate(t0_values):
-        main_df = load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz", 
+        main_df = data_loader.load_panda("HHG", f"{DIR}/exp_laser/{MODEL}", "current_density.json.gz", 
                              **hhg_params(T=T, E_F=E_F, v_F=v_F, band_width=W, 
                                           field_amplitude=1., photon_energy=1., 
                                           tau_diag=TAU_DIAG, tau_offdiag=TAU_OFFDIAG, t0=t0))

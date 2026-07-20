@@ -1,7 +1,6 @@
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots()
@@ -12,7 +11,7 @@ system = "bcc"
 extra=0.2
 
 for g in Gs:
-    main_df = load_panda("lattice_cut", f"./{system}", "gap.json.gz",
+    main_df = data_loader.load_panda("lattice_cut", f"./{system}", "gap.json.gz",
                     **lattice_cut_params(N=16000, 
                                          g=g, 
                                          U=0, 

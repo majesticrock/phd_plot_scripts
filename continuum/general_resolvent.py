@@ -1,10 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import legacy_continued_fraction as cf
-import plot_settings as ps
+import mrock_centralized_scripts.legacy_continued_fraction as cf
+from mrock_centralized_scripts.plot_settings import *
 # Calculates the resolvent in w^2
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
@@ -19,23 +17,18 @@ fig, ax = plt.subplots()
 MEV_FACTOR = 1e3
 ax.set_ylim(-0.05, 1000. / MEV_FACTOR)
 
-plotter = ps.CURVEFAMILY(6, axis=ax)
-plotter.set_individual_colors("nice")
-plotter.set_individual_linestyles(["-", "-.", "--", "-", "--", ":"])
-#plotter.set_individual_dashes()
-
 plot_upper_lim = 0.11
 plot_lower_lim = -0.01 * plot_upper_lim
 
 name_suffix = "phase_SC"
 data, data_real, w_lin, res = cf.resolvent_data(f"{folder}", name_suffix, plot_lower_lim, plot_upper_lim, 
                                                     number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-7, ingore_first=5)
-plotter.plot(w_lin * MEV_FACTOR, data / MEV_FACTOR, label="Phase")
+ax.plot(w_lin * MEV_FACTOR, data / MEV_FACTOR, label="Phase")
 
 name_suffix = "higgs_SC"
 data, data_real, w_lin, res = cf.resolvent_data(f"{folder}", name_suffix, plot_lower_lim, plot_upper_lim, 
                                                     number_of_values=20000, xp_basis=use_XP, imaginary_offset=1e-7, ingore_first=5)
-plotter.plot(w_lin * MEV_FACTOR, data / MEV_FACTOR, label="Higgs")
+ax.plot(w_lin * MEV_FACTOR, data / MEV_FACTOR, label="Higgs")
 
 res.mark_continuum(ax, scale_factor=MEV_FACTOR)
 legend = plt.legend()

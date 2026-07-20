@@ -2,17 +2,15 @@ import numpy as np
 import pandas as pd
 import string
 from scipy.signal import find_peaks
-
-from . import path_appender as __ap
-__ap.append()
-import continued_fraction as cf
-import spectral_peak_analyzer as spa
-from legend import *
 from matplotlib import ticker
 
+import mrock.continued_fraction as cf
+
 from .create_figure import create_normal_figure, create_large_figure
-from make_panels_touch import make_panels_touch
-from label_axes import label_axes
+from .spectral_peak_analyzer import analyze_peak
+from .legend import *
+from .make_panels_touch import make_panels_touch
+from .label_axes import label_axes
 
 #MAX_EXP = 2.1
 #CUT_OFF_EXP = -1.5
@@ -20,23 +18,23 @@ from label_axes import label_axes
 # Settings the importer
 G_MAX_LOAD = 3
 
-__BEGIN_OFFSET__ = 2e-3
-__RANGE__ = 2e-3
-__SECOND_BEGIN__ = 1e-9
-__SECOND_RANGE__ = 1e-8
-__PEAK_PROMINCE__ = 1.
+BEGIN_OFFSET = 2e-3
+RANGE = 2e-3
+SECOND_BEGIN = 1e-9
+SECOND_RANGE = 1e-8
+PEAK_PROMINCE = 1.
 
-__INITIAL_IMAG__ = 1e-5j
-__FIT_COMPLEX_SHIFT__ = 1e-8j
-__CONTINUUM_CUT_SHIFT__ = 1e-5
+INITIAL_IMAG = 1e-5j
+FIT_COMPLEX_SHIFT = 1e-8j
+CONTINUUM_CUT_SHIFT = 1e-5
 
-__sigma__ = 0.0005
+SIGMA = 0.0005
 
-def gaussian_bell(x, mu, sigma):
-    return np.exp(-0.5 * ((x - mu) / sigma)**2) / (sigma * np.sqrt(2 * np.pi))
+def gaussian_bell(x, mu):
+    return np.exp(-0.5 * ((x - mu) / SIGMA)**2) / (SIGMA * np.sqrt(2 * np.pi))
 
-def derivative_gaussian_bell(x, mu, sigma):
-    return -((x - mu) / sigma**2) * gaussian_bell(x, mu, sigma)
+def derivative_gaussian_bell(x, mu):
+    return -((x - mu) / SIGMA**2) * gaussian_bell(x, mu)
 
 def is_phase_peak(peak):
     return abs(peak) < 1.5e-3
@@ -142,9 +140,9 @@ class HeatmapPlotter:
     def identify_modes(self, spectral, pos):
         if self.max_gaps[pos] == 0:
             return np.array([])
-        indizes = find_peaks(spectral, prominence=8 * self.true_gaps[pos] * __PEAK_PROMINCE__)[0]
+        indizes = find_peaks(spectral, prominence=8 * self.true_gaps[pos] * PEAK_PROMINCE)[0]
         positions = np.array([self.__scale_if__(self.y[i], pos) for i in indizes])
-        positions = positions[positions < self.true_gaps[pos] - __CONTINUUM_CUT_SHIFT__]
+        positions = positions[positions < self.true_gaps[pos] - CONTINUUM_CUT_SHIFT]
         positions[is_phase_peak(positions)] = 0
         return positions
 
@@ -167,28 +165,28 @@ class HeatmapPlotter:
         return [lower_err, upper_err]
         
     def __decide_if_to_reverse__(self, peak_idx, peaks, gap):
-        if len(peaks) > peak_idx and peaks[peak_idx] - __BEGIN_OFFSET__ - __RANGE__ <= 0:
+        if len(peaks) > peak_idx and peaks[peak_idx] - BEGIN_OFFSET - RANGE <= 0:
             return False
         if len(peaks) > peak_idx + 1:
-            return abs(peaks[peak_idx + 1] - peaks[peak_idx]) < np.sqrt(__RANGE__)
+            return abs(peaks[peak_idx + 1] - peaks[peak_idx]) < np.sqrt(RANGE)
         else:
             if len(peaks) > peak_idx:
-                return abs(peaks[peak_idx] - gap) < __RANGE__
+                return abs(peaks[peak_idx] - gap) < RANGE
             else:
                 return False
     
     def fit_goldstone_peak(self, _real, _imag, i):
-        __result = spa.analyze_peak(_real, _imag, 
+        __result = analyze_peak(_real, _imag, 
                                     peak_position         = 0, 
-                                    range                 = __RANGE__,
-                                    begin_offset          = __BEGIN_OFFSET__,
+                                    range                 = RANGE,
+                                    begin_offset          = BEGIN_OFFSET,
                                     reversed              = False,
                                     lower_continuum_edge  = self.true_gaps[i],
                                     peak_pos_range        = self.y[20] - self.y[0],
                                     improve_peak_position = False)
 
-        current_range = __RANGE__
-        current_offset = __BEGIN_OFFSET__
+        current_range = RANGE
+        current_offset = BEGIN_OFFSET
         
         __best_fit = __result
 
@@ -197,11 +195,11 @@ class HeatmapPlotter:
         def break_condition():
             return abs(__result.slope.nominal_value + 2) > 0.2
         
-        while break_condition() and (current_range >= __SECOND_RANGE__):
-            current_offset = __BEGIN_OFFSET__
-            while break_condition() and (current_offset >= __SECOND_BEGIN__):
+        while break_condition() and (current_range >= SECOND_RANGE):
+            current_offset = BEGIN_OFFSET
+            while break_condition() and (current_offset >= SECOND_BEGIN):
                 # Retry the fit with changed parameters
-                __result = spa.analyze_peak(_real, _imag, 
+                __result = analyze_peak(_real, _imag, 
                                             peak_position         = __result.position, 
                                             range                 = 1e2 * current_range,
                                             begin_offset          = __result.position + 1e2 * current_offset,
@@ -226,10 +224,10 @@ class HeatmapPlotter:
     # New version programmed in cpp - works well for delta-peaks
     # KK version is needed for Goldstone boson (delta derivative peaks)
     def try_to_fit(self, _real, _imag, _intial_positions, i, higgs):
-        __result = [ spa.analyze_peak(  _real, _imag, 
+        __result = [ analyze_peak(  _real, _imag, 
                                         peak_position         = peak_position, 
-                                        range                 = __RANGE__,
-                                        begin_offset          = __BEGIN_OFFSET__ if not is_phase_peak(peak_position) else peak_position + __BEGIN_OFFSET__,
+                                        range                 = RANGE,
+                                        begin_offset          = BEGIN_OFFSET if not is_phase_peak(peak_position) else peak_position + BEGIN_OFFSET,
                                         reversed              = self.__decide_if_to_reverse__(__i, _intial_positions, self.true_gaps[i]),
                                         lower_continuum_edge  = self.true_gaps[i],
                                         peak_pos_range        = self.y[20] - self.y[0],
@@ -237,8 +235,8 @@ class HeatmapPlotter:
                                 for __i, peak_position in enumerate(_intial_positions) ]
         
         for j in range(len(__result)):
-            current_range = __RANGE__
-            current_offset = __BEGIN_OFFSET__
+            current_range = RANGE
+            current_offset = BEGIN_OFFSET
             
             __best_fit = __result[j]
             
@@ -254,11 +252,11 @@ class HeatmapPlotter:
                 else:
                     return abs(__result[j].slope.nominal_value + 2) > 0.2
             
-            while break_condition() and (current_range >= __SECOND_RANGE__):
-                current_offset = __BEGIN_OFFSET__
-                while break_condition() and (current_offset >= __SECOND_BEGIN__):
+            while break_condition() and (current_range >= SECOND_RANGE):
+                current_offset = BEGIN_OFFSET
+                while break_condition() and (current_offset >= SECOND_BEGIN):
                     # Retry the fit with changed parameters
-                    __result[j] = spa.analyze_peak(_real, _imag, 
+                    __result[j] = analyze_peak(_real, _imag, 
                                                 peak_position         = __result[j].position, 
                                                 range                 = current_range if not is_phase_peak(__result[j].position) else 1e2 * current_range,
                                                 begin_offset          = current_offset if not is_phase_peak(__result[j].position) else __result[j].position + 1e2 * current_offset,
@@ -294,7 +292,7 @@ class HeatmapPlotter:
         __phase_peak_weights   = [ [data[1] for data in cpp_result] for cpp_result in phase_cpp_results ]
 
         for i, res in enumerate(self.resolvents):
-            if self.max_gaps[i] < __RANGE__ + __BEGIN_OFFSET__:
+            if self.max_gaps[i] < RANGE + BEGIN_OFFSET:
                 continue
             __phase_peak_positions[i].insert(0, 0.0)
             __phase_peak_weights[i].insert(0, 0.0)
@@ -302,7 +300,7 @@ class HeatmapPlotter:
             # because the analytical form is then 1/x rather than x/(x^2 + delta^2)
             __phase_real = lambda x: res.continued_fraction(x, "phase_SC").real
             # Imaginary part needs an imaginary shift to resolve the delta peaks
-            __phase_imag = lambda x: res.continued_fraction(x + __FIT_COMPLEX_SHIFT__, "phase_SC").imag
+            __phase_imag = lambda x: res.continued_fraction(x + FIT_COMPLEX_SHIFT, "phase_SC").imag
             
             __phase_result = self.fit_goldstone_peak(__phase_real, __phase_imag, i)
              
@@ -323,13 +321,13 @@ class HeatmapPlotter:
     def __remove_data_below_continuum__(self, spectral_functions):
         if not self.scale_energy_by_gaps:
             for i in range(self.N_data):
-                spectral_functions[:, i][self.y < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
+                spectral_functions[:, i][self.y < self.true_gaps[i] - CONTINUUM_CUT_SHIFT] = 0
         else:
             for i in range(self.N_data):
-                spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - __CONTINUUM_CUT_SHIFT__] = 0
+                spectral_functions[:, i][self.y * self.max_gaps[i] < self.true_gaps[i] - CONTINUUM_CUT_SHIFT] = 0
 
     def plot_one(self, ax, cmap, which="amplitude_SC", continuum_color="cyan", min_exp=-1.5, max_exp=2.1):
-        spectral_functions = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + __INITIAL_IMAG__, which) for __i, res in enumerate(self.resolvents)]).transpose()
+        spectral_functions = np.array([res.spectral_density(self.__scale_if__(self.y, __i) + INITIAL_IMAG, which) for __i, res in enumerate(self.resolvents)]).transpose()
 
         if which == "amplitude_SC":
             _peak_positions, _peak_weights = self.compute_higgs_peaks()
@@ -372,9 +370,9 @@ class HeatmapPlotter:
         for i in range(self.N_data):
             for peak_position, weight in zip(_peak_positions[i], _peak_weights[i]):
                 if is_phase_peak(peak_position):
-                    summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0, __sigma__)
+                    summand = -weight * derivative_gaussian_bell(self.__scale_if__(self.y, i), 0)
                 else:
-                    summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position, __sigma__)
+                    summand =  weight * gaussian_bell(self.__scale_if__(self.y, i), peak_position)
                 spectral_functions[:, i] += summand
              
         levels = np.power(10, np.linspace(min_exp, max_exp, 255, endpoint=True))

@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 def fermi_function(x, beta):
     if np.isscalar(beta) and beta < 0:
@@ -48,9 +47,9 @@ E_F=-0.5
 U=0.5
 OMEGA_D=0.02
 SYSTEM = 'bcc'
-main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "all_gaps.json.gz", condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
-tc_df   = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
-dos_df  = load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
+main_df = data_loader.load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "all_gaps.json.gz", condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
+tc_df   = data_loader.load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
+dos_df  = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "gap.json.gz",
                     **lattice_cut_params(N=N,  g=0., U=0.,  E_F=0., omega_D=0.02))
 
 from matplotlib import cm

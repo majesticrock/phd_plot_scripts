@@ -1,12 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
 
-from get_data import load_panda, hubbard_params
-pd_data = load_panda("hubbard/square", "test", "dispersions.json.gz", **hubbard_params(0.0, -2.5, 0.0))
+from mrock.get_data import *
+data_loader = DataLoader()
+pd_data = data_loader.load_panda("hubbard/square", "test", "dispersions.json.gz", **hubbard_params(0.0, -2.5, 0.0))
 
-import dispersions_2D as d2d
+import mrock_centralized_scripts.dispersions_2D as d2d
 
 # Initialize resolvents
 resolvents = d2d.Dispersions2D(pd_data, messages=False)

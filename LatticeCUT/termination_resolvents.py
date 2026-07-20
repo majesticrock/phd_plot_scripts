@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from create_zoom import *
-from get_data import *
-import continued_fraction as cf
+from mrock_centralized_scripts.create_zoom import *
+from mrock.get_data import *
+data_loader = DataLoader()
+import mrock.continued_fraction as cf
 
 SYSTEM = "bcc"
 G   = 1.4
@@ -18,7 +17,7 @@ fig.subplots_adjust(hspace=0, wspace=0)
 w_lin = np.linspace(0, 0.2, 15000, dtype=complex)
 w_lin += 1e-4j
 
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
+main_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz",
                         **lattice_cut_params(N=N, 
                                              g=G, 
                                              U=0, 

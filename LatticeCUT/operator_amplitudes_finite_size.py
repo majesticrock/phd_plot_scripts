@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 
 SYSTEM = 'sc'
 E_F=0.0
@@ -30,8 +29,8 @@ for i, N in enumerate(Ns):
                                 U=0, 
                                 E_F=E_F,
                                 omega_D=OMEGA_D)
-    main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", print_date=False, **params)
-    gap_df = load_panda("lattice_cut", DIR, "gap.json.gz", print_date=False, **params)
+    main_df = data_loader.load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", print_date=False, **params)
+    gap_df = data_loader.load_panda("lattice_cut", DIR, "gap.json.gz", print_date=False, **params)
 
     purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - E_F)
     eigenvalue_distance[i] = main_df["continuum_boundaries"][0] - purger.amplitude_eigenvalues[0]
@@ -52,7 +51,7 @@ for i, N in enumerate(Ns):
     C_alphas[i] = C1
 
 fig_i, ax_i = plt.subplots()
-from ez_fit import ez_linear_fit
+from mrock_centralized_scripts.ez_fit import  ez_linear_fit
 ez_linear_fit(1./Ns, C_alphas, ax_i, np.linspace(0, 1.1/Ns[0], 100))
 ax_i.plot(1./Ns, C_alphas, "o", markersize=8)
 ax_i.set_xlabel(r"$1/N$")
@@ -61,7 +60,7 @@ ax_i.set_ylabel(r"$C_\alpha$")
 
 
 fig_d, ax_d = plt.subplots()
-from ez_fit import ez_general_fit
+from mrock_centralized_scripts.ez_fit import  ez_general_fit
 def square_func(x, a, b, c):
     return a*x**2 + b*x + c
 

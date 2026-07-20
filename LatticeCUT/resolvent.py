@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 import mrock.continued_fraction as cf
 
@@ -13,7 +12,7 @@ params = lattice_cut_params(N=N,
                             U=0., 
                             E_F=0,
                             omega_D=0.02)
-main_df = load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz", **params)
+main_df = data_loader.load_panda("lattice_cut", f"./{SYSTEM}", "resolvents.json.gz", **params)
 
 
 

@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
@@ -16,7 +17,7 @@ MAX_FREQ = 20
 
 LASER = "powerlaw1_laser"
 DIR = "test"
-main_df = load_panda("HHG", f"{DIR}/{LASER}/PiFlux", "split_current.json.gz", 
+main_df = data_loader.load_panda("HHG", f"{DIR}/{LASER}/PiFlux", "split_current.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
                                   field_amplitude=1.6, photon_energy=5.25, 
                                   tau_diag=TAU_DIAG, tau_offdiag=-1, t0=8))
@@ -33,7 +34,7 @@ sigma =  T_AVE * main_df["photon_energy"] / TIME_TO_UNITLESS
 kernel = cauchy(times, times[N_times//2], sigma)
 
 ##########################
-#full_df = load_panda("HHG", f"cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
+#full_df = data_loader.load_panda("HHG", f"cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
 #                     **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
 #                                  field_amplitude=1, photon_energy=1., 
 #                                  tau_diag=TAU_DIAG, tau_offdiag=-1, t0=0))

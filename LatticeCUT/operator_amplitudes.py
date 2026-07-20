@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 
 SYSTEM = 'bcc'
 E_F=0
@@ -27,7 +26,7 @@ params = lattice_cut_params(N=N,
                             U=0, 
                             E_F=E_F,
                             omega_D=OMEGA_D)
-main_df = load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", print_date=False, **params)
+main_df = data_loader.load_panda("lattice_cut", DIR, "full_diagonalization.json.gz", print_date=False, **params)
 purger = fdp.FullDiagPurger(main_df, np.linspace(-1, 1, N) - main_df["chemical_potential"])
 
 purger.plot_amplitude(axes[:2], combined_norm=True)

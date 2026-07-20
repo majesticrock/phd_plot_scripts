@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
-main_df = load_panda("HHG", "test", "current_density.json.gz")
+main_df = data_loader.load_panda("HHG", "test", "current_density.json.gz")
 times = np.linspace(main_df["t_begin"], main_df["t_end"], main_df["n_measurements"]) / (2 * np.pi)
 
 fig, ax = plt.subplots()

@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import resolvent_peak as rp
-import legacy_continued_fraction as cf
+import mrock_centralized_scripts.resolvent_peak as rp
+import mrock_centralized_scripts.legacy_continued_fraction as cf
 
 reversed = True
 
@@ -10,7 +8,7 @@ T = 0.0
 U = -2.5
 V = 0.0
 name = f"T={T}/U={U}/V={V}"
-folder = "data/modes/square/dos_3k/"
+folder = "data/pre_pandas/modes/square/dos_6000/"
 name_suffix = "higgs_CDW"
 fig, ax = plt.subplots()
 
@@ -31,5 +29,4 @@ ax.set_ylabel(r"$\ln(\Re G^\mathrm{ret}(z - z_0))$")
 fig.tight_layout()
 
 import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()

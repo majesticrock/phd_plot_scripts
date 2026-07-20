@@ -1,0 +1,29 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from mrock.get_data import *
+data_loader = DataLoader()
+
+SYSTEM = 'bcc'
+DIR = '.'
+N=10000
+Us = [0, 0.01]
+Gs = [1.86, 1.866, 1.876]
+
+fig, axes = plt.subplots(ncols=len(Gs), nrows=len(Us), sharex="row", sharey="col", 
+                         constrained_layout=True, figsize=(10, 5))
+
+for j, (axs, U) in enumerate(zip(axes, Us)):
+    for i, (ax, G) in enumerate(zip(axs, Gs)):
+        params = lattice_cut_params(N=N, 
+                                    g=G,
+                                    U=U, 
+                                    E_F=-0.5,
+                                    omega_D=0.02)
+        main_df = data_loader.load_panda("lattice_cut", f"{DIR}/T_C/{SYSTEM}", "T_C.json.gz", **params)
+
+        ax.plot(main_df["temperatures"], main_df["max_gaps"],  ls="-" , c=f"C{i}", label=f"$g={G}$")
+        ax.plot(main_df["temperatures"], main_df["true_gaps"], ls="--", c=f"C{i}")
+
+    ax.set_ylim(0, None)
+
+plt.show()

@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from scipy.optimize import curve_fit
 
 def linear_model(T, m, b):
@@ -16,7 +15,7 @@ N=10000
 U=0.01
 E_F=-0.5
 
-main_df = load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", 
+main_df = data_loader.load_all(f"lattice_cut/./T_C/{SYSTEM}/N={N}/", "T_C.json.gz", 
                    condition=[f"U={U}", f"E_F={E_F}", f"omega_D={OMEGA_D}"]).sort_values('g')
 mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 10)
 

@@ -2,15 +2,21 @@ from turtle import pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 
 MEV_FACTOR = 1e3
 
 fig, ax = plt.subplots()
 
-main_df = load_panda("continuum", "limits", "gap.json.gz", **continuum_params(0.0, 1., 9.3, 10., 10.))
+main_df = data_loader.load_panda("continuum", "offset_10", "gap.json.gz", 
+                                 **continuum_params(N_k=20000,
+                                                    T=0,
+                                                    g=1, 
+                                                    coulomb_scaling=1, 
+                                                    screening=1e-4,
+                                                    k_F=4.25, 
+                                                    omega_D=10.))
 pd_data = main_df["data"]
 pd_data["total"] = np.abs( pd_data["Delta_Coulomb"])
 pd_data.plot("ks", "total", ax=ax, label=r"$\Delta_\mathrm{Coulomb}$")
@@ -31,6 +37,4 @@ ax.set_xscale("log")
 ax.legend()
 fig.tight_layout()
 
-import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.svg")
 plt.show()

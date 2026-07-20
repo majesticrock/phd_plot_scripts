@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-import legacy_continued_fraction as cf
+import mrock_centralized_scripts.legacy_continued_fraction as cf
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
 colors = prop_cycle.by_key()['color']
@@ -15,9 +13,6 @@ use_XP = True
 
 folder = "data/pre_pandas/modes/cube/dos_6000/"
 fig, ax = plt.subplots()
-
-#ax.set_xscale("log")
-#ax.set_yscale("log")
 
 name = f"T={T}/U={U}/V={V}"
 phase_imag, phase_real, w_log, res = cf.resolvent_data_log_z(f"{folder}{name}", "phase_SC", imaginary_offset=0, range=0.05, begin_offset=1e-3, number_of_values=10000, xp_basis=use_XP, ingore_first=5)
@@ -44,6 +39,4 @@ ax.set_xlabel(r"$\ln((z - z_0) / t)$")
 ax.set_ylabel(r"$\ln(-\Im G^\mathrm{ret}(z - z_0))$")
 fig.tight_layout()
 
-import os
-#plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()

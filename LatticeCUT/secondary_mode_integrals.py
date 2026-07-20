@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mrock_centralized_scripts.path_appender as __ap
-__ap.append()
-from get_data import *
+from mrock.get_data import *
+data_loader = DataLoader()
 from mrock_centralized_scripts.create_figure import *
-import mrock_centralized_scripts.FullDiagPurger as fdp
+import mrock.FullDiagPurger as fdp
 
 PICK = 0
 N = 16000
@@ -17,7 +16,7 @@ systems = ['sc', 'bcc', 'fcc']
 markers = ["o", "s", "D"]
 
 for j, system in enumerate(systems):
-    main_df = load_pickle(f"lattice_cut/{system}/N={N}", "full_diagonalizations.pkl").query(
+    main_df = data_loader.load_pickle(f"lattice_cut", f"{system}/N={N}", "full_diagonalizations.pkl").query(
         f"E_F=={E_F} & omega_D==0.02 & U==0"
     ).sort_values("g").reset_index(drop=True)
     Gs = main_df["g"]
@@ -36,7 +35,7 @@ for j, system in enumerate(systems):
 ax.set_ylim(0, 1)
 ax.set_xlabel("$g$")
 ax.set_ylabel("Total contribution")
-from color_and_linestyle_legends import color_and_linestyle_legends
+from mrock_centralized_scripts.color_and_linestyle_legends import color_and_linestyle_legends
 color_and_linestyle_legends(ax, color_labels=systems, 
                             linestyle_labels=[r"$\sum_j |\alpha_j^{(1)}|^2$", r"$\sum_j |\nu_j^{(1)}|^2$"], 
                             linestyle_legend_loc="lower right")

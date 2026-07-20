@@ -5,24 +5,25 @@ from matplotlib.animation import FuncAnimation
 
 import mrock_centralized_scripts.path_appender as ap
 ap.append()
-from get_data import *
-from legend import *
+from mrock.get_data import *
+data_loader = DataLoader()
+from mrock_centralized_scripts.legend import  *
 
 BAND_WIDTH=300
 MOD_FLUX = False
 DIR = "test"
-main_df = load_panda("HHG", f"{DIR}/powerlaw1_laser/{'ModifiedPiFlux' if MOD_FLUX else 'PiFlux'}", "occupations.json.gz", 
+main_df = data_loader.load_panda("HHG", f"{DIR}/powerlaw1_laser/{'ModifiedPiFlux' if MOD_FLUX else 'PiFlux'}", "occupations.json.gz", 
                      **hhg_params(T=300, E_F=118, v_F=1.5e6, band_width=BAND_WIDTH, 
                                   field_amplitude=1.6, photon_energy=5.25, 
                                   tau_diag=15, tau_offdiag=-1, t0=8))
 
 #DIR = "test"
-#main_df = load_panda("HHG", f"{DIR}/quench_laser/PiFlux", "occupations.json.gz", 
+#main_df = data_loader.load_panda("HHG", f"{DIR}/quench_laser/PiFlux", "occupations.json.gz", 
 #                     **hhg_params(T=300, E_F=250, v_F=1.5e6, band_width=BAND_WIDTH, 
 #                                  field_amplitude=1.6, photon_energy=5.25, 
 #                                  tau_diag=10, tau_offdiag=-1, t0=8))
 
-#main_df = load_panda("HHG", f"{DIR}/powerlaw1_laser/PiFlux", "occupations.json.gz", 
+#main_df = data_loader.load_panda("HHG", f"{DIR}/powerlaw1_laser/PiFlux", "occupations.json.gz", 
 #                     **hhg_params(T=300, E_F=250, v_F=1.5e6, band_width=BAND_WIDTH, 
 #                                  field_amplitude=1.6, photon_energy=5.25, 
 #                                  tau_diag=15, tau_offdiag=-1, t0=8))
