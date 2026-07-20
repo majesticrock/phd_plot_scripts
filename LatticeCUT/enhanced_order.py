@@ -8,7 +8,7 @@ N=10000
 U=0.0
 E_F=-0.5
 omega_D=0.02
-main_df = data_loader.load_pickle(f"lattice_cut", "./T_C/bcc/", "all_gaps.pkl")
+main_df = data_loader.load_pickle(f"lattice_cut", f"./T_C/bcc/", "all_gaps.pkl")
 
 fig, ax = plt.subplots()
 

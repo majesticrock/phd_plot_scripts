@@ -4,8 +4,7 @@ from tkinter import filedialog, ttk
 
 import pandas as pd
 
-import mrock_centralized_scripts.path_appender as ap
-ap.append()
+
 from mrock.get_data import *
 data_loader = DataLoader()
 import current_density_fourier

@@ -9,7 +9,7 @@ fig, ax = plt.subplots()
 N=16000
 SYSTEM = 'bcc'
 
-main_df = data_loader.load_pickle(f"lattice_cut", "{SYSTEM}/N={N}", "resolvents.pkl").query(
+main_df = data_loader.load_pickle(f"lattice_cut", f"{SYSTEM}/N={N}", "resolvents.pkl").query(
         f"E_F==-0.5 & omega_D==0.02"
     ).sort_values("U", ignore_index=True)
 

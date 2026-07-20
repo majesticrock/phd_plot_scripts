@@ -12,7 +12,7 @@ DOS="bcc"
 G=1.5
 n_mode = 0
 
-main_df = data_loader.load_pickle(f"lattice_cut", "{DOS}/N={N}", "resolvents.pkl").query(
+main_df = data_loader.load_pickle(f"lattice_cut", f"{DOS}/N={N}", "resolvents.pkl").query(
     f"E_F == {E_F} & omega_D == {OMEGA_D} & g == {G} & U>=1").sort_values("U", ignore_index=True)
 
 color_values = main_df["U"].to_numpy()

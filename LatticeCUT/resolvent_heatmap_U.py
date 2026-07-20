@@ -11,7 +11,7 @@ DOS="bcc"
 G=1.5
 n_mode = 0
 
-all_data = data_loader.load_pickle(f"lattice_cut", "{DOS}/N={N}", "resolvents.pkl")
+all_data = data_loader.load_pickle(f"lattice_cut", f"{DOS}/N={N}", "resolvents.pkl")
 
 tasks = [
     (all_data.query(f"E_F == {E_F} & omega_D == {OMEGA_D} & g == {G} & U>0.5"), "U", legend("U"))

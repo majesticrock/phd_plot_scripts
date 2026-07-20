@@ -9,8 +9,7 @@ from scipy.interpolate import interp1d
 import current_density_time as cdt
 import current_density_fourier as cdf
 
-import mrock_centralized_scripts.path_appender as ap
-ap.append()
+
 from mrock.get_data import *
 data_loader = DataLoader()
 from mrock_centralized_scripts.legend import  *

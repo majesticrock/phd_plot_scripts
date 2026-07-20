@@ -137,15 +137,6 @@ class HeatmapPlotter:
             return self.max_gaps[i] * x
         return x
 
-    def identify_modes(self, spectral, pos):
-        if self.max_gaps[pos] == 0:
-            return np.array([])
-        indizes = find_peaks(spectral, prominence=8 * self.true_gaps[pos] * PEAK_PROMINCE)[0]
-        positions = np.array([self.__scale_if__(self.y[i], pos) for i in indizes])
-        positions = positions[positions < self.true_gaps[pos] - CONTINUUM_CUT_SHIFT]
-        positions[is_phase_peak(positions)] = 0
-        return positions
-
     def __get_error__(self, key, i):
         __std_g__ = 0.05
         base = self.data_frame["g"].iloc[i]
@@ -164,17 +155,6 @@ class HeatmapPlotter:
         upper_err = np.abs(self.data_frame[key].iloc[i] - self.data_frame[key].iloc[upper_err_idx]) if upper_err_idx < len(self.true_gaps) else None
         return [lower_err, upper_err]
         
-    def __decide_if_to_reverse__(self, peak_idx, peaks, gap):
-        if len(peaks) > peak_idx and peaks[peak_idx] - BEGIN_OFFSET - RANGE <= 0:
-            return False
-        if len(peaks) > peak_idx + 1:
-            return abs(peaks[peak_idx + 1] - peaks[peak_idx]) < np.sqrt(RANGE)
-        else:
-            if len(peaks) > peak_idx:
-                return abs(peaks[peak_idx] - gap) < RANGE
-            else:
-                return False
-    
     def fit_goldstone_peak(self, _real, _imag, i):
         __result = analyze_peak(_real, _imag, 
                                     peak_position         = 0, 
@@ -217,68 +197,6 @@ class HeatmapPlotter:
             print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
             print(__result)
             print(extract_model_settings(self.data_frame.iloc[i]), "\n")
-        
-        return __result
-        
-    # Legacy: using the Kramers-Kronig relations to obtain the weights
-    # New version programmed in cpp - works well for delta-peaks
-    # KK version is needed for Goldstone boson (delta derivative peaks)
-    def try_to_fit(self, _real, _imag, _intial_positions, i, higgs):
-        __result = [ analyze_peak(  _real, _imag, 
-                                        peak_position         = peak_position, 
-                                        range                 = RANGE,
-                                        begin_offset          = BEGIN_OFFSET if not is_phase_peak(peak_position) else peak_position + BEGIN_OFFSET,
-                                        reversed              = self.__decide_if_to_reverse__(__i, _intial_positions, self.true_gaps[i]),
-                                        lower_continuum_edge  = self.true_gaps[i],
-                                        peak_pos_range        = self.y[20] - self.y[0],
-                                        improve_peak_position = not is_phase_peak(peak_position))
-                                for __i, peak_position in enumerate(_intial_positions) ]
-        
-        for j in range(len(__result)):
-            current_range = RANGE
-            current_offset = BEGIN_OFFSET
-            
-            __best_fit = __result[j]
-            
-            def deviation(_current):
-                if higgs or not is_phase_peak(_current.position):
-                    return abs(_current.slope.nominal_value + 1)
-                else:
-                    return abs(_current.slope.nominal_value + 2)
-            
-            def break_condition():
-                if higgs or not is_phase_peak(__result[j].position):
-                    return abs(__result[j].slope.nominal_value + 1) > 0.005
-                else:
-                    return abs(__result[j].slope.nominal_value + 2) > 0.2
-            
-            while break_condition() and (current_range >= SECOND_RANGE):
-                current_offset = BEGIN_OFFSET
-                while break_condition() and (current_offset >= SECOND_BEGIN):
-                    # Retry the fit with changed parameters
-                    __result[j] = analyze_peak(_real, _imag, 
-                                                peak_position         = __result[j].position, 
-                                                range                 = current_range if not is_phase_peak(__result[j].position) else 1e2 * current_range,
-                                                begin_offset          = current_offset if not is_phase_peak(__result[j].position) else __result[j].position + 1e2 * current_offset,
-                                                reversed              = self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]),
-                                                lower_continuum_edge  = self.true_gaps[i],
-                                                improve_peak_position = False)
-                    if deviation(__result[j]) < deviation(__best_fit):
-                        __best_fit = __result[j]
-                    current_offset *= 0.5
-                current_range *= 0.5
-                
-            __result[j] = __best_fit
-            
-            if not higgs and is_phase_peak(__result[j].position):
-                if abs(__result[j].slope.nominal_value + 2) > 0.33:
-                    print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
-                    print(__result[j])
-                    print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]), "\n")
-            elif abs(__result[j].slope.nominal_value + 1) > 0.01:
-                print(f"WARNING in {'Higgs' if higgs else 'Phase'}! Expected slope of '-1' does not match fitted slope!")
-                print(__result[j])
-                print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]), "\n")
         
         return __result
 

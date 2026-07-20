@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import mrock_centralized_scripts.legacy_continued_fraction as cf
-from mrock_centralized_scripts.plot_settings import *
+import mrock_centralized_scripts.plot_settings as ps
 # Calculates the resolvent in w^2
 
 prop_cycle = plt.rcParams['axes.prop_cycle']

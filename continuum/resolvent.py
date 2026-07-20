@@ -7,7 +7,7 @@ pd_data = data_loader.load_panda("continuum", "offset_25", "resolvents.json.gz",
                     **continuum_params(N_k=30000, T=0, coulomb_scaling=1, screening=1e-4, k_F=4.25, g=3.65, omega_D=10))
 
 import mrock.continued_fraction as cf
-from mrock_centralized_scripts.plot_settings import *
+import mrock_centralized_scripts.plot_settings as ps
 
 resolvents = cf.ContinuedFraction(pd_data, ignore_first=80, ignore_last=90)
 print("Delta_true = ", 0.5e3 * resolvents.continuum_edges()[0])

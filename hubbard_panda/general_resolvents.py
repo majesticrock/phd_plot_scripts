@@ -6,7 +6,7 @@ data_loader = DataLoader()
 pd_data = data_loader.load_panda("hubbard/square", "test", "dispersions.json.gz", **hubbard_params(0.0, -2.5, 0.0))
 
 import mrock_centralized_scripts.dispersions_2D as d2d
-from mrock_centralized_scripts.plot_settings import *
+import mrock_centralized_scripts.plot_settings as ps
 
 resolvents = d2d.Dispersions2D(pd_data)
 

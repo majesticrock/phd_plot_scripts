@@ -6,8 +6,7 @@ if __name__ != '__main__x':
 import numpy as np
 import matplotlib.pyplot as plt
 
-import mrock_centralized_scripts.path_appender as ap
-ap.append()
+
 from mrock.get_data import *
 data_loader = DataLoader()
 from mrock_centralized_scripts.legend import  *

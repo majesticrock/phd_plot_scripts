@@ -36,16 +36,16 @@ def __load_raw__():
     return all_data
 
 def __load_gaps__():
-    data_5 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}5", "gaps.pkl").query(
+    data_5 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}5", "gaps.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 3]}"
         )
-    data_10 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}10", "gaps.pkl").query(
+    data_10 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}10", "gaps.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 3]} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 2]}"
         )
-    data_20 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}20", "gaps.pkl").query(
+    data_20 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}20", "gaps.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 2]} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 1]}"
         )
-    data_25 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}25", "gaps.pkl").query(
+    data_25 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}25", "gaps.pkl").query(
         f"discretization == 30000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 1]}"
         )
     
@@ -53,16 +53,16 @@ def __load_gaps__():
     return all_data
 
 def __load_full_pickle__():
-    data_5 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}5", "resolvents.pkl").query(
+    data_5 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}5", "resolvents.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 3]}"
         )
-    data_10 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}10", "resolvents.pkl").query(
+    data_10 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}10", "resolvents.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 3]} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 2]}"
         )
-    data_20 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}20", "resolvents.pkl").query(
+    data_20 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}20", "resolvents.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 2]} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 1]}"
         )
-    data_25 = data_loader.load_pickle(f"continuum/{__BASE_FOLDER_TYPE__}25", "resolvents.pkl").query(
+    data_25 = data_loader.load_pickle(f"continuum", f"{__BASE_FOLDER_TYPE__}25", "resolvents.pkl").query(
         f"discretization == 30000 & T == 0.0 & k_F == {K_F_ALL} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 1]}"
         )
     
@@ -78,13 +78,13 @@ def __load_full_pickle__():
     return all_data
 
 def __load_sc_channel__():
-    sc_data_10 = data_loader.load_pickle(f"continuum/{__SC_ONLY_FOLDER__}10", "resolvents.pkl").query(
+    sc_data_10 = data_loader.load_pickle(f"continuum", f"{__SC_ONLY_FOLDER__}10", "resolvents.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_BCS} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 3]} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 2]}"
         )
-    sc_data_20 = data_loader.load_pickle(f"continuum/{__SC_ONLY_FOLDER__}20", "resolvents.pkl").query(
+    sc_data_20 = data_loader.load_pickle(f"continuum", f"{__SC_ONLY_FOLDER__}20", "resolvents.pkl").query(
         f"discretization == 20000 & T == 0.0 & k_F == {K_F_BCS} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 2]} & Delta_max < {DATA_CUTS[len(DATA_CUTS) - 1]}"
         )
-    sc_data_25 = data_loader.load_pickle(f"continuum/{__SC_ONLY_FOLDER__}25", "resolvents.pkl").query(
+    sc_data_25 = data_loader.load_pickle(f"continuum", f"{__SC_ONLY_FOLDER__}25", "resolvents.pkl").query(
         f"discretization == 30000 & T == 0.0 & k_F == {K_F_BCS} & Delta_max >= {DATA_CUTS[len(DATA_CUTS) - 1]}"
         )
     

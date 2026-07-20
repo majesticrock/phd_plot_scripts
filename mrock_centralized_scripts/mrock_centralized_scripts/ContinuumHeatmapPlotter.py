@@ -2,7 +2,6 @@ import matplotlib.colors as mcolors
 import numpy as np
 import pandas as pd
 import string
-from scipy.signal import find_peaks
 
 import mrock.continued_fraction as cf
 
@@ -23,10 +22,10 @@ G_MAX_PLOT = 3.4
 MEV = 1e3
 INV_MEV = 1e-3
 
-BEGIN_OFFSET = 1e-4
-RANGE = 1e-4
-SECOND_BEGIN = 1e-9
-SECOND_RANGE = 1e-8
+BEGIN_OFFSET = 1e1
+RANGE = 1e1
+SECOND_BEGIN = 1e-5
+SECOND_RANGE = 1e-5
 PEAK_PROMINCE = 1.
 FIT_COMPLEX_SHIFT = 1e-8j
 
@@ -38,7 +37,7 @@ def gaussian_bell(x, mu):
     return np.exp(-0.5 * ((x - mu) / SIGMA)**2) / (SIGMA * np.sqrt(2 * np.pi))
 
 def derivative_gaussian_bell(x, mu):
-    return -((x - mu) / SIGMA**2) * gaussian_bell(x, mu, SIGMA)
+    return -((x - mu) / SIGMA**2) * gaussian_bell(x, mu)
 
 def is_phase_peak(peak, coulomb):
     if coulomb:
@@ -83,16 +82,6 @@ class HeatmapPlotter:
     def uses_coulomb(self, i):
         return self.data_frame["coulomb_scaling"].iloc[i] != 0
 
-    # Returns found peak positions in eV, maybe try prominences here - worked well on the lattice, we will see whether this is needed here as well
-    def identify_modes(self, spectral, pos):
-        if self.max_gaps[pos] == 0:
-            return np.array([])
-        indizes = find_peaks(spectral)[0] #, distance=int(1 / (self.y[1] - self.y[0]))
-        positions = np.array([self.__to_eV__(self.y[i], pos) for i in indizes])
-        positions = positions[MEV * positions < self.true_gaps[pos] - CONTINUUM_CUT_SHIFT]
-        positions[is_phase_peak(positions, self.uses_coulomb(pos))] = 0
-        return positions
-
     def __get_error__(self, key, i):
         __std_g__ = 0.05
         base = self.data_frame["g"].iloc[i]
@@ -111,98 +100,207 @@ class HeatmapPlotter:
         upper_err = np.abs(self.data_frame[key].iloc[i] - self.data_frame[key].iloc[upper_err_idx]) if upper_err_idx < len(self.true_gaps) else None
         return [lower_err, upper_err]
 
-    # This function assumes that the quantities provided come in eV
-    def __decide_if_to_reverse__(self, peak_idx, peaks, gap):
-        if len(peaks) > peak_idx and 1e3 * peaks[peak_idx] - BEGIN_OFFSET - INV_MEV * RANGE <= 0:
-            return False
-        if len(peaks) > peak_idx + 1:
-            return abs(peaks[peak_idx + 1] - peaks[peak_idx]) < np.sqrt(INV_MEV * RANGE)
-        else:
-            if len(peaks) > peak_idx:
-                return abs(peaks[peak_idx] - gap) < np.sqrt(INV_MEV * RANGE)
-            else:
-                return False
+    def fit_goldstone_peak(self, _real, _imag, i):
+        """
+        Fit the Goldstone / phase peak at omega = 0.
 
-    def try_to_fit(self, _real, _imag, _intial_positions, i, higgs):
-        __result = [ analyze_peak(  _real, _imag, 
-                                        peak_position         = peak_position, 
-                                        range                 = RANGE if not is_phase_peak(peak_position, self.uses_coulomb(i)) else 1e5 * RANGE,
-                                        begin_offset          = BEGIN_OFFSET if not is_phase_peak(peak_position, self.uses_coulomb(i)) else peak_position + 1e5 * BEGIN_OFFSET,
-                                        scaling               = INV_MEV,
-                                        reversed              = self.__decide_if_to_reverse__(__i, _intial_positions, INV_MEV * self.true_gaps[i]),
-                                        lower_continuum_edge  = INV_MEV * self.true_gaps[i],
-                                        peak_pos_range        = self.y[20] - self.y[0],
-                                        improve_peak_position = not is_phase_peak(peak_position, self.uses_coulomb(i)))
-                                for __i, peak_position in enumerate(_intial_positions) ]
-        
-        for j in range(len(__result)):
-            current_range = RANGE
+        Energies passed to the continued fraction are in eV.
+        The plotting grid self.y and gaps are in meV, therefore we keep using
+        scaling=INV_MEV as in the old version of this class.
+        """
+        __result = analyze_peak(
+            _real,
+            _imag,
+            peak_position         = 0,
+            range                 = RANGE,
+            begin_offset          = BEGIN_OFFSET,
+            scaling               = INV_MEV,
+            reversed              = False,
+            lower_continuum_edge  = INV_MEV * self.true_gaps[i],
+            peak_pos_range        = self.y[20] - self.y[0],
+            improve_peak_position = False
+        )
+
+        current_range = RANGE
+        current_offset = BEGIN_OFFSET
+
+        __best_fit = __result
+
+        def deviation(_current):
+            return abs(_current.slope.nominal_value + 2)
+
+        def break_condition():
+            return abs(__result.slope.nominal_value + 2) > 0.2
+
+        while break_condition() and current_range >= SECOND_RANGE:
             current_offset = BEGIN_OFFSET
-            
-            def break_condition():
-                if higgs or not is_phase_peak(__result[j].position, self.uses_coulomb(i)):
-                    return abs(__result[j].slope.nominal_value + 1) > 0.01
-                else:
-                    return abs(__result[j].slope.nominal_value + 2) > 0.2
-            
-            while break_condition() and (current_range >= SECOND_RANGE):
-                current_offset = BEGIN_OFFSET
-                while break_condition() and (current_offset >= SECOND_BEGIN):
-                    # Retry the fit with changed parameters
-                    __result[j] = analyze_peak(_real, _imag, 
-                                                peak_position         = __result[j].position, 
-                                                range                 = current_range if not is_phase_peak(__result[j].position, self.uses_coulomb(i)) else 1e5 * current_range,
-                                                begin_offset          = current_offset if not is_phase_peak(__result[j].position, self.uses_coulomb(i)) else __result[j].position + 1e5 * current_offset,
-                                                scaling               = INV_MEV,
-                                                reversed              = self.__decide_if_to_reverse__(j, _intial_positions, INV_MEV * self.true_gaps[i]),
-                                                lower_continuum_edge  = INV_MEV * self.true_gaps[i],
-                                                improve_peak_position = False)
-                    current_offset *= 0.2
-                current_range *= 0.2
 
-            if not higgs and is_phase_peak(__result[j].position, self.uses_coulomb(i)):
-                if abs(__result[j].slope.nominal_value + 2) > 0.2:
-                    print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
-                    print(__result[j])
-                    print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]), "\n")
-            elif abs(__result[j].slope.nominal_value + 1) > 0.01:
-                print(f"WARNING in {'Higgs' if higgs else 'Phase'}! Expected slope of '-1' does not match fitted slope!")
-                print(__result[j])
-                print(extract_model_settings(self.data_frame.iloc[i]), "\nReversed=", self.__decide_if_to_reverse__(j, _intial_positions, self.true_gaps[i]), "\n")
-        
+            while break_condition() and current_offset >= SECOND_BEGIN:
+                __result = analyze_peak(
+                    _real,
+                    _imag,
+                    peak_position         = __result.position,
+                    range                 = current_range,
+                    begin_offset          = __result.position + current_offset,
+                    scaling               = INV_MEV,
+                    reversed              = False,
+                    lower_continuum_edge  = INV_MEV * self.true_gaps[i],
+                    improve_peak_position = False
+                )
+
+                if deviation(__result) < deviation(__best_fit):
+                    __best_fit = __result
+                    best_range = current_range
+                    best_offset = current_offset
+
+                current_offset *= 0.5
+
+            current_range *= 0.5
+
+        __result = __best_fit
+
+        if abs(__result.slope.nominal_value + 2) > 0.33:
+            print("WARNING in Phase! Expected slope of '-2' does not match fitted slope!")
+            print(__result)
+            print(extract_model_settings(self.data_frame.iloc[i]), "\n")
+
         return __result
 
-    def compute_peaks(self, spectral_functions_higgs, spectral_functions_phase):
-        __higgs_peak_positions = [ self.identify_modes(spectral_functions_higgs[:, i], i) for i in range(self.N_data) ]
-        __higgs_peak_weights   = [ ]
-        
-        __phase_peak_positions = [ self.identify_modes(spectral_functions_phase[:, i], i) for i in range(self.N_data) ]
-        __phase_peak_weights   = [ ]
+    def compute_higgs_peaks(self):
+        """
+        Compute Higgs bound-state positions and weights using the C++/continued-fraction
+        bound-state classifier, as in the reference HeatmapPlotter.
+
+        Returned peak positions are in eV.
+        """
+        higgs_cpp_results = [
+            resolvent.classify_bound_states(
+                "amplitude_SC",
+                weight_domega=1e-8
+            )
+            for resolvent in self.resolvents
+        ]
+
+        __higgs_peak_positions = [
+            np.array([data[0] for data in cpp_result])
+            for cpp_result in higgs_cpp_results
+        ]
+
+        __higgs_peak_weights = [
+            np.array([data[1] for data in cpp_result])
+            for cpp_result in higgs_cpp_results
+        ]
+
+        return __higgs_peak_positions, __higgs_peak_weights
+
+    def compute_phase_peaks(self):
+        """
+        Compute phase bound-state positions and weights using the same logic as
+        the reference HeatmapPlotter.
+
+        Non-Goldstone phase modes are obtained from classify_bound_states.
+        The Goldstone mode at omega = 0 is inserted and fitted separately,
+        unless Coulomb is active.
+
+        Returned peak positions are in eV.
+        """
+        phase_cpp_results = []
+
+        for i, resolvent in enumerate(self.resolvents):
+            phase_cpp_results.append(
+                resolvent.classify_bound_states(
+                    "phase_SC",
+                    weight_domega=1e-8,
+                    is_phase_peak=lambda omega, i=i: is_phase_peak(
+                        omega,
+                        self.uses_coulomb(i)
+                    )
+                )
+            )
+
+        __phase_peak_positions = [
+            [data[0] for data in cpp_result]
+            for cpp_result in phase_cpp_results
+        ]
+
+        __phase_peak_weights = [
+            [data[1] for data in cpp_result]
+            for cpp_result in phase_cpp_results
+        ]
 
         for i, res in enumerate(self.resolvents):
-            # Real part should not have an imaginary shift -> yields better fits
-            # because the analytical form is then 1/x rather than x/(x^2 + delta^2)
-            __higgs__real = lambda x: res.continued_fraction(x, "amplitude_SC").real
-            __phase__real = lambda x: res.continued_fraction(x, "phase_SC").real
-            # Imaginary part needs an imaginary shift to resolve the delta peaks
-            __higgs__imag = lambda x: res.continued_fraction(x + FIT_COMPLEX_SHIFT, "amplitude_SC").imag
-            __phase__imag = lambda x: res.continued_fraction(x + FIT_COMPLEX_SHIFT, "phase_SC").imag
-            
-            __higgs_result = self.try_to_fit(__higgs__real, __higgs__imag, __higgs_peak_positions[i], i, True)
-            __phase_result = self.try_to_fit(__phase__real, __phase__imag, __phase_peak_positions[i], i, False)
-            
-            # There are numerical artifacts in the data that have tiny weights which we want to remove here
-            # These vanish with increasing numerical accuracy, so they are certainly not physical
-            __higgs_result = [result for result in __higgs_result if result.weight >= 15e-6] 
-            __phase_result = [result for result in __phase_result if result.weight >= 15e-6 or is_phase_peak(result.position, self.uses_coulomb(i))] 
-            
-            __higgs_peak_positions[i] = np.array([ result.position     for result in __higgs_result ])
-            __higgs_peak_weights.append(np.array([ result.weight       for result in __higgs_result ]))
-            
-            __phase_peak_positions[i] = np.array([ result.position     for result in __phase_result ])
-            __phase_peak_weights.append(np.array([ result.weight       for result in __phase_result ]))
-        
-        return (__higgs_peak_positions, __higgs_peak_weights, __phase_peak_positions, __phase_peak_weights)
+            # With Coulomb interaction, the Goldstone mode is lifted;
+            # do not insert an omega=0 derivative-delta peak.
+            if self.uses_coulomb(i):
+                continue
+
+            if self.max_gaps[i] < RANGE + BEGIN_OFFSET:
+                continue
+
+            # Remove possible duplicate numerical phase peak at omega = 0
+            # before inserting the separately fitted one.
+            filtered_positions = []
+            filtered_weights = []
+
+            for position, weight in zip(__phase_peak_positions[i], __phase_peak_weights[i]):
+                if not is_phase_peak(position, self.uses_coulomb(i)):
+                    filtered_positions.append(position)
+                    filtered_weights.append(weight)
+
+            __phase_peak_positions[i] = filtered_positions
+            __phase_peak_weights[i] = filtered_weights
+
+            # Real part should not have an imaginary shift.
+            # This yields a cleaner 1/x form instead of x/(x^2 + delta^2).
+            __phase_real = lambda x, res=res: res.continued_fraction(
+                x,
+                "phase_SC"
+            ).real
+
+            # Imaginary part needs an imaginary shift to resolve delta peaks.
+            __phase_imag = lambda x, res=res: res.continued_fraction(
+                x + FIT_COMPLEX_SHIFT,
+                "phase_SC"
+            ).imag
+
+            __phase_result = self.fit_goldstone_peak(
+                __phase_real,
+                __phase_imag,
+                i
+            )
+
+            __phase_peak_positions[i].insert(0, __phase_result.position)
+            __phase_peak_weights[i].insert(0, __phase_result.weight)
+
+        __phase_peak_positions = [
+            np.array(positions)
+            for positions in __phase_peak_positions
+        ]
+
+        __phase_peak_weights = [
+            np.array(weights)
+            for weights in __phase_peak_weights
+        ]
+
+        return __phase_peak_positions, __phase_peak_weights
+
+    def compute_peaks(self):
+        """
+        Wrapper matching the old return structure:
+
+            higgs_positions, higgs_weights, phase_positions, phase_weights
+
+        All positions are in eV.
+        """
+        __higgs_peak_positions, __higgs_peak_weights = self.compute_higgs_peaks()
+        __phase_peak_positions, __phase_peak_weights = self.compute_phase_peaks()
+
+        return (
+            __higgs_peak_positions,
+            __higgs_peak_weights,
+            __phase_peak_positions,
+            __phase_peak_weights
+        )
 
     def __remove_data_below_continuum__(self, spectral_functions):
         if not self.scale_energy_by_gaps:
@@ -218,7 +316,7 @@ class HeatmapPlotter:
 
         if not self.scale_energy_by_gaps:
             (__higgs_peak_positions, __higgs_peak_weights,
-                __phase_peak_positions, __phase_peak_weights) = self.compute_peaks(spectral_functions_higgs, spectral_functions_phase) 
+                __phase_peak_positions, __phase_peak_weights) = self.compute_peaks()
 
             self.HiggsModes = pd.DataFrame([ {
                     "resolvent_type": "Higgs",
@@ -237,6 +335,7 @@ class HeatmapPlotter:
                     "lambda_screening": self.data_frame["lambda_screening"].iloc[i],
                     "coulomb": self.uses_coulomb(i)
                 } for i in range(self.N_data) ])
+
             self.PhaseModes = pd.DataFrame([ {
                     "resolvent_type": "Phase",
                     "energies": MEV * __phase_peak_positions[i],
@@ -282,8 +381,6 @@ class HeatmapPlotter:
         
         contour_higgs = axes[0].contourf(self.x, self.y, spectral_functions_higgs, cmap=cmap, levels=levels, norm=cnorm, extend='both', zorder=-20)
         contour_phase = axes[1].contourf(self.x, self.y, spectral_functions_phase, cmap=cmap, levels=levels, norm=cnorm, extend='both', zorder=-20)
-        #ontour_higgs.set_edgecolor('face')
-        #ontour_phase.set_edgecolor('face')
         
         for ax in axes:
             if not self.scale_energy_by_gaps:

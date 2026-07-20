@@ -15,7 +15,7 @@ Us = [0,  0.01, 0.05, 0.1, 0.5]
 sweep_ef = False
 
 fig, axes = plt.subplots(ncols=len(E_Fs) if sweep_ef else len(Us), figsize=(12, 6), layout="constrained", sharey=True)
-main_df = data_loader.load_pickle(f"lattice_cut", "bcc/N=16000/", "gaps.pkl")
+main_df = data_loader.load_pickle(f"lattice_cut", f"bcc/N=16000/", "gaps.pkl")
 
 for ax, sweep in zip(axes, (E_Fs if sweep_ef else Us)):
     if sweep_ef:

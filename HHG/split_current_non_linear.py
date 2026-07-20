@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.fft import rfft, rfftfreq
 
-import mrock_centralized_scripts.path_appender as ap
-ap.append()
+
 from mrock.get_data import *
 data_loader = DataLoader()
 from mrock_centralized_scripts.legend import  *
