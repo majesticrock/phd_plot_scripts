@@ -60,6 +60,4 @@ ax.set_xlabel(r"$\omega [t]$")
 ax.set_ylabel(r"$\mathcal{A} (\omega) [t^{-1}]$")
 fig.tight_layout()
 
-import os
-plt.savefig(f"python/build/{os.path.basename(__file__).split('.')[0]}.pdf")
 plt.show()

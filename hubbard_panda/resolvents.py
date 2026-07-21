@@ -12,8 +12,8 @@ resolvents = cf.ContinuedFraction(pd_data)
 
 fig, ax = plt.subplots()
 ax.set_ylim(-0.05, 1.)
-ax.set_xlabel(r"$\omega [t]$")
-ax.set_ylabel(r"$\mathcal{A} (\omega) [t^{-1}]$")
+ax.set_xlabel(r"$\omega / t$")
+ax.set_ylabel(r"$\mathcal{A} (\omega) / t^{-1}$")
 
 plotter = ps.CURVEFAMILY(6, axis=ax)
 plotter.set_individual_colors("nice")

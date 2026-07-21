@@ -22,12 +22,6 @@ mask = main_df["temperatures"].apply(lambda arr: len(arr) >= 10)
 main_df = main_df[mask].reset_index(drop=True)
 interactions = main_df["g"].to_numpy(dtype=np.float64) - U
 
-main_df["time"] = pd.to_datetime(main_df["time"], format="%d-%m-%Y %H:%M:%S")
-#cutoff = pd.to_datetime(main_df["time"].dt.year.astype(str) + "-11-21")
-#result = main_df[main_df["time"] < cutoff]
-#for _, xresult in result.iterrows():
-#    print(xresult["g"])
-
 max_gaps = main_df["max_gaps"]
 true_gaps = main_df["true_gaps"]
 TCs = np.zeros_like(interactions)
