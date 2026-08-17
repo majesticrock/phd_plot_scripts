@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import TwoSlopeNorm
 from mrock.get_data import *
 
 data_loader = DataLoader()
@@ -10,34 +11,83 @@ L = data["L"]
 N = L * L
 
 def at_fixed_momentum_transfer(U, Qx, Qy):
+    kx_zero_idx = L//2
     ky_zero_idx = L*L//2
     p = np.arange(L)[:, None]
     q = np.arange(L)[None, :]
     
-    V = U[p + ky_zero_idx, q + ky_zero_idx, Qx + L*Qy] * N
+    V = U[kx_zero_idx, kx_zero_idx, q + p]*N#Qx + L*Qy] * N
     return V
 
-Q = [L//2, L//2]
-#Q = [0,0]
+Q = [0,0]
 ELL_STEP = data["index_of_lowest_ROD"]
 
 im_show_kwargs = {
     "origin":         "lower",
     "aspect":         "equal",
     "interpolation" : "nearest",
-    "cmap" :          "inferno"
+    "cmap" :          "seismic"
 }
+
+def create_momentum_labels(L):
+    """Create tick positions and labels for momentum space plots.
+    Labels follow: pi * (2*i/L - 1), simplified as much as possible."""
+    from math import gcd
+    
+    ticks = np.arange(L)
+    labels = []
+    for i in range(L):
+        numerator = 2 * i - L
+        denominator = L
+        
+        # Simplify the fraction
+        g = gcd(abs(numerator), denominator)
+        numerator //= g
+        denominator //= g
+        
+        # Format the label
+        if numerator == 0:
+            label = r"$0$"
+        elif denominator == 1:
+            if numerator == 1:
+                label = r"$\pi$"
+            elif numerator == -1:
+                label = r"$-\pi$"
+            else:
+                label = rf"${numerator}\pi$"
+        else:
+            if numerator == 1:
+                label = rf"$\frac{{\pi}}{{{denominator}}}$"
+            elif numerator == -1:
+                label = rf"$-\frac{{\pi}}{{{denominator}}}$"
+            else:
+                label = rf"$\frac{{{numerator}\pi}}{{{denominator}}}$"
+        
+        labels.append(label)
+    
+    return ticks, labels
 
 fig_same, ax_same = plt.subplots()
 same_spin = data["flow_states"][ELL_STEP]["interactions_same_spin"]
 V_same = at_fixed_momentum_transfer(same_spin, *Q)
 
-im_same = plt.imshow(V_same, **im_show_kwargs)
+vmax_same = np.max(np.abs(V_same))
+if vmax_same == 0.0:
+    vmax_same +=0.1
+norm_same = TwoSlopeNorm(vmin=-vmax_same, vcenter=0, vmax=vmax_same)
+im_same = plt.imshow(V_same, norm=norm_same, **im_show_kwargs)
 
-ax_same.set_xlabel(r"$k_x'$")
+# Set custom tick labels for momentum space
+ticks, labels = create_momentum_labels(L)
+ax_same.set_xticks(ticks)
+ax_same.set_xticklabels(labels)
+ax_same.set_yticks(ticks)
+ax_same.set_yticklabels(labels)
+
+ax_same.set_xlabel(r"$k_y$")
 ax_same.set_ylabel(r"$k_x$")
 ax_same.set_title("Same spin orientation")
-fig_same.colorbar(im_same, label=r"$V(k_x,k_x')$")
+fig_same.colorbar(im_same, label=r"$V(k_x,k_y)$")
 fig_same.tight_layout()
 
 
@@ -46,12 +96,23 @@ fig_differing, ax_differing = plt.subplots()
 same_spin = data["flow_states"][ELL_STEP]["interactions_differing_spin"]
 V_differing = at_fixed_momentum_transfer(same_spin, *Q)
 
-im_differing = plt.imshow(V_differing, **im_show_kwargs)
+vmax_differing = np.max(np.abs(V_differing))
+if vmax_differing == 0.0:
+    vmax_differing +=0.1
+norm_differing = TwoSlopeNorm(vmin=-vmax_differing, vcenter=0, vmax=vmax_differing)
+im_differing = plt.imshow(V_differing, norm=norm_differing, **im_show_kwargs)
 
-ax_differing.set_xlabel(r"$k_x'$")
+# Set custom tick labels for momentum space
+ticks, labels = create_momentum_labels(L)
+ax_differing.set_xticks(ticks)
+ax_differing.set_xticklabels(labels)
+ax_differing.set_yticks(ticks)
+ax_differing.set_yticklabels(labels)
+
+ax_differing.set_xlabel(r"$k_y$")
 ax_differing.set_ylabel(r"$k_x$")
 ax_differing.set_title("Differing spin orientation")
-fig_differing.colorbar(im_differing, label=r"$V(k_x,k_x')$")
+fig_differing.colorbar(im_differing, label=r"$V(k_x,k_y)$")
 fig_differing.tight_layout()
 
 
