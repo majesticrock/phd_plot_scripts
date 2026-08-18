@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 from mrock.get_data import *
+from create_momentum_labels import create_momentum_labels
 
 data_loader = DataLoader()
 
@@ -29,43 +30,7 @@ im_show_kwargs = {
     "cmap" :          "seismic"
 }
 
-def create_momentum_labels(L):
-    """Create tick positions and labels for momentum space plots.
-    Labels follow: pi * (2*i/L - 1), simplified as much as possible."""
-    from math import gcd
-    
-    ticks = np.arange(L)
-    labels = []
-    for i in range(L):
-        numerator = 2 * i - L
-        denominator = L
-        
-        # Simplify the fraction
-        g = gcd(abs(numerator), denominator)
-        numerator //= g
-        denominator //= g
-        
-        # Format the label
-        if numerator == 0:
-            label = r"$0$"
-        elif denominator == 1:
-            if numerator == 1:
-                label = r"$\pi$"
-            elif numerator == -1:
-                label = r"$-\pi$"
-            else:
-                label = rf"${numerator}\pi$"
-        else:
-            if numerator == 1:
-                label = rf"$\frac{{\pi}}{{{denominator}}}$"
-            elif numerator == -1:
-                label = rf"$-\frac{{\pi}}{{{denominator}}}$"
-            else:
-                label = rf"$\frac{{{numerator}\pi}}{{{denominator}}}$"
-        
-        labels.append(label)
-    
-    return ticks, labels
+
 
 fig_same, ax_same = plt.subplots()
 same_spin = data["flow_states"][ELL_STEP]["interactions_same_spin"]
@@ -75,7 +40,7 @@ vmax_same = np.max(np.abs(V_same))
 if vmax_same == 0.0:
     vmax_same +=0.1
 norm_same = TwoSlopeNorm(vmin=-vmax_same, vcenter=0, vmax=vmax_same)
-im_same = plt.imshow(V_same, norm=norm_same, **im_show_kwargs)
+im_same = ax_same.imshow(V_same, norm=norm_same, **im_show_kwargs)
 
 # Set custom tick labels for momentum space
 ticks, labels = create_momentum_labels(L)
@@ -100,7 +65,7 @@ vmax_differing = np.max(np.abs(V_differing))
 if vmax_differing == 0.0:
     vmax_differing +=0.1
 norm_differing = TwoSlopeNorm(vmin=-vmax_differing, vcenter=0, vmax=vmax_differing)
-im_differing = plt.imshow(V_differing, norm=norm_differing, **im_show_kwargs)
+im_differing = ax_differing.imshow(V_differing, norm=norm_differing, **im_show_kwargs)
 
 # Set custom tick labels for momentum space
 ticks, labels = create_momentum_labels(L)

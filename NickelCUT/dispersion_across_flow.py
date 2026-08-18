@@ -31,19 +31,25 @@ for i in range(data["number_of_data_points"]):
     idx = np.arange(n + 1)
     y3 = dispersion[idx, idx]
 
+    # (-π, 0) -> (0, -π)
+    s4 = np.arange(n + 1) + 3*n
+    y4 = dispersion[np.arange(0, n + 1), np.arange(n, -1, -1)]
+
     ax.plot(s1, y1, c=f"C{i}")
     ax.plot(s2, y2, c=f"C{i}")
     ax.plot(s3, y3, c=f"C{i}")
+    ax.plot(s4, y4, c=f"C{i}")
 
     
 
 ax.axvline(L//2, c="k", ls=":")    
 ax.axvline(L, c="k", ls=":")
+ax.axvline(3*L//2, c="k", ls=":")
 
 ax.set_xlabel("$k$")
 ax.set_ylabel(r"$\varepsilon$")
 
-ax.set_xticks([0, n, 2*n, 3*n])
-ax.set_xticklabels([r'$\Gamma$', 'X', 'M', r'$\Gamma$'])
+ax.set_xticks([0, n, 2*n, 3*n, 4*n])
+ax.set_xticklabels([r'$\Gamma$', 'X', 'M', r'$\Gamma$', r'$(0, -\pi)$'])
 
 plt.show()
