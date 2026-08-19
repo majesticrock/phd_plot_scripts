@@ -1,10 +1,7 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from mrock.get_data import *
+from load_full_flow_file import load_full_flow_file
 
-data_loader = DataLoader()
-
-data = data_loader.load_panda_file("cpp/NickelCUT/build/test.json.gz")
+data = load_full_flow_file("cpp/NickelCUT/build/test")
 
 fig, ax = plt.subplots()
 

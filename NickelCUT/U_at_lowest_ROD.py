@@ -1,27 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
-from mrock.get_data import *
 from create_momentum_labels import create_momentum_labels
+from load_full_flow_file import load_full_flow_file
 
-data_loader = DataLoader()
-
-data = data_loader.load_panda_file("cpp/NickelCUT/build/test.json.gz")
-
+data = load_full_flow_file("cpp/NickelCUT/build/test")
+ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
-
-def at_fixed_momentum_transfer(U, Qx, Qy):
-    kx_zero_idx = L//2
-    ky_zero_idx = L*L//2
-    p = np.arange(L)[:, None]
-    q = np.arange(L)[None, :]
-    
-    V = U[kx_zero_idx, kx_zero_idx, q + p]*N#Qx + L*Qy] * N
-    return V
-
-Q = [0,0]
-ELL_STEP = data["index_of_lowest_ROD"]
 
 im_show_kwargs = {
     "origin":         "lower",
@@ -30,15 +16,22 @@ im_show_kwargs = {
     "cmap" :          "seismic"
 }
 
-
+def one_channel(U):
+    kx_zero_idx = L//2
+    ky_zero_idx = L*L//2
+    x_arr = np.arange(L)[:, None]
+    y_arr = L * np.arange(L)[None, :]
+    
+    V = U[kx_zero_idx, x_arr + y_arr, 0]*N
+    return V
 
 fig_same, ax_same = plt.subplots()
 same_spin = data["flow_states"][ELL_STEP]["interactions_same_spin"]
-V_same = at_fixed_momentum_transfer(same_spin, *Q)
+V_same = one_channel(same_spin)
 
 vmax_same = np.max(np.abs(V_same))
 if vmax_same == 0.0:
-    vmax_same +=0.1
+    vmax_same += 0.1
 norm_same = TwoSlopeNorm(vmin=-vmax_same, vcenter=0, vmax=vmax_same)
 im_same = ax_same.imshow(V_same, norm=norm_same, **im_show_kwargs)
 
@@ -59,11 +52,11 @@ fig_same.tight_layout()
 
 fig_differing, ax_differing = plt.subplots()
 same_spin = data["flow_states"][ELL_STEP]["interactions_differing_spin"]
-V_differing = at_fixed_momentum_transfer(same_spin, *Q)
+V_differing = one_channel(same_spin)
 
 vmax_differing = np.max(np.abs(V_differing))
 if vmax_differing == 0.0:
-    vmax_differing +=0.1
+    vmax_differing += 0.1
 norm_differing = TwoSlopeNorm(vmin=-vmax_differing, vcenter=0, vmax=vmax_differing)
 im_differing = ax_differing.imshow(V_differing, norm=norm_differing, **im_show_kwargs)
 

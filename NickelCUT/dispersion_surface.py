@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from mrock.get_data import *
 from create_momentum_labels import create_momentum_labels
+from load_full_flow_file import load_full_flow_file
 
-data_loader = DataLoader()
-data = data_loader.load_panda_file("cpp/NickelCUT/build/test.json.gz")
+data = load_full_flow_file("cpp/NickelCUT/build/test")
+
 L = data["L"]
 ELL_INDEX = data["index_of_lowest_ROD"]
 
@@ -38,7 +38,7 @@ im_show_kwargs = {
     "origin":         "lower",
     "aspect":         "equal",
     "interpolation" : "nearest",
-    "cmap" :          "tab10"
+    "cmap" :          "seismic"
 }
 fig2d, ax2d = plt.subplots()
 im = ax2d.imshow(Z, **im_show_kwargs)

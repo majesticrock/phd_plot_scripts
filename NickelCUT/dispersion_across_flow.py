@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mrock.get_data import *
+import matplotlib.colors as mc
+from load_full_flow_file import load_full_flow_file
 
-data_loader = DataLoader()
-
-data = data_loader.load_panda_file("cpp/NickelCUT/build/test.json.gz")
+data = load_full_flow_file("cpp/NickelCUT/build/test")
 
 L = data["L"]
 
@@ -12,8 +11,10 @@ L = data["L"]
 def convert_1d_to_2d(arr):
     return np.reshape(arr, (-1, L))
 
-fig, ax = plt.subplots()
+cmap = plt.get_cmap("inferno")
+norm = mc.Normalize(data["l_times"][0], data["l_times"][-1])
 
+fig, ax = plt.subplots()
 for i in range(data["number_of_data_points"]):
     dispersion = convert_1d_to_2d(data["flow_states"][i]["dispersion"])
     
@@ -35,10 +36,10 @@ for i in range(data["number_of_data_points"]):
     s4 = np.arange(n + 1) + 3*n
     y4 = dispersion[np.arange(0, n + 1), np.arange(n, -1, -1)]
 
-    ax.plot(s1, y1, c=f"C{i}")
-    ax.plot(s2, y2, c=f"C{i}")
-    ax.plot(s3, y3, c=f"C{i}")
-    ax.plot(s4, y4, c=f"C{i}")
+    ax.plot(s1, y1, c=cmap(norm(data["l_times"][i])))
+    ax.plot(s2, y2, c=cmap(norm(data["l_times"][i])))
+    ax.plot(s3, y3, c=cmap(norm(data["l_times"][i])))
+    ax.plot(s4, y4, c=cmap(norm(data["l_times"][i])))
 
     
 
