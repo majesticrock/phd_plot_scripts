@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 from load_full_flow_file import load_full_flow_file
-from Momentum import MomentumGrid, Q
+from Momentum import MomentumGrid, MomentumHalfFillingFS, Q
 
 data = load_full_flow_file("cpp/NickelCUT/build/test")
 ELL_STEP = data["index_of_lowest_ROD"]
@@ -19,6 +19,8 @@ im_show_kwargs = {
 q = MomentumGrid(L)
 p = MomentumGrid(L)
 
+k_FS = MomentumHalfFillingFS(L)
+
 def DW_channel(V):
     return V[(-p).flat_pos()[:,None], q.flat_pos()[None,:], Q(L).pos]
 
@@ -26,7 +28,7 @@ def BCS_channel(V):
     #return V[p.flat_pos()[:,None], (-p).flat_pos()[:,None], q - p] - V[p.flat_pos()[:,None], (-p).flat_pos()[:,None], q - p].T
     return V[p.flat_pos()[:,None], (-p).flat_pos()[:,None], q - p] + V[q.flat_pos()[:,None], (-q).flat_pos()[:,None], (p - q)].T
 
-channel = BCS_channel
+channel = DW_channel
 
 fig_same, ax_same = plt.subplots()
 
@@ -62,17 +64,17 @@ ax_differing.set_title("Differing spin orientation")
 fig_differing.colorbar(im_differing, label=r"$V(\mathbf{p},\mathbf{q})$")
 fig_differing.tight_layout()
 
-T = 0.065
+T = 0.06
 tolerance = 1e-8
 for l in range(0, ELL_STEP + 1):
     V = channel(
         data["flow_states"][l]["interactions_differing_spin"]
     )
-    dispersion = data["flow_states"][l]["dispersion"]
+    dispersion = data["flow_states"][l]["dispersion"][q.flat_pos()]
 
     # g_i = tanh(eps_i / 2T) / (2 eps_i)
-    g = np.empty(N)
-    for i in range(N):
+    g = np.empty(len(dispersion))
+    for i in range(len(dispersion)):
         eps = dispersion[i]
 
         if abs(eps) < tolerance:
