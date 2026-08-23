@@ -23,7 +23,7 @@ def BCS_channel(V):
     return V[p.flat_pos()[:,None], (-p).flat_pos()[:,None], q - p] + V[q.flat_pos()[:,None], (-q).flat_pos()[:,None], (p - q)].T
 
 channel = BCS_channel
-interaction = channel(usage_data["interactions_differing_spin"]).reshape(L, L, L, L).transpose(1, 0, 3, 2)
+interaction = channel(usage_data["interactions_differing_spin"]).reshape(L, L, L, L).transpose(1, 0, 3, 2) * N
 
 k = np.linspace(-np.pi, np.pi, L, endpoint=False)
 dispersion = usage_data["dispersion"].reshape(L, L)
@@ -56,7 +56,7 @@ interp_interaction = RegularGridInterpolator(
 def wrap(k):
     return ((k + np.pi) % (2*np.pi)) - np.pi
 
-# Checks on a 100x100 grid
+# Checks on a finer grid
 L_inter = 50
 q = np.linspace(-np.pi, np.pi, L_inter)
 X, Y = np.meshgrid(q, q, indexing="xy")
@@ -71,10 +71,12 @@ Deltas = 0.1 * np.ones(L_inter*L_inter)
 Deltas_new = np.zeros(L_inter*L_inter)
 error = 100.
 
-while error > 1e-4:
+while error > 1e-5:
     for ix in range(L_inter):
         for iy in range(L_inter):
-            Deltas_new[ix + L_inter * iy] = -0.5 * np.sum(interpolated_interaction[ix, iy].flatten() * Deltas / np.sqrt(interpolated_dispersion.flatten()**2 + Deltas**2))
+            # extra factor of 2 because of the spin sum
+            Deltas_new[ix + L_inter * iy] = -np.sum(interpolated_interaction[ix, iy].flatten() * Deltas / np.sqrt(interpolated_dispersion.flatten()**2 + Deltas**2))
+    Deltas_new /= L_inter*L_inter
     error = np.linalg.norm(Deltas - Deltas_new)
     Deltas = Deltas_new.copy()
     print(f"Error = {error},  Delta_max = {np.max(np.abs(Deltas))}")
