@@ -14,7 +14,7 @@ def convert_1d_to_2d(arr):
     return np.reshape(arr, (-1, L))
 
 X, Y = np.meshgrid(np.arange(0, L), np.arange(0, L))
-Z = convert_1d_to_2d(data["flow_states"][ELL_INDEX]["dispersion"])
+Z = convert_1d_to_2d(data["extracted_channels"][ELL_INDEX]["dispersion"])
 norm = plt.Normalize(Z.min(), Z.max())
 colors = cm.inferno(norm(Z))
 

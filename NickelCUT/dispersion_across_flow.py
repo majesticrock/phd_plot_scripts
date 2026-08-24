@@ -17,7 +17,7 @@ norm = mc.Normalize(data["l_times"][0], data["l_times"][end_index])
 
 fig, ax = plt.subplots()
 for i in range(end_index):
-    dispersion = convert_1d_to_2d(data["flow_states"][i]["dispersion"])
+    dispersion = convert_1d_to_2d(data["extracted_channels"][i]["dispersion"])
     
     n = L // 2
     # Γ -> X
