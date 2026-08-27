@@ -12,7 +12,7 @@ def convert_1d_to_2d(arr):
     return np.reshape(arr, (-1, L))
 
 cmap = plt.get_cmap("inferno")
-end_index = min(data["number_of_data_points"], data["index_of_lowest_ROD"] + 3)
+end_index = min(data["number_of_data_points"] - 1, data["index_of_lowest_ROD"] + 3)
 norm = mc.Normalize(data["l_times"][0], data["l_times"][end_index])
 
 fig, ax = plt.subplots()

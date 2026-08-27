@@ -23,7 +23,6 @@ p = MomentumGrid(L)
 CHANNEL = "superconductivity"
 
 interaction = 0.5 * (usage_data[CHANNEL] + usage_data[CHANNEL].T)
-print(interaction.max())
 interaction = interaction.reshape(L, L, L, L) * N
 
 k = np.linspace(-np.pi, np.pi, L, endpoint=False)
