@@ -27,8 +27,8 @@ w_lin += 1e-8j
 
 spectral = resolvents.spectral_density(w_lin, MODE_TYPE, with_terminator=True)
 
-spectral_indizes = find_peaks(spectral)[0]
-spectral_positions = np.array([w_lin[i].real for i in spectral_indizes])
+spectral_indices = find_peaks(spectral)[0]
+spectral_positions = np.array([w_lin[i].real for i in spectral_indices])
 
 spectral_real = lambda x: resolvents.continued_fraction(x, MODE_TYPE, with_terminator=True).real
 spectral_imag = lambda x: resolvents.continued_fraction(x + 1e-8j, MODE_TYPE, with_terminator=True).imag

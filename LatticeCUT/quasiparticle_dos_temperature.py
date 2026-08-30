@@ -37,15 +37,15 @@ sp_dos = interp1d(energies, dos_df['dos'], bounds_error=False, fill_value=0.0)
 
 temps = tc_df['temperatures']
 temps_picks = np.array([0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.])
-plot_indizes = np.argmin(np.abs(np.array(temps)[:, None] - temps_picks[None, :] * temps[-1]), axis=0)
+plot_indices = np.argmin(np.abs(np.array(temps)[:, None] - temps_picks[None, :] * temps[-1]), axis=0)
 
-n_curves = len(plot_indizes)
+n_curves = len(plot_indices)
 cmap = plt.get_cmap("viridis")
 
 min_E = 0
 max_E = 0
 
-for c, idx in enumerate(plot_indizes):
+for c, idx in enumerate(plot_indices):
     gaps = main_df['finite_gaps'][idx]
     mu = tc_df['chemical_potentials'][idx]
     

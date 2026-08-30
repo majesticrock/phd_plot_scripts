@@ -6,7 +6,7 @@ import numpy as np
 # x/ylim                -   x and y limit of the zoomed region, expects tuples (lower limit, upper limit)
 # y_funcs               -   Functions generating the y_data from x_data. May only take 1 argument. Need to be in order
 #                               If it is None, the data is extracted from the plot
-# skip_lines            -   If some lines should be skipped, you can pass the corresponding indizes in an array
+# skip_lines            -   If some lines should be skipped, you can pass the corresponding indices in an array
 # x/yticklabels         -   Default behaviour: "None" matplotlib default behaviour
 # **kwargs              -   Is forwarded to the creation of the inset axes
 def create_zoom(ax, inset_xpos, inset_ypos, inset_width, inset_height, 
