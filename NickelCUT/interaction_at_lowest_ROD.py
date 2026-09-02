@@ -4,8 +4,10 @@ from matplotlib.colors import TwoSlopeNorm
 from create_momentum_labels import create_momentum_labels
 from load_full_flow_file import load_full_flow_file
 
+from Momentum import Momentum
+
 data = load_full_flow_file(subdir="", 
-                           L=6,
+                           L=8,
                            T=0,
                            U_0=-1,
                            tprime=0,
@@ -22,13 +24,15 @@ im_show_kwargs = {
     "cmap" :          "seismic"
 }
 
+p = Momentum(L, 0, L//2)
+
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
 CHANNEL = "superconductivity"
 
 fig, ax = plt.subplots()
-V = data["extracted_channels"][ELL_STEP][CHANNEL][p.pos].reshape(L, L)
+V = data["extracted_channels"][ELL_STEP][CHANNEL][p.pos].reshape(L, L) * N
 
 vmax = np.max(np.abs(V))
 if vmax == 0.0:

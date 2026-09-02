@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from load_full_flow_file import load_full_flow_file
 from scipy.interpolate import RegularGridInterpolator
+from Momentum import Momentum
 
 data = load_full_flow_file(subdir="", 
-                           L=6,
+                           L=8,
                            T=0,
                            U_0=-1,
                            tprime=0,
@@ -22,11 +23,11 @@ usage_data = data["extracted_channels"][ELL_STEP]
 # superconductivity
 CHANNEL = "superconductivity"
 
-interaction = 0.5 * (usage_data[CHANNEL] + usage_data[CHANNEL].T)
-interaction = interaction.reshape(L, L, L, L) * N
+# tranpose is required because we save the momenta in [x+L*y] instead of [y+L*x]
+interaction = usage_data[CHANNEL].reshape(L, L, L, L).transpose(1, 0, 3, 2) * N
 
 k = np.linspace(-np.pi, np.pi, L, endpoint=False)
-dispersion = usage_data["dispersion"].reshape(L, L)
+dispersion = usage_data["dispersion"].reshape(L, L).T
 
 # --- Periodic extension ---
 k_ext = np.concatenate([k, [np.pi]])
@@ -48,7 +49,7 @@ interaction_ext = np.pad(
 interp_interaction = RegularGridInterpolator(
     (k_ext, k_ext, k_ext, k_ext),
     interaction_ext,
-    method="cubic",
+    method="linear",
     bounds_error=False,
     fill_value=None,
 )
@@ -59,25 +60,25 @@ def wrap(k):
 # Checks on a finer grid
 L_inter = 40
 q = np.linspace(-np.pi, np.pi, L_inter, endpoint=False)
-X, Y = np.meshgrid(q, q, indexing="xy")
+X, Y = np.meshgrid(q, q, indexing="ij")
 points_2d = np.stack((wrap(X), wrap(Y)), axis=-1)
-interpolated_dispersion = interp_dispersion(points_2d)
+interpolated_dispersion = interp_dispersion(points_2d).flatten()
 
 TOL = 1e-12
 print("Filling:", ((interpolated_dispersion < -TOL).sum() + 0.5 * (np.abs(interpolated_dispersion) < TOL).sum()) / (L_inter*L_inter))
 
-PX, PY, QX, QY = np.meshgrid(q, q, q, q, indexing="xy")
+PX, PY, QX, QY = np.meshgrid(q, q, q, q, indexing="ij")
 points_4d = np.stack((wrap(PX), wrap(PY), wrap(QX), wrap(QY)), axis=-1)
 interpolated_interaction = interp_interaction(points_4d)
 
-Deltas = 0.01 * np.ones(L_inter*L_inter) + 0.1j * np.linspace(0.0, 0.1, L_inter*L_inter)
-Deltas_new = np.zeros(L_inter*L_inter) + 0.0001j
+Deltas = 0.01 * np.ones(L_inter*L_inter)
+Deltas_new = np.zeros(L_inter*L_inter)
 error = 100.
 
-while error > 1e-8:
+while error > 1e-6:
     for ix in range(L_inter):
         for iy in range(L_inter):
-            Deltas_new[ix + L_inter * iy] = -0.5 * np.sum(interpolated_interaction[ix, iy].flatten() * Deltas / np.sqrt(interpolated_dispersion.flatten()**2 + Deltas**2))
+            Deltas_new[ix + L_inter * iy] = -0.5 * np.sum(interpolated_interaction[ix, iy].flatten() * Deltas / np.sqrt(interpolated_dispersion**2 + Deltas**2))
     Deltas_new /= L_inter*L_inter
     error = np.linalg.norm(Deltas - Deltas_new)
     Deltas = Deltas_new.copy()
@@ -85,7 +86,7 @@ while error > 1e-8:
 
 fig_re, ax_re = plt.subplots()
 ax_re.set_title("Real part")
-image_re = ax_re.imshow(Deltas.real.reshape(L_inter, L_inter), 
+image_re = ax_re.imshow(Deltas.reshape(L_inter, L_inter), 
             extent=[-np.pi, np.pi * ( 1. - 1. / L_inter), -np.pi, np.pi * ( 1. - 1. / L_inter)],
             origin="lower",
             aspect="equal")
@@ -94,46 +95,60 @@ ax_re.set_xlabel(r"$k_x$")
 ax_re.set_ylabel(r"$k_y$")
 cbar_re.set_label(r"$\Delta_\mathrm{SC}$")
 
-fig_im, ax_im = plt.subplots()
-ax_im.set_title("Imaginary part")
-image_im = ax_im.imshow(Deltas.imag.reshape(L_inter, L_inter), 
-            extent=[-np.pi, np.pi * ( 1. - 1. / L_inter), -np.pi, np.pi * ( 1. - 1. / L_inter)],
-            origin="lower",
-            aspect="equal")
-cbar_im = fig_im.colorbar(image_im, ax=ax_im)
-ax_im.set_xlabel(r"$k_x$")
-ax_im.set_ylabel(r"$k_y$")
-cbar_im.set_label(r"$\Delta_\mathrm{SC}$")
+
+
+P = Momentum(L, 0, L//2)
+# Plot the interpolated interaction for one fixed incoming momentum.
+interaction_px, interaction_py = [P.kx, P.ky]
+QX_slice, QY_slice = np.meshgrid(q, q, indexing="ij")
+points_4d_slice = np.stack(
+    (
+        np.full_like(QX_slice, interaction_px),
+        np.full_like(QX_slice, interaction_py),
+        wrap(QX_slice),
+        wrap(QY_slice),
+    ),
+    axis=-1,
+)
+interpolated_interaction_slice = interp_interaction(points_4d_slice)
+
+raw_interaction_slice = interaction[P.x, P.y]
+raw_qx, raw_qy = np.meshgrid(k, k, indexing="ij")
+
+fig_interaction = plt.figure()
+ax_interaction = fig_interaction.add_subplot(projection="3d")
+surface = ax_interaction.plot_surface(
+    QX_slice,
+    QY_slice,
+    interpolated_interaction_slice,
+    cmap="seismic",
+    linewidth=0,
+    antialiased=True,
+    alpha=0.8,
+)
+ax_interaction.scatter(
+    raw_qx,
+    raw_qy,
+    raw_interaction_slice,
+    color="black",
+    s=24,
+    depthshade=False,
+    label="Raw interaction",
+)
+ax_interaction.set_xlabel(r"$q_x$")
+ax_interaction.set_ylabel(r"$q_y$")
+ax_interaction.set_zlabel(r"$V(\mathbf{p},\mathbf{q})$")
+ax_interaction.set_title(
+    rf"Interpolated {CHANNEL}, $p = ({interaction_px:.3g}, {interaction_py:.3g})$"
+)
+fig_interaction.colorbar(surface, ax=ax_interaction, shrink=0.7, pad=0.1, label=r"$V(\mathbf{p},\mathbf{q})$")
+fig_interaction.tight_layout()
 
 #fig = plt.figure()
 #ax = fig.add_subplot(projection='3d')
-#KX, KY = np.meshgrid(k, k, indexing="xy")
+#KX, KY = np.meshgrid(k, k, indexing="ij")
 #ax.scatter(KX.ravel(), KY.ravel(), dispersion.ravel(), s=60, c='k', label='data')
 #ax.plot_wireframe(X, Y, interpolated_dispersion, rstride=5, cstride=5,
 #                  color="m", alpha=0.5)
 
-
-#points_4d = np.stack((
-#    np.full_like(X, wrap(0.0)),      # k1x
-#    np.full_like(X, wrap(-np.pi)),   # k1y
-#    wrap(X),                         # k2x
-#    wrap(Y),                         # k2y
-#), axis=-1)
-#Z = interp4(points_4d)
-#
-#vmax = np.max(np.abs(interaction))
-#if vmax == 0.0:
-#    vmax += 0.1
-#norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
-#
-#fig, ax = plt.subplots()
-#im = ax.imshow(
-#    Z,
-#    extent=[-np.pi, np.pi, -np.pi, np.pi],
-#    origin="lower",
-#    aspect="equal",
-#    cmap="seismic",
-#    norm=norm
-#)
-#fig.colorbar(im, ax=ax)
 plt.show()

@@ -4,7 +4,7 @@ import matplotlib.colors as mc
 from load_full_flow_file import load_full_flow_file
 
 data = load_full_flow_file(subdir="", 
-                           L=6,
+                           L=8,
                            T=0,
                            U_0=-1,
                            tprime=0,
