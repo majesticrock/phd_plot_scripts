@@ -4,7 +4,13 @@ from matplotlib import cm
 from create_momentum_labels import create_momentum_labels
 from load_full_flow_file import load_full_flow_file
 
-data = load_full_flow_file("cpp/NickelCUT/build/test")
+data = load_full_flow_file(subdir="", 
+                           L=6,
+                           T=0,
+                           U_0=-1,
+                           tprime=0,
+                           E_F=0.01,
+                           force_json=False)
 
 L = data["L"]
 ELL_INDEX = data["index_of_lowest_ROD"]

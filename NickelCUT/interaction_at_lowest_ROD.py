@@ -3,9 +3,14 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 from create_momentum_labels import create_momentum_labels
 from load_full_flow_file import load_full_flow_file
-from Momentum import Momentum, MomentumGrid, Q, Gamma
 
-data = load_full_flow_file("cpp/NickelCUT/build/test")
+data = load_full_flow_file(subdir="", 
+                           L=6,
+                           T=0,
+                           U_0=-1,
+                           tprime=0,
+                           E_F=0.01,
+                           force_json=False)
 ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
@@ -16,8 +21,6 @@ im_show_kwargs = {
     "interpolation" : "nearest",
     "cmap" :          "seismic"
 }
-
-p = Momentum(L, 0, L//2)
 
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same

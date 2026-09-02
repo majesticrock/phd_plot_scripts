@@ -1,21 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
-from create_momentum_labels import create_momentum_labels
 from load_full_flow_file import load_full_flow_file
-from Momentum import Momentum, MomentumGrid, Q, Gamma
 from scipy.interpolate import RegularGridInterpolator
 
-data = load_full_flow_file("cpp/NickelCUT/build/test")
+data = load_full_flow_file(subdir="", 
+                           L=6,
+                           T=0,
+                           U_0=-1,
+                           tprime=0,
+                           E_F=0.01,
+                           force_json=False)
+
 ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
 
 usage_data = data["extracted_channels"][ELL_STEP]
-
-q = MomentumGrid(L)
-p = MomentumGrid(L)
-
 
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
@@ -63,7 +63,7 @@ X, Y = np.meshgrid(q, q, indexing="xy")
 points_2d = np.stack((wrap(X), wrap(Y)), axis=-1)
 interpolated_dispersion = interp_dispersion(points_2d)
 
-TOL = 1e12
+TOL = 1e-12
 print("Filling:", ((interpolated_dispersion < -TOL).sum() + 0.5 * (np.abs(interpolated_dispersion) < TOL).sum()) / (L_inter*L_inter))
 
 PX, PY, QX, QY = np.meshgrid(q, q, q, q, indexing="xy")

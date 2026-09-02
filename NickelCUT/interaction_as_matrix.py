@@ -2,9 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 from load_full_flow_file import load_full_flow_file
-from Momentum import MomentumGrid, MomentumHalfFillingFS, Q
 
-data = load_full_flow_file("cpp/NickelCUT/build/test")
+data = load_full_flow_file(subdir="", 
+                           L=6,
+                           T=0,
+                           U_0=-1,
+                           tprime=0,
+                           E_F=0.01,
+                           force_json=False)
+
 ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
