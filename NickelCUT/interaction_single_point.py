@@ -12,6 +12,7 @@ data = load_full_flow_file(subdir="",
                            U_0=-1,
                            tprime=0,
                            E_F=0.01,
+                           resume_num="",
                            force_json=False)
 ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
@@ -32,7 +33,7 @@ p = Momentum(L, 0, L//2)
 CHANNEL = "superconductivity"
 
 fig, ax = plt.subplots()
-V = data["extracted_channels"][ELL_STEP][CHANNEL][p.pos].reshape(L, L) * N
+V = data["extracted_channels"][ELL_STEP][CHANNEL][p.pos].reshape(L, L).T * N
 
 vmax = np.max(np.abs(V))
 if vmax == 0.0:

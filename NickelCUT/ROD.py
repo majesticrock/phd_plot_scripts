@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
-from load_full_flow_file import load_full_flow_file
+from load_full_flow_file import *
 
-data = load_full_flow_file(subdir="", 
-                           L=8,
+data = load_all_resumed_files(subdir="", 
+                           L=6,
                            T=0,
                            U_0=-1,
                            tprime=0,
@@ -11,9 +11,11 @@ data = load_full_flow_file(subdir="",
 
 fig, ax = plt.subplots()
 
-ax.plot(data["l_times"], data["residual_offdiagonalities"], "-o")
-
-ax.axvline(data["l_times"][data["index_of_lowest_ROD"]], ls=":", c="k")
+l0 = 0.
+for i in range(len(data)):
+    ax.plot(l0 + data[i]["l_times"], data[i]["residual_offdiagonalities"], "-o")
+    ax.axvline(l0 + data[i]["l_times"][data[i]["index_of_lowest_ROD"]], ls=":", c="k")
+    l0 = data[i]["l_times"][-1]
 
 ax.set_xlabel(r"$\ell \cdot t$")
 ax.set_ylabel(r"$\mathrm{ROD} / t$")

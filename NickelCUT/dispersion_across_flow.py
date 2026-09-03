@@ -4,11 +4,12 @@ import matplotlib.colors as mc
 from load_full_flow_file import load_full_flow_file
 
 data = load_full_flow_file(subdir="", 
-                           L=8,
+                           L=6,
                            T=0,
                            U_0=-1,
                            tprime=0,
                            E_F=0.01,
+                           resume_num="",
                            force_json=False)
 
 L = data["L"]

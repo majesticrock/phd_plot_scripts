@@ -10,10 +10,12 @@ data = load_full_flow_file(subdir="",
                            U_0=-1,
                            tprime=0,
                            E_F=0.01,
+                           resume_num="",
                            force_json=False)
 
 L = data["L"]
 ELL_INDEX = data["index_of_lowest_ROD"]
+print("ROD of plotted data =", data["residual_offdiagonalities"][ELL_INDEX], ", index =", ELL_INDEX)
 
 # turns a L*L 1D array into a L x L 2D array
 def convert_1d_to_2d(arr):
