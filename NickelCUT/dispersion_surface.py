@@ -5,11 +5,11 @@ from create_momentum_labels import create_momentum_labels
 from load_full_flow_file import load_full_flow_file
 
 data = load_full_flow_file(subdir="", 
-                           L=8,
+                           L=10,
                            T=0,
-                           U_0=-1,
-                           tprime=0,
-                           E_F=0.01,
+                           U_0=2,
+                           tprime=-0.3,
+                           E_F=-1.2,
                            resume_num="",
                            force_json=False)
 
@@ -48,8 +48,11 @@ im_show_kwargs = {
     "interpolation" : "nearest",
     "cmap" :          "seismic"
 }
+import matplotlib.colors as mcolors
+ex = max(abs(np.min(Z)), abs(np.max(Z)))
+norm_im = mcolors.TwoSlopeNorm(vcenter=0.0, vmin=-ex, vmax=ex)
 fig2d, ax2d = plt.subplots()
-im = ax2d.imshow(Z, **im_show_kwargs)
+im = ax2d.imshow(Z, norm=norm_im, **im_show_kwargs)
 fig2d.colorbar(im)
 
 # Set custom tick labels for momentum space

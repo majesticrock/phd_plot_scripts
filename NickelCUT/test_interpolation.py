@@ -5,11 +5,12 @@ from scipy.interpolate import RegularGridInterpolator
 from Momentum import Momentum
 
 data = load_full_flow_file(subdir="", 
-                           L=8,
+                           L=10,
                            T=0,
                            U_0=-1,
                            tprime=0,
                            E_F=0.01,
+                           resume_num="",
                            force_json=False)
 
 ELL_STEP = data["index_of_lowest_ROD"]

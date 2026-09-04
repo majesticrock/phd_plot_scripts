@@ -7,13 +7,14 @@ from load_full_flow_file import load_full_flow_file
 from Momentum import Momentum
 
 data = load_full_flow_file(subdir="", 
-                           L=8,
+                           L=10,
                            T=0,
-                           U_0=-1,
-                           tprime=0,
-                           E_F=0.01,
+                           U_0=2,
+                           tprime=-0.3,
+                           E_F=-1.2,
                            resume_num="",
                            force_json=False)
+
 ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
