@@ -6,11 +6,10 @@ import mrock.continued_fraction as cf
 data_loader = DataLoader()
 
 SYSTEM = "sc"
-N = 8000
 
 params = lattice_cut_params(
     N=16000,
-    g=2.0,
+    g=2,
     U=0.0,
     E_F=0,
     omega_D=0.02,
@@ -19,7 +18,7 @@ params = lattice_cut_params(
 # Replace these folder names with the two datasets to compare.
 datasets = {
     "My Interaction": f"./{SYSTEM}",
-    "LW Interaction": f"test_LW/{SYSTEM}",
+    "LW Interaction": f"LW/{SYSTEM}",
 }
 
 fig, axes = plt.subplots(2, 1, sharex=True, figsize=(7, 8))
@@ -65,7 +64,6 @@ for label, folder in datasets.items():
 
     axes[0].plot(w_lin.real, A_phase, label=label)
     axes[1].plot(w_lin.real, A_amplitude, label=label)
-    params["N"] = N
 
 for ax in axes:
     ax.set_ylim(-0.05, 3.5)

@@ -5,7 +5,6 @@ from mrock.get_data import DataLoader, lattice_cut_params
 data_loader = DataLoader()
 
 SYSTEM = "sc"
-N = 8000
 
 params = lattice_cut_params(
     N=16000,
@@ -17,7 +16,7 @@ params = lattice_cut_params(
 
 datasets = {
     "My Interaction": f"./{SYSTEM}",
-    "LW Interaction": f"test_LW/{SYSTEM}",
+    "LW Interaction": f"LW/{SYSTEM}",
 }
 
 fig, ax = plt.subplots(figsize=(7, 5))
@@ -40,7 +39,6 @@ for label, folder in datasets.items():
         f"Max = {np.max(delta):.5f}, "
         f"Min = {np.min(delta):.5f}",
     )
-    params["N"] = N
 
 ax.set_xlabel(r"$\epsilon - \mu$")
 ax.set_ylabel(r"$\Delta$")
