@@ -1,9 +1,28 @@
 import math
 from dataclasses import dataclass
+
 import numpy as np
+
 
 @dataclass(frozen=True)
 class Momentum:
+    """
+    A single momentum on an L x L periodic momentum grid.
+
+    The momentum indices are
+
+        x, y = 0, ..., L-1
+
+    and the physical momenta are
+
+        kx = pi * (2*x/L - 1)
+        ky = pi * (2*y/L - 1).
+
+    The linear position in an L x L array is
+
+        pos = x + L*y.
+    """
+
     L: int
     x: int
     y: int = 0
@@ -11,6 +30,7 @@ class Momentum:
     def __post_init__(self):
         if self.L % 2:
             raise ValueError("L must be even")
+
         object.__setattr__(self, "x", self.x % self.L)
         object.__setattr__(self, "y", self.y % self.L)
 
@@ -24,14 +44,31 @@ class Momentum:
 
     @property
     def pos(self):
+        """
+        Linear position in an L x L array.
+        """
         return self.x + self.L * self.y
+
+    def flat_pos(self):
+        """
+        One-element 1D array containing the linear position.
+        """
+        return np.asarray(self.pos).reshape(-1)
 
     def __index__(self):
-        return self.x + self.L * self.y
+        return self.pos
 
     def __add__(self, other):
-        assert self.L == other.L
+        if not isinstance(other, Momentum):
+            return NotImplemented
+
+        if self.L != other.L:
+            raise ValueError(
+                "Cannot add momenta with different lattice sizes"
+            )
+
         L = self.L
+
         return Momentum(
             L,
             (self.x + other.x + L // 2) % L,
@@ -39,8 +76,16 @@ class Momentum:
         )
 
     def __sub__(self, other):
-        assert self.L == other.L
+        if not isinstance(other, Momentum):
+            return NotImplemented
+
+        if self.L != other.L:
+            raise ValueError(
+                "Cannot subtract momenta with different lattice sizes"
+            )
+
         L = self.L
+
         return Momentum(
             L,
             (self.x - other.x + L // 2) % L,
@@ -48,159 +93,250 @@ class Momentum:
         )
 
     def __neg__(self):
-        return Momentum(self.L, self.L // 2, self.L // 2) - self
+        return Momentum(
+            self.L,
+            self.L // 2,
+            self.L // 2,
+        ) - self
 
     def __repr__(self):
-        return f"Momentum(idx=({self.x},{self.y}), k=({self.kx/math.pi:.3f}π,{self.ky/math.pi:.3f}π))"
+        return (
+            f"Momentum("
+            f"idx=({self.x},{self.y}), "
+            f"k=({self.kx / math.pi:.3f}π,"
+            f"{self.ky / math.pi:.3f}π)"
+            f")"
+        )
 
 
 def Gamma(L):
+    """
+    Gamma = (0, 0).
+    """
     return Momentum(L, L // 2, L // 2)
 
+
 def Q(L):
+    """
+    Q = (pi, pi), represented by the index (0, 0).
+    """
     return Momentum(L, 0, 0)
 
+
 class MomentumGrid:
-    def __init__(self, L):
+    """
+    The complete L x L momentum grid represented as a flat array
+    of L**2 momenta.
+
+    This representation is particularly convenient for Bethe-Salpeter
+    calculations because a momentum variable can be turned into a
+    row or column variable simply with
+
+        K = MomentumGrid(L)[:, None]
+        P = MomentumGrid(L)[None, :]
+
+    giving
+
+        K.shape == (L**2, 1)
+        P.shape == (1, L**2)
+
+    and hence
+
+        K - P
+
+    has shape
+
+        (L**2, L**2).
+    """
+
+    def __init__(self, L, x=None, y=None):
         if L % 2:
             raise ValueError("L must be even")
 
         self.L = L
-        self.x, self.y = np.meshgrid(
-            np.arange(L),
-            np.arange(L),
-            indexing="xy",
+
+        if x is None and y is None:
+            # Flattened momentum grid.
+            #
+            # pos = x + L*y
+            #
+            # First x varies fastest, then y.
+            self.x = np.tile(np.arange(L), L)
+            self.y = np.repeat(np.arange(L), L)
+
+        elif x is None or y is None:
+            raise ValueError(
+                "x and y must either both be provided or both be None"
+            )
+
+        else:
+            self.x = np.asarray(x) % L
+            self.y = np.asarray(y) % L
+
+            # Allow NumPy broadcasting between x and y.
+            self.x, self.y = np.broadcast_arrays(
+                self.x,
+                self.y,
+            )
+
+    # ------------------------------------------------------------------
+    # Basic properties
+    # ------------------------------------------------------------------
+
+    @property
+    def shape(self):
+        return self.x.shape
+
+    @property
+    def size(self):
+        return self.x.size
+
+    # ------------------------------------------------------------------
+    # Physical momentum
+    # ------------------------------------------------------------------
+
+    @property
+    def kx(self):
+        return math.pi * (2 * self.x / self.L - 1)
+
+    @property
+    def ky(self):
+        return math.pi * (2 * self.y / self.L - 1)
+
+    # ------------------------------------------------------------------
+    # Linear position
+    # ------------------------------------------------------------------
+
+    @property
+    def pos(self):
+        """
+        Linear momentum index.
+
+        Preserves the shape of the MomentumGrid.
+
+        Examples:
+
+            MomentumGrid(L).pos.shape
+                -> (L**2,)
+
+            MomentumGrid(L)[:, None].pos.shape
+                -> (L**2, 1)
+
+            MomentumGrid(L)[None, :].pos.shape
+                -> (1, L**2)
+        """
+        return self.x + self.L * self.y
+
+    def flat_pos(self):
+        """
+        Return the momentum indices as a flat 1D array.
+        """
+        return self.pos.reshape(-1)
+
+    # ------------------------------------------------------------------
+    # NumPy-style indexing
+    # ------------------------------------------------------------------
+
+    def __getitem__(self, key):
+        """
+        Preserve MomentumGrid under NumPy-style slicing.
+
+        Examples
+        --------
+        K0 = MomentumGrid(L)
+
+        K0[:, None].shape
+            -> (L**2, 1)
+
+        K0[None, :].shape
+            -> (1, L**2)
+        """
+        return MomentumGrid(
+            self.L,
+            self.x[key],
+            self.y[key],
         )
 
-    def _idx(self, x, y):
-        return x + self.L * y
+    # ------------------------------------------------------------------
+    # Momentum arithmetic
+    # ------------------------------------------------------------------
+
+    def __add__(self, other):
+        L = self.L
+
+        if isinstance(other, Momentum):
+            if self.L != other.L:
+                raise ValueError(
+                    "Cannot add momenta with different lattice sizes"
+                )
+
+            return MomentumGrid(
+                L,
+                (self.x + other.x + L // 2) % L,
+                (self.y + other.y + L // 2) % L,
+            )
+
+        if isinstance(other, MomentumGrid):
+            if self.L != other.L:
+                raise ValueError(
+                    "Cannot add momentum grids with different lattice sizes"
+                )
+
+            return MomentumGrid(
+                L,
+                (self.x + other.x + L // 2) % L,
+                (self.y + other.y + L // 2) % L,
+            )
+
+        return NotImplemented
 
     def __sub__(self, other):
         L = self.L
 
         if isinstance(other, Momentum):
-            # Shift the whole BZ
-            x = (self.x - other.x + L//2) % L
-            y = (self.y - other.y + L//2) % L
-            return self._idx(x, y)
+            if self.L != other.L:
+                raise ValueError(
+                    "Cannot subtract momenta with different lattice sizes"
+                )
 
-        elif isinstance(other, MomentumGrid):
-            # Pairwise q - p
-            x = (self.x.ravel()[None, :] - other.x.ravel()[:, None] + L//2) % L
-            y = (self.y.ravel()[None, :] - other.y.ravel()[:, None] + L//2) % L
-            return self._idx(x, y)
+            return MomentumGrid(
+                L,
+                (self.x - other.x + L // 2) % L,
+                (self.y - other.y + L // 2) % L,
+            )
 
-        return NotImplemented
+        if isinstance(other, MomentumGrid):
+            if self.L != other.L:
+                raise ValueError(
+                    "Cannot subtract momentum grids with different lattice sizes"
+                )
 
-    def __add__(self, other):
-        if not isinstance(other, Momentum):
-            return NotImplemented
-
-        L = self.L
-        x = (self.x + other.x + L // 2) % L
-        y = (self.y + other.y + L // 2) % L
-        return MomentumGrid(L, x, y)
-
-    def __neg__(self):
-        tmp = MomentumGrid(self.L)
-        L = self.L
-        tmp.x = (-self.x + L) % L
-        tmp.y = (-self.y + L) % L
-        return tmp
-
-    def pos(self):
-        return self._idx(self.x, self.y)
-    
-    def flat_pos(self):
-        return self.pos().flatten()
-    
-    
-class MomentumHalfFillingFS:
-    def __init__(self, L):
-        if L % 2:
-            raise ValueError("L must be even")
-
-        self.L = L
-        self.x = np.concatenate([np.arange(L), [0], np.arange(L - 1, 0, -1)])
-        self.y = np.concatenate([np.arange(L//2, L), [0], np.arange(L - 1, 0, -1), np.arange(L//2)])
-
-    def _idx(self, x, y):
-        return x + self.L * y
-
-    def kx_ky(self):
-        return np.array([math.pi * (2 * self.x / L - 1), math.pi * (2 * self.y / L - 1)]).T
-
-    def __sub__(self, other):
-        L = self.L
-
-        if isinstance(other, Momentum):
-            # Shift the whole BZ
-            x = (self.x - other.x + L//2) % L
-            y = (self.y - other.y + L//2) % L
-            return self._idx(x, y)
-
-        elif isinstance(other, MomentumHalfFillingFS):
-            # Pairwise q - p
-            x = (self.x.ravel() - other.x.ravel() + L//2) % L
-            y = (self.y.ravel() - other.y.ravel() + L//2) % L
-            return self._idx(x, y)
+            return MomentumGrid(
+                L,
+                (self.x - other.x + L // 2) % L,
+                (self.y - other.y + L // 2) % L,
+            )
 
         return NotImplemented
 
-    def __add__(self, other):
-        if not isinstance(other, Momentum):
-            return NotImplemented
-
-        L = self.L
-        x = (self.x + other.x + L // 2) % L
-        y = (self.y + other.y + L // 2) % L
-        return MomentumHalfFillingFS(L, x, y)
-
     def __neg__(self):
-        tmp = MomentumHalfFillingFS(self.L)
         L = self.L
-        tmp.x = (-self.x + L) % L
-        tmp.y = (-self.y + L) % L
-        return tmp
 
-    def as_list_of_strings(self):
-        return [
-            f"Momentum(idx=({x},{y}))"
-                for x, y in zip(self.x, self.y) ]
+        return MomentumGrid(
+            L,
+            (-self.x + L) % L,
+            (-self.y + L) % L,
+        )
 
-    def pos(self):
-        return self._idx(self.x, self.y)
-    
-    def flat_pos(self):
-        return self.pos().flatten()
-    
+    # ------------------------------------------------------------------
+    # Representation
+    # ------------------------------------------------------------------
 
-if __name__ == "__main__":
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mc
-    from load_full_flow_file import load_full_flow_file
-
-    data = load_full_flow_file("cpp/NickelCUT/build/test")
-
-    L = data["L"]
-
-    # turns a L*L 1D array into a L x L 2D array
-    def convert_1d_to_2d(arr):
-        return np.reshape(arr, (-1, L))
-
-    k_FS = MomentumHalfFillingFS(L)
-
-    cmap = plt.get_cmap("inferno")
-    norm = mc.Normalize(data["l_times"][0], data["l_times"][-1])
-    fig, ax = plt.subplots()
-    for i in range(data["number_of_data_points"]):
-        if (i % 5 != 0):
-            continue
-        dispersion = convert_1d_to_2d(data["flow_states"][i]["dispersion"])
-        ax.plot(dispersion[k_FS.x, k_FS.y].flatten(), c=cmap(norm(data["l_times"][i])))
-    
-    ax.set_xlabel("$k$")
-    ax.set_ylabel(r"$\varepsilon$")
-    
-    plt.show()
+    def __repr__(self):
+        return (
+            f"MomentumGrid("
+            f"L={self.L}, "
+            f"shape={self.shape}, "
+            f"size={self.size}"
+            f")"
+        )
