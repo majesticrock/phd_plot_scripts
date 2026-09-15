@@ -2,16 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mc
 from load_full_flow_file import load_full_flow_file
+from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_full_flow_file(subdir="", 
-                           L=10,
-                           T=0,
-                           U_0=2,
-                           tprime=-0.3,
-                           E_F=-1.2,
-                           resume_num="1",
-                           force_json=False)
-
+data = load_full_flow_file(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
+print("Loaded data was produced on", data["time"])
 L = data["L"]
 
 # turns a L*L 1D array into a L x L 2D array
@@ -20,11 +14,11 @@ def convert_1d_to_2d(arr):
 
 cmap = plt.get_cmap("inferno")
 end_index = min(data["number_of_data_points"] - 1, data["index_of_lowest_ROD"] + 3)
-norm = mc.Normalize(data["l_times"][0], data["l_times"][end_index])
+norm = mc.Normalize(data["l_times"][0], data["l_times"][end_index-1])
 
 fig, ax = plt.subplots()
 for i in range(end_index):
-    dispersion = convert_1d_to_2d(data["extracted_channels"][i]["dispersion"])
+    dispersion = convert_1d_to_2d(data["extracted_channels"][i]["epsilon_tilde"])
     
     n = L // 2
     # Γ -> X

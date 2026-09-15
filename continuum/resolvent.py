@@ -3,21 +3,20 @@ import matplotlib.pyplot as plt
 from mrock_centralized_scripts.create_zoom import *
 from mrock.get_data import *
 data_loader = DataLoader()
-pd_data = data_loader.load_panda("continuum", "offset_25", "resolvents.json.gz",
-                    **continuum_params(N_k=30000, T=0, coulomb_scaling=1, screening=1e-4, k_F=4.25, g=3.65, omega_D=10))
+pd_data = data_loader.load_panda("continuum", "offset_10", "resolvents.json.gz",
+                    **continuum_params(N_k=20000, T=0, coulomb_scaling=0, screening=1e-4, k_F=4.25, g=0.3, omega_D=10))
 
 import mrock.continued_fraction as cf
-import mrock_centralized_scripts.plot_settings as ps
 
 resolvents = cf.ContinuedFraction(pd_data, ignore_first=80, ignore_last=90)
 print("Delta_true = ", 0.5e3 * resolvents.continuum_edges()[0])
 
 fig, ax = plt.subplots()
-ax.set_ylim(-0.01, 0.1)
+ax.set_ylim(-0.01, 0.99)
 ax.set_xlabel(r"$\omega [\mathrm{meV}]$")
 ax.set_ylabel(r"$\mathcal{A} (\omega) [\mathrm{eV}^{-1}]$")
 
-w_lin = np.linspace(-0.005 * pd_data["continuum_boundaries"][1], 1.5 * pd_data["continuum_boundaries"][0], 5000, dtype=complex)
+w_lin = np.linspace(-0.005e-3, 32e-3, 5000, dtype=complex)
 w_lin += 1e-6j
 
 ax.plot(1e3 * w_lin.real, resolvents.spectral_density(w_lin, "phase_SC",     with_terminator=True), label="Phase")

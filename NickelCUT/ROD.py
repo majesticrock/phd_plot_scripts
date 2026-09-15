@@ -1,13 +1,8 @@
 import matplotlib.pyplot as plt
 from load_full_flow_file import *
+from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_all_resumed_files(subdir="", 
-                           L=10,
-                           T=0,
-                           U_0=2,
-                           tprime=-0.3,
-                           E_F=-1.2,
-                           force_json=False)
+data = load_all_resumed_files(subdir="", **FLOW_PARAMETERS, force_json=False)
 
 
 fig, ax = plt.subplots()

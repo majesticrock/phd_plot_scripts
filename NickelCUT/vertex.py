@@ -3,15 +3,9 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 from Momentum import MomentumGrid, Momentum
 from load_full_flow_file import load_full_flow_state
+from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_full_flow_state(subdir="", 
-                           L=10,
-                           T=0,
-                           U_0=2,
-                           tprime=0.,
-                           E_F=0,
-                           resume_num="",
-                           force_json=False)
+data = load_full_flow_state(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
 
 L = data["L"]
 

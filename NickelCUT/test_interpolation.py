@@ -3,15 +3,11 @@ import matplotlib.pyplot as plt
 from load_full_flow_file import load_full_flow_file
 from scipy.interpolate import RegularGridInterpolator
 from Momentum import Momentum
+from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_full_flow_file(subdir="", 
-                           L=10,
-                           T=0,
-                           U_0=-1,
-                           tprime=0,
-                           E_F=0.01,
-                           resume_num="",
-                           force_json=False)
+data = load_full_flow_file(
+    subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False
+)
 
 ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
