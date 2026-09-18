@@ -25,7 +25,7 @@ p = Momentum(L, 0, L//2)
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
-CHANNEL = "superconductivity"
+CHANNEL = "density_wave_differing"
 
 fig, ax = plt.subplots()
 V = data["extracted_channels"][ELL_STEP][CHANNEL][p.pos].reshape(L, L).T * N

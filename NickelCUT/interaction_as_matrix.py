@@ -20,7 +20,7 @@ im_show_kwargs = {
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
-CHANNEL = "superconductivity"
+CHANNEL = "density_wave_differing"
 
 fig, ax = plt.subplots()
 

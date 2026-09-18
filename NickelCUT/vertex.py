@@ -8,19 +8,6 @@ from nickel_cut_parameters import FLOW_PARAMETERS
 data = load_full_flow_state(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
 
 L = data["L"]
-
-A = np.array([
-    x + L*((L//2 - x) % L)
-    for x in range(L)
-])
-B = np.array([
-    x + L*((x - L//2) % L)
-    for x in range(L)
-])
-B = np.setdiff1d(B, A, assume_unique=True)
-
-FS_points = np.concatenate((A, B))
-
 im_show_kwargs = {
     "origin":         "lower",
     "aspect":         "equal",
@@ -30,36 +17,12 @@ im_show_kwargs = {
 
 fig, ax = plt.subplots()
 
-perm = np.array([
-    ((-x) % L) + L*((-y) % L)
-    for y in range(L)
-    for x in range(L)
-])
-
-K0 = MomentumGrid(L)
-P0 = MomentumGrid(L)
-
-K = K0[:, None]
-P = P0[None, :]
-
 Q = Momentum(L, 0, 0)
 
-V = (
-    data["interactions_same_spin"][
-        K.pos,
-        P.pos,
-        Q.pos,
-    ]
-    - data["interactions_same_spin"][
-        P.pos,
-        K.pos,
-        (K - P - Q).pos,
-    ]
-    - data["interactions_differing_spin"][
-        K.pos,
-        P.pos,
-        Q.pos,
-    ]
+print(np.max(np.abs(data["interactions_same_spin"])) * 2 * L*L, np.max(np.abs(data["interactions_differing_spin"])) * 2 * L*L)
+
+V = -2 * (
+    data["interactions_same_spin"][:,:,Q.pos] - data["interactions_differing_spin"][:,:,Q.pos]
 ) * L*L
 
 vmax = np.max(np.abs(V))
