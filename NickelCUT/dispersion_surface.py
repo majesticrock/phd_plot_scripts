@@ -58,8 +58,4 @@ ax2d.set_yticklabels(labels)
 ax2d.set_xlabel(r"$k_y$")
 ax2d.set_ylabel(r"$k_x$")
 
-
-disp_flat = np.sort(Z.ravel())
-print(disp_flat)
-
 plt.show()

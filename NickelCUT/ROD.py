@@ -4,13 +4,12 @@ from nickel_cut_parameters import FLOW_PARAMETERS
 
 data = load_all_resumed_files(subdir="", **FLOW_PARAMETERS, force_json=False)
 
-
 fig, ax = plt.subplots()
 
 l0 = 0.
 for i in range(len(data)):
     ax.plot(l0 + data[i]["l_times"], data[i]["residual_offdiagonalities"], "-o")
-    ax.axvline(l0 + data[i]["l_times"][data[i]["index_of_lowest_ROD"]], ls=":", c="k")
+    ax.axvline(l0 + data[i]["l_times"][data[i]["index_of_lowest_ROD"]], ls=":", c="k", alpha=0.6)
     l0 += data[i]["l_times"][-1]
 
 ax.set_xlabel(r"$\ell \cdot t$")

@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     L = data["L"]
     N = L * L
-    beta = 5.5 #1.0 / data["T"] if data["T"] > 0.0 else 32
+    beta = 40. #1.0 / data["T"] if data["T"] > 0.0 else 32
     
     #full_vertex = 2.7 * np.ones((N, N)) / N
     #x = np.linspace(-np.pi, np.pi, L, endpoint=False)
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     full_vertex = (data["interactions_differing_spin"] - data["interactions_same_spin"])
 
     rpa = RPA(L, beta, dispersion, full_vertex)
-    print("Filling:", np.sum(rpa.lindhard.fermi(dispersion)) / N)
+    print("Filling:", np.average(rpa.lindhard.fermi(dispersion)))
     #rpa.plot_susceptibility_heatmap()
     #rpa.lindhard.plot_susceptibility_heatmap()
     

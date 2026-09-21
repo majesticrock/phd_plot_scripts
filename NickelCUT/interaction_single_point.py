@@ -9,7 +9,7 @@ from Momentum import Momentum
 
 data = load_full_flow_file(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
 
-ELL_STEP = data["index_of_lowest_ROD"]
+ELL_STEP = -1#data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
 
@@ -33,8 +33,7 @@ V = data["extracted_channels"][ELL_STEP][CHANNEL][p.pos].reshape(L, L).T * N
 vmax = np.max(np.abs(V))
 if vmax == 0.0:
     vmax += 0.1
-norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
-im = ax.imshow(V, norm=norm, **im_show_kwargs)
+im = ax.imshow(V, vmin=-vmax, vmax=vmax, **im_show_kwargs)
 
 # Set custom tick labels for momentum space
 ticks, labels = create_momentum_labels(L)
