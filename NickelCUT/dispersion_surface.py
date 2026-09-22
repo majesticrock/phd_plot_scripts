@@ -42,11 +42,10 @@ im_show_kwargs = {
     "interpolation" : "nearest",
     "cmap" :          "seismic"
 }
-import matplotlib.colors as mcolors
+
 ex = max(abs(np.min(Z)), abs(np.max(Z)))
-norm_im = mcolors.TwoSlopeNorm(vcenter=0.0, vmin=-ex, vmax=ex)
 fig2d, ax2d = plt.subplots()
-im = ax2d.imshow(Z, norm=norm_im, **im_show_kwargs)
+im = ax2d.imshow(Z, vmin=-ex, vmax=ex, **im_show_kwargs)
 fig2d.colorbar(im)
 
 # Set custom tick labels for momentum space

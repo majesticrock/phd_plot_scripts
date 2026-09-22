@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     L = data["L"]
     N = L * L
-    beta = 40. #1.0 / data["T"] if data["T"] > 0.0 else 32
+    beta = 15. #1.0 / data["T"] if data["T"] > 0.0 else 32
     
     #full_vertex = 2.7 * np.ones((N, N)) / N
     #x = np.linspace(-np.pi, np.pi, L, endpoint=False)

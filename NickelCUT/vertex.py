@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
-from Momentum import MomentumGrid, Momentum
+from Momentum import Momentum
 from load_full_flow_file import load_full_flow_state
 from nickel_cut_parameters import FLOW_PARAMETERS
 
@@ -21,7 +20,7 @@ fig, ax = plt.subplots()
 Q = Momentum(L, 0, 0)
 
 V = 2 * (
-    data["interactions_differing_spin"][:,:,Q.pos] - data["interactions_same_spin"][:,:,Q.pos]
+    data["interactions_differing_spin"][:,:,Q.pos] - 2 * data["interactions_same_spin"][:,:,Q.pos]
 ) * N
 
 print(np.sum(V) / N)
@@ -29,9 +28,8 @@ print(np.sum(V) / N)
 vmax = np.max(np.abs(V))
 if vmax == 0.0:
     vmax += 0.1
-norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
 
-im = ax.imshow(V, norm=norm, **im_show_kwargs)
+im = ax.imshow(V, vmin=-vmax, vmax=vmax, **im_show_kwargs)
 
 ax.set_xlabel(r"$k_i$")
 ax.set_ylabel(r"$p_i$")

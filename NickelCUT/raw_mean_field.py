@@ -2,28 +2,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from Momentum import Momentum
-from load_full_flow_file import load_full_flow_file
+from load_full_flow_file import load_full_flow_file, load_full_flow_state
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_full_flow_file(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
-ELL_STEP = data["index_of_lowest_ROD"]+5
-L = data["L"]
+L = FLOW_PARAMETERS["L"]
 N = L * L
-beta = 50.
-
+beta = 20.
 def fermi(energy):
     return 1.0 / (1.0 + np.exp(beta * energy))
 
-dispersion     = data["extracted_channels"][ELL_STEP]["epsilon_tilde"]# + FLOW_PARAMETERS["U_0"] / 2
-dw_channel     = data["extracted_channels"][ELL_STEP]["density_wave_differing"] + data["extracted_channels"][ELL_STEP]["density_wave_same"]
-direct_channel = data["extracted_channels"][ELL_STEP]["single_particle_energy_differing"] + data["extracted_channels"][ELL_STEP]["single_particle_energy_same"]
+data = load_full_flow_file(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
+ELL_STEP = data["index_of_lowest_ROD"]
+dispersion      = data["extracted_channels"][ELL_STEP]["epsilon_tilde"]
+self_energy     = data["extracted_channels"][ELL_STEP]["dispersion"] - dispersion
+dw_channel      = data["extracted_channels"][ELL_STEP]["density_wave_differing"] - data["extracted_channels"][ELL_STEP]["density_wave_same"]
+direct_channel  = data["extracted_channels"][ELL_STEP]["single_particle_energy_differing"] + data["extracted_channels"][ELL_STEP]["single_particle_energy_same"]
 
-#2 * (data["interactions_differing_spin"] - 2 * data["interactions_same_spin"])[:,:,0]
-#2 * (data["interactions_differing_spin"] - 2 * data["interactions_same_spin"])[:,:,(L+1)*L//2]
+print(data["extracted_channels"][ELL_STEP]["density_wave_differing"][:,0])
 
-self_energy = data["extracted_channels"][ELL_STEP]["dispersion"] - dispersion
-Delta = np.ones_like(dispersion)
+MOM_GAMMA = Momentum(L, L//2, L//2)
 MOM_PI = Momentum(L, 0, 0)
+
+#data = load_full_flow_state(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=True)
+#dispersion      = data["epsilon_tilde"]
+#self_energy     = data["dispersion"] - dispersion
+#dw_channel      = 2 * (data["interactions_differing_spin"] - 2 * data["interactions_same_spin"])[:,:,MOM_PI.pos]
+#direct_channel  = 2 * (data["interactions_differing_spin"] + 2 * data["interactions_same_spin"])[:,:,MOM_GAMMA.pos]
+
+
+Delta = np.ones_like(dispersion)
+
 
 mu = 0.
 best_val = 1.
@@ -80,27 +88,8 @@ new_delta = np.zeros_like(Delta)
 new_self_energy = np.zeros_like(Delta)
 
 while error > 1e-5:
-    best = 0.
-    best_val = 1.
-    unique_energies = np.unique(dispersion + self_energy)
-    for i in range(len(unique_energies) - 1):
-        mu = unique_energies[i]
-        fill_expecs()
-        filling_x = np.average(NUM_expecs)
-        if np.abs(filling_x - 0.5) < best_val:
-            best_val = np.abs(filling_x - 0.5)
-            best = mu
-
-        mu = 0.5 * (unique_energies[i+1] + unique_energies[i])
-        fill_expecs()
-        filling_x = np.average(NUM_expecs)
-        if np.abs(filling_x - 0.5) < best_val:
-            best_val = np.abs(filling_x - 0.5)
-            best = mu
-    mu = best
-    
     fill_expecs()
-
+    
     for ix in range(L):
         for iy in range(L):
             k = Momentum(L, ix, iy)
@@ -108,6 +97,7 @@ while error > 1e-5:
     
     error = np.sqrt(np.sum((new_delta - Delta)**2))
     Delta = new_delta.copy()
+    self_energy = new_self_energy.copy()
     
     print("Delta_max =", Delta[np.argmax(np.abs(Delta))], "  Error =", error, "  Filling =", np.average(NUM_expecs))
 
