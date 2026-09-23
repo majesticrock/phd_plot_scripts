@@ -38,7 +38,7 @@ def plot_order_parameter(ax, values, title, value_limit, cmap="seismic"):
 	return image
 
 
-data = load_mean_field_solution()
+data = load_mean_field_solution()#["transition_data"][1]
 L = FLOW_PARAMETERS["L"]
 momentum_ticks, momentum_labels = create_momentum_labels(L)
 momentum_ticks = np.pi * (2 * momentum_ticks / L - 1)
