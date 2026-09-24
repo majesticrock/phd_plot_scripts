@@ -5,7 +5,7 @@ from nickel_cut_parameters import FLOW_PARAMETERS
 from copy import copy
 from Momentum import Momentum
 
-data = load_full_flow_state(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_full_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=False)
 L = data["L"]
 
 def extract_fermi_surface(dispersion):
@@ -62,7 +62,7 @@ perm = np.array([
     for x in range(L)
 ])
 
-V = data["interactions_differing_spin"][FS_indices[None,:], FS_indices[:,None], Q_indices[:,None]] * L*L
+V = 2 * data["interactions_differing_spin"][FS_indices[None,:], FS_indices[:,None], Q_indices[:,None]] * L*L
 vmax = np.max(np.abs(V))
 if vmax == 0.0:
     vmax += 0.1

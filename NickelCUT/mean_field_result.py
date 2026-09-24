@@ -9,10 +9,10 @@ from create_momentum_labels import create_momentum_labels
 MEAN_FIELD_FILE_NAME = "mean_field_solution.json.gz"
 
 
-def load_mean_field_solution(subdir=""):
+def load_mean_field_solution():
 	return DataLoader().load_panda(
 		"nickel_cut",
-		subdir,
+  		FLOW_PARAMETERS["subdir"],
 		MEAN_FIELD_FILE_NAME,
 		print_date=False,
 		**nickel_cut_params(**FLOW_PARAMETERS),

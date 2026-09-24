@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from load_full_flow_file import load_full_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_full_flow_file(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_full_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
 
 ELL_STEP = data["index_of_lowest_ROD"]
 L = data["L"]
@@ -19,7 +19,7 @@ im_show_kwargs = {
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
-CHANNEL = "single_particle_energy_same"
+CHANNEL = "density_wave_differing"
 
 fig, ax = plt.subplots()
 

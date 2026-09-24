@@ -27,11 +27,7 @@ class RPA:
         chi0 = self.lindhard.lindhard_susceptibility_for_q(q)
         chi0_sqrt = np.sqrt(chi0)
         
-        print(np.min(chi0), np.min(chi0_sqrt))
-        
         system_matrix = np.diag(chi0_sqrt) @ self.gamma_matrix_for_q(q) @ np.diag(chi0_sqrt)
-        
-        print("||S-S^T||^2 =", np.sum((system_matrix - system_matrix.T)**2))
         
         eigenvalues, eigenvectors = np.linalg.eigh(system_matrix)
         max_idx = np.argmax(eigenvalues)
@@ -130,18 +126,18 @@ class RPA:
 if __name__ == "__main__":
     from load_full_flow_file import load_full_flow_state
     from nickel_cut_parameters import FLOW_PARAMETERS
-    data = load_full_flow_state(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
+    data = load_full_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=False)
 
     L = data["L"]
     N = L * L
-    beta = 15. #1.0 / data["T"] if data["T"] > 0.0 else 32
+    beta = 2.9 #1.0 / data["T"] if data["T"] > 0.0 else 32
     
     #full_vertex = 2.7 * np.ones((N, N)) / N
     #x = np.linspace(-np.pi, np.pi, L, endpoint=False)
     #dispersion = -2 * (np.cos(x[:, None]) + np.cos(x[None, :])).flatten()
 
-    dispersion = data["epsilon_tilde"] + FLOW_PARAMETERS["U_0"] / 2
-    full_vertex = (data["interactions_differing_spin"] - data["interactions_same_spin"])
+    dispersion = data["dispersion"]# + FLOW_PARAMETERS["U_0"] / 2 + 0.44
+    full_vertex = 2*(data["interactions_differing_spin"] - 2*data["interactions_same_spin"])
 
     rpa = RPA(L, beta, dispersion, full_vertex)
     print("Filling:", np.average(rpa.lindhard.fermi(dispersion)))

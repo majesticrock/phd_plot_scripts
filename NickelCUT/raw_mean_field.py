@@ -11,7 +11,7 @@ beta = 20.
 def fermi(energy):
     return 1.0 / (1.0 + np.exp(beta * energy))
 
-data = load_full_flow_file(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_full_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
 ELL_STEP = data["index_of_lowest_ROD"]
 dispersion      = data["extracted_channels"][ELL_STEP]["epsilon_tilde"]
 self_energy     = data["extracted_channels"][ELL_STEP]["dispersion"] - dispersion
@@ -23,7 +23,7 @@ print(data["extracted_channels"][ELL_STEP]["density_wave_differing"][:,0])
 MOM_GAMMA = Momentum(L, L//2, L//2)
 MOM_PI = Momentum(L, 0, 0)
 
-#data = load_full_flow_state(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=True)
+#data = load_full_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=True)
 #dispersion      = data["epsilon_tilde"]
 #self_energy     = data["dispersion"] - dispersion
 #dw_channel      = 2 * (data["interactions_differing_spin"] - 2 * data["interactions_same_spin"])[:,:,MOM_PI.pos]

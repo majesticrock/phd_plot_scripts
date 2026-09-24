@@ -7,7 +7,7 @@ from nickel_cut_parameters import FLOW_PARAMETERS
 
 from Momentum import Momentum
 
-data = load_full_flow_file(subdir="", **FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_full_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
 
 ELL_STEP = -1#data["index_of_lowest_ROD"]
 L = data["L"]
