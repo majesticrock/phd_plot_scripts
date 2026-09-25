@@ -24,12 +24,11 @@ order_colors = {}
 
 for _, row in data.iterrows():
     E_F = row["E_F"]
-    print(E_F)
     transitions = row["transition_data"]
     transition_fillings = []
 
     for transition in transitions:
-        x = 0.5 * (transition["upper_filling"] + transition["lower_filling"])
+        x = 1 - 0.5 * (transition["upper_filling"] + transition["lower_filling"]) 
         xerr = 0.5 * abs(transition["upper_filling"] - transition["lower_filling"])
         y = 0.5 * (transition["upper_temperature"] + transition["lower_temperature"])
         yerr = 0.5 * abs(transition["upper_temperature"] - transition["lower_temperature"])
@@ -78,19 +77,19 @@ for order in order_colors:
             x = row["filling"]
             y = 0.0
 
-        x_values.append(x)
+        x_values.append(1-x)
         y_values.append(y)
 
     ax.plot(x_values, y_values, color=order_colors[order], linewidth=2)
 
-ax.set_xlabel(r"$n$")
+ax.set_xlabel(r"$\delta$")
 ax.set_ylabel(r"$T / t$")
 
-top_ax = ax.twiny()
-top_ax.set_xlim(ax.get_xlim())
-top_ax.set_xticks(list(filling_by_fermi_energy.values()))
-top_ax.set_xticklabels([f"{E_F:g}" for E_F in filling_by_fermi_energy])
-top_ax.set_xlabel(r"$E_F$")
+#top_ax = ax.twiny()
+#top_ax.set_xlim(ax.get_xlim())
+#top_ax.set_xticks(list(filling_by_fermi_energy.values()))
+#top_ax.set_xticklabels([f"{E_F:g}" for E_F in filling_by_fermi_energy])
+#top_ax.set_xlabel(r"$E_F$")
 
 ax.legend()
 
