@@ -10,13 +10,18 @@ MEAN_FIELD_FILE_NAME = "mean_field_solution.json.gz"
 
 
 def load_mean_field_solution():
-	return DataLoader().load_panda(
-		"nickel_cut",
-  		FLOW_PARAMETERS["subdir"],
-		MEAN_FIELD_FILE_NAME,
-		print_date=False,
-		**nickel_cut_params(**FLOW_PARAMETERS),
-	)
+    params = {
+        key: value
+        for key, value in FLOW_PARAMETERS.items()
+        if key != "subdir"
+    }
+    return DataLoader().load_panda(
+        "nickel_cut",
+        FLOW_PARAMETERS["subdir"],
+        MEAN_FIELD_FILE_NAME,
+        print_date=False,
+        **nickel_cut_params(**params),
+    )
 
 
 def plot_order_parameter(ax, values, title, value_limit, cmap="seismic"):

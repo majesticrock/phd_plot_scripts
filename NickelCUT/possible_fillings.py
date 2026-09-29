@@ -1,7 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 tolerance = 1e-14
-beta = 30.
 L=14
 T_PRIME=-0.3
 
@@ -15,20 +15,38 @@ energies = -2. * (
 energies = np.sort(energies)
 
 unique_energies = energies[np.concatenate(([True], np.abs(np.diff(energies)) > tolerance))]
+print("Largest energy spacing:", np.max(np.abs((np.diff(unique_energies)))))
+
+def compute_filling(chemical_potentials, temperature):
+    energy_offsets = energies[None, :] - chemical_potentials[:, None]
+    if temperature == 0:
+        occupations = np.heaviside(-energy_offsets, 0.5)
+    else:
+        exponent = np.clip(energy_offsets / temperature, -700., 700.)
+        occupations = 1. / (1. + np.exp(exponent))
+    return 2. * np.average(occupations, axis=1)
 
 
-def compute_filling(mu):
-    return 2. * np.average(1. / (1. + np.exp(beta*(energies - mu))))
+chemical_potentials = np.linspace(energies[0], energies[-1], 200)
+temperatures = np.array([0., 0.04, 0.1, 0.2])
 
-#mu = unique_energies[0]
-#print(f"#0:\tmu={mu:.6f}\t|   n={compute_filling(mu):.6f}")
-for i in range(1, len(unique_energies)):
-    mu = 0.5 * (unique_energies[i] + unique_energies[i-1])
-    print(f"#{i}:\tmu={mu:.6f}\t|   n={compute_filling(mu):.6f}   |   [{unique_energies[i-1]:.4f}\t, {unique_energies[i]:.4f}\t]")
-    
-    #mu = unique_energies[i]
-    #print(f"#{2*i}:\tmu={mu:.6f}\t|   n={compute_filling(mu):.6f}")
-    
+fig, ax = plt.subplots()
+for temperature in temperatures:
+    ax.plot(
+        chemical_potentials,
+        compute_filling(chemical_potentials, temperature),
+        label=f"T={temperature:g}",
+    )
+
+ax.set_xlabel(r"Chemical potential $\mu$")
+ax.set_ylabel("Filling")
+ax.set_xlim(energies[0], energies[-1])
+ax.set_ylim(0., 2.)
+ax.grid(True, alpha=0.3)
+ax.legend(title="Temperature")
+fig.tight_layout()
+plt.show()
+
     
 #### Outputs
 """ L=10, tprime=-0.3

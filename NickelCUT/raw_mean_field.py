@@ -12,7 +12,8 @@ def fermi(energy):
     return 1.0 / (1.0 + np.exp(beta * energy))
 
 data = load_full_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
-ELL_STEP = data["index_of_lowest_ROD"]
+ELL_STEP = 0#data["index_of_lowest_ROD"]
+
 dispersion      = data["extracted_channels"][ELL_STEP]["epsilon_tilde"]
 self_energy     = data["extracted_channels"][ELL_STEP]["dispersion"] - dispersion
 dw_channel      = data["extracted_channels"][ELL_STEP]["density_wave_differing"] - data["extracted_channels"][ELL_STEP]["density_wave_same"]
