@@ -63,7 +63,7 @@ def compute_dynamical_matrix(occupation_numbers, x):
                         + differing_spin[k.pos, K.pos, gamma.pos]
                         - same_spin[kx, K.pos, (K - k - x).pos]
                         + same_spin[kx, K.pos, gamma.pos]
-                        - same_spin[k.pos, K.pos, (K - k - x).pos]
+                        - same_spin[k.pos, K.pos, (K - k).pos]
                         + same_spin[k.pos, K.pos, gamma.pos]
                     ) * occupation_numbers[K.pos]
 
@@ -103,7 +103,7 @@ def compute_norm_matrix(occupation_numbers, x):
 def chi_ieom(occupation_numbers, x):
     N_mat = compute_norm_matrix(occupation_numbers, x)
     M_mat = compute_dynamical_matrix(occupation_numbers, x)
-    return np.sum(N_mat @ np.linalg.inv(M_mat) @ N_mat) / N
+    return np.sum(N_mat @ np.linalg.pinv(M_mat, hermitian=True) @ N_mat) / N
 
 def find_ieom_divergence(
     x,
@@ -191,36 +191,36 @@ path = (
 #plt.show()
 
 
-beta, f, vec, weight = find_ieom_divergence(
-                    Momentum(L, L//2, L//2),
-                    beta_min=5.,
-                    beta_max=100.,
-                    beta_tolerance=0.005,
-                    weight_tolerance=1e-11)
-
-fig_vector, ax_vector = plt.subplots(layout="constrained")
-ax_vector.set_title(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
-print(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
-im = ax_vector.imshow(vec.reshape(L, L), aspect="equal")
-cbar = fig_vector.colorbar(im, ax=ax_vector)
-cbar.set_label("Eigenvector")
-ax_vector.set_xlabel("$q_x$")
-ax_vector.set_xlabel("$q_y$")
-
-beta *= 0.9
+#beta, f, vec, weight = find_ieom_divergence(
+#                    Momentum(L, L//2, L//2),
+#                    beta_min=0.1,
+#                    beta_max=40.,
+#                    beta_tolerance=0.01,
+#                    weight_tolerance=1e-11)
+#
+#fig_vector, ax_vector = plt.subplots(layout="constrained")
+#ax_vector.set_title(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
+#print(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
+#im = ax_vector.imshow(vec.reshape(L, L), aspect="equal")
+#cbar = fig_vector.colorbar(im, ax=ax_vector)
+#cbar.set_label("Eigenvector")
+#ax_vector.set_xlabel("$q_x$")
+#ax_vector.set_xlabel("$q_y$")
+#beta *= 0.9
+beta = 20.
 occupation_numbers = compute_occupation_numbers(beta, hartree_fock(beta))
 
-#chi_values = np.asarray([
-#    chi_ieom(occupation_numbers, momentum) for momentum in path
-#])
-#
-#fig, ax = plt.subplots()
-#ax.plot(np.arange(len(path)), chi_values)
-#ax.set_xticks([0, n, 2 * n, 3 * n])
-#ax.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
-#ax.set_xlabel(r"$\mathbf{x}$")
-#ax.set_ylabel(r"$\chi_{\mathrm{IEOM}}(\mathbf{x})$")
-#ax.grid(axis="x", linestyle=":")
-#fig.tight_layout()
+chi_values = np.asarray([
+    chi_ieom(occupation_numbers, momentum) for momentum in path
+])
+
+fig, ax = plt.subplots()
+ax.plot(np.arange(len(path)), chi_values)
+ax.set_xticks([0, n, 2 * n, 3 * n])
+ax.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
+ax.set_xlabel(r"$\mathbf{x}$")
+ax.set_ylabel(r"$\chi_{\mathrm{IEOM}}(\mathbf{x})$")
+ax.grid(axis="x", linestyle=":")
+fig.tight_layout()
 
 plt.show()
