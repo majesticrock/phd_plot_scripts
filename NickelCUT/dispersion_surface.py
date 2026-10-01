@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from create_momentum_labels import create_momentum_labels
-from load_full_flow_file import load_full_flow_file
+from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_full_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
 
 L = data["L"]
 ELL_INDEX = data["index_of_lowest_ROD"]

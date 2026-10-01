@@ -72,7 +72,7 @@ for color_index, e_f in enumerate(available_efs):
 
     for segment_index, flow_data in enumerate(data):
         l_times = flow_data["l_times"]
-        rod = flow_data["residual_offdiagonalities"]
+        rod = flow_data["max_interactions"]
 
         ax.plot(
             l0 + l_times,
@@ -88,6 +88,6 @@ ax.set_xlabel(r"$\ell \cdot t$")
 ax.set_ylabel(r"$\mathrm{ROD} / t$")
 ax.legend()
 
-ax.set_ylim(0.2, 2)
+#ax.set_ylim(0.2, 2)
 
 plt.show()

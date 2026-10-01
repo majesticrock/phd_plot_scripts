@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mc
-from load_full_flow_file import load_full_flow_file
+from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_full_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
 print("Loaded data was produced on", data["time"])
 L = data["L"]
 
@@ -13,7 +13,7 @@ def convert_1d_to_2d(arr):
     return np.reshape(arr, (-1, L))
 
 cmap = plt.get_cmap("inferno")
-end_index = min(data["number_of_data_points"] - 1, data["index_of_lowest_ROD"])
+end_index = data["number_of_data_points"] - 1
 norm = mc.Normalize(data["l_times"][0], data["l_times"][end_index-1])
 
 fig, ax = plt.subplots()

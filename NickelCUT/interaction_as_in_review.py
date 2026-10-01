@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from load_full_flow_file import load_full_flow_state
+from load_flow_files import load_final_flow_state
 from nickel_cut_parameters import FLOW_PARAMETERS
 from copy import copy
 from Momentum import Momentum
 
-data = load_full_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_final_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=False)
 L = data["L"]
 
 def extract_fermi_surface(dispersion):

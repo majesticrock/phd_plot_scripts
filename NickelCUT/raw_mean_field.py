@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from Momentum import Momentum
-from load_full_flow_file import load_full_flow_file, load_full_flow_state
+from load_flow_files import load_flow_file, load_final_flow_state
 from nickel_cut_parameters import FLOW_PARAMETERS
 
 L = FLOW_PARAMETERS["L"]
@@ -11,7 +11,7 @@ beta = 20.
 def fermi(energy):
     return 1.0 / (1.0 + np.exp(beta * energy))
 
-data = load_full_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
 ELL_STEP = 0#data["index_of_lowest_ROD"]
 
 dispersion      = data["extracted_channels"][ELL_STEP]["epsilon_tilde"]
@@ -24,7 +24,7 @@ print(data["extracted_channels"][ELL_STEP]["density_wave_differing"][:,0])
 MOM_GAMMA = Momentum(L, L//2, L//2)
 MOM_PI = Momentum(L, 0, 0)
 
-#data = load_full_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=True)
+#data = load_final_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=True)
 #dispersion      = data["epsilon_tilde"]
 #self_energy     = data["dispersion"] - dispersion
 #dw_channel      = 2 * (data["interactions_differing_spin"] - 2 * data["interactions_same_spin"])[:,:,MOM_PI.pos]

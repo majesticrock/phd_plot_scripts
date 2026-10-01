@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
 from mrock.get_data import DataLoader
-from load_full_flow_file import load_all_resumed_files
+from load_flow_files import load_all_resumed_files
 from nickel_cut_parameters import FLOW_PARAMETERS
 
 

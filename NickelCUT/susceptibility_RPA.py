@@ -124,9 +124,9 @@ class RPA:
 
 
 if __name__ == "__main__":
-    from load_full_flow_file import load_full_flow_state
+    from load_flow_files import load_final_flow_state
     from nickel_cut_parameters import FLOW_PARAMETERS
-    data = load_full_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=False)
+    data = load_final_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=False)
 
     L = data["L"]
     N = L * L

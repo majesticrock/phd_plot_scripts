@@ -10,7 +10,7 @@ from create_momentum_labels import create_momentum_labels
 
 
 MEAN_FIELD_FILE_NAME = "mean_field_across_flow.json.gz"
-PLOT_L_INDICES = [12, 13, 14, 15, 16]
+PLOT_L_INDICES = [0, 5, 10, 13, -1]
 
 PLOTS = [
 	("Delta_AFM", r"$\Delta_{\mathrm{AFM}}(\mathbf{k})$"),
@@ -57,18 +57,7 @@ data = load_mean_field_across_flow()
 solutions = data["solutions"]
 lattice_size = data.get("L", FLOW_PARAMETERS["L"])
 
-if "lowest_ROD_index" in data:
-	lowest_rod_index = int(data["lowest_ROD_index"])
-elif "index_of_lowest_ROD" in data:
-	lowest_rod_index = int(data["index_of_lowest_ROD"])
-else:
-	lowest_rod_index = int(np.argmin(data["residual_offdiagonalities"]))
-
-indices_to_plot = list(dict.fromkeys([*PLOT_L_INDICES, lowest_rod_index]))
-for index in indices_to_plot:
-	if index < 0 or index >= len(solutions):
-		raise IndexError(f"Mean-field solution index {index} is out of range")
-
+indices_to_plot = list(dict.fromkeys([*PLOT_L_INDICES]))
 momentum_ticks, momentum_labels = create_momentum_labels(lattice_size)
 momentum_ticks = np.pi * (2 * momentum_ticks / lattice_size - 1)
 

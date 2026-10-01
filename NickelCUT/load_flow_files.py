@@ -4,32 +4,33 @@ import re
 import pandas as pd
 
 FLOW_FILE_NAME = "flow"
-FULL_STATE_FILE_NAME = "full_flow_state"
+DENSE_FLOW_FILE_NAME = "dense_flow"
+FINAL_STATE_FILE_NAME = "final_flow_state"
 
 BINARY_DIR = "binaries"
 
 # The first output files are simply called "FLOW_FILE_NAME.ENDING"
 # Simulations resumed from a state are then numbered via "FLOW_FILE_NAME.ENDING{number}" starting with 1
-def load_full_flow_file(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=False):
+def load_flow_file(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=False, dense=False):
+    USED_FLOW_FILE_NAME = DENSE_FLOW_FILE_NAME if dense else FLOW_FILE_NAME
     data_loader = DataLoader()
     JSON_FILE = os.path.join(data_loader._to_path(
         "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, E_F)
-    ), f"{FLOW_FILE_NAME}.json.gz{resume_num}")
+    ), f"{USED_FLOW_FILE_NAME}.json.gz{resume_num}")
     PKL_FILE = os.path.join(data_loader._to_path(
         f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, E_F)
-    ), f"{FLOW_FILE_NAME}.pkl{resume_num}")
+    ), f"{USED_FLOW_FILE_NAME}.pkl{resume_num}")
 
-    if os.path.isfile(PKL_FILE) and not force_json:
-        PKL_TIME = os.path.getmtime(PKL_FILE)
-        JSON_TIME = os.path.getmtime(JSON_FILE)
-        if PKL_TIME > JSON_TIME:
-            print(f"Loading pickle {PKL_FILE}...")
-            return pd.read_pickle(PKL_FILE)
-
-    print(f"Loading json {JSON_FILE}...")
-    data = data_loader.load_panda_file(JSON_FILE)
-    data.to_pickle(PKL_FILE)
-    
+    JSON_TIME = os.path.getmtime(JSON_FILE)
+            
+    if os.path.isfile(PKL_FILE) and os.path.getmtime(PKL_FILE) > JSON_TIME and not force_json:
+        print(f"Loading pickle {PKL_FILE}...")
+        data = pd.read_pickle(PKL_FILE)
+    else:
+        print(f"Loading json {JSON_FILE}...")
+        data = data_loader.load_panda_file(JSON_FILE)
+        data.to_pickle(PKL_FILE)
+    print("Loaded data have been produced on", data["time"])
     return data
 
 def load_all_resumed_files(subdir, L, T, U_0, tprime, E_F, force_json=False):
@@ -78,14 +79,14 @@ def load_all_resumed_files(subdir, L, T, U_0, tprime, E_F, force_json=False):
 
     return dataframes
 
-def load_full_flow_state(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=False):
+def load_final_flow_state(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=False):
     data_loader = DataLoader()
     JSON_FILE = os.path.join(data_loader._to_path(
         "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, E_F)
-    ), f"{FULL_STATE_FILE_NAME}.json.gz{resume_num}")
+    ), f"{FINAL_STATE_FILE_NAME}.json.gz{resume_num}")
     PKL_FILE = os.path.join(data_loader._to_path(
         f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, E_F)
-    ), f"{FULL_STATE_FILE_NAME}.pkl{resume_num}")
+    ), f"{FINAL_STATE_FILE_NAME}.pkl{resume_num}")
     
     if os.path.isfile(PKL_FILE) and not force_json:
         PKL_TIME = os.path.getmtime(PKL_FILE)
