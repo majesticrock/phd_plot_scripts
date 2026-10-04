@@ -31,6 +31,7 @@ def load_flow_file(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=Fal
         data = data_loader.load_panda_file(JSON_FILE)
         data.to_pickle(PKL_FILE)
     print("Loaded data have been produced on", data["time"])
+    print("Flow terminated because", data["end_reason"])
     return data
 
 def load_all_resumed_files(subdir, L, T, U_0, tprime, E_F, force_json=False):

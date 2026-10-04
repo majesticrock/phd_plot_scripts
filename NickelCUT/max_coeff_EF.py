@@ -5,12 +5,13 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
 from mrock.get_data import DataLoader, nickel_cut_params
-from load_flow_files import load_all_resumed_files
+from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
+dense = True
 
-FLOW_FILE_PATTERN = "flow.json.gz*"
-FLOW_FILE_RE = re.compile(r"^flow\.json\.gz\d*$")
+FLOW_FILE_PATTERN = f"{'dense_' if dense else ''}flow.json.gz*"
+FLOW_FILE_RE = re.compile(fr"^{FLOW_FILE_PATTERN}\d*$")
 EF_DIR_RE = re.compile(r"^E_F=(.+)$")
 
 
@@ -66,23 +67,20 @@ for color_index, e_f in enumerate(available_efs):
         "E_F": e_f,
     }
 
-    data = load_all_resumed_files(**parameters, force_json=False)
+    data = load_flow_file(**parameters, force_json=False, dense=dense)
     color = cmap(norm(e_f))
     l0 = 0.0
 
-    for segment_index, flow_data in enumerate(data):
-        l_times = flow_data["l_times"]
-        rod = flow_data["max_interactions"]
+    l_times = data["l_times"]
+    rod = data["max_interactions"]
 
-        ax.plot(
-            l0 + l_times,
-            rod,
-            "-o",
-            color=color,
-            label=rf"$E_F={e_f:g}$" if segment_index == 0 else None,
-        )
-
-        l0 += l_times[-1]
+    ax.plot(
+        l0 + l_times,
+        rod,
+        "-o",
+        color=color,
+        label=rf"$E_F={e_f:g}$",
+    )
 
 ax.set_xlabel(r"$\ell \cdot t$")
 ax.set_ylabel(r"$\mathrm{ROD} / t$")

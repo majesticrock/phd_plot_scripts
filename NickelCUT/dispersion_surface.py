@@ -5,10 +5,10 @@ from create_momentum_labels import create_momentum_labels
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
 
 L = data["L"]
-ELL_INDEX = data["index_of_lowest_ROD"]
+ELL_INDEX = -1#data["index_of_lowest_ROD"]
 print("ROD of plotted data =", data["residual_offdiagonalities"][ELL_INDEX], ", index =", ELL_INDEX)
 
 # turns a L*L 1D array into a L x L 2D array

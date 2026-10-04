@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
 from mrock.get_data import DataLoader
-from load_flow_files import load_all_resumed_files
+from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
+dense = True
 
-FLOW_FILE_PATTERN = "flow.json.gz*"
-FLOW_FILE_RE = re.compile(r"^flow\.json\.gz\d*$")
-
+FLOW_FILE_PATTERN = f"{'dense_' if dense else ''}flow.json.gz*"
+FLOW_FILE_RE = re.compile(fr"^{FLOW_FILE_PATTERN}\d*$")
+EF_DIR_RE = re.compile(r"^E_F=(.+)$")
 
 def find_available_temperatures(parameters):
     loader = DataLoader()
@@ -79,28 +80,23 @@ for temperature in available_temperatures:
         "T": temperature,
     }
 
-    data = load_all_resumed_files(**parameters, force_json=False)
+    data = load_flow_file(**parameters, force_json=False, dense=dense)
     color = cmap(norm(temperature))
     l0 = 0.0
 
-    for segment_index, flow_data in enumerate(data):
-        l_times = flow_data["l_times"]
-        rod = flow_data["residual_offdiagonalities"]
+    l_times = data["l_times"]
+    rod = data["max_interactions"]
 
-        ax.plot(
-            l0 + l_times,
-            rod,
-            "-o",
-            color=color,
-            label=rf"$T={temperature:g}$" if segment_index == 0 else None,
-        )
-
-        l0 += l_times[-1]
+    ax.plot(
+        l0 + l_times,
+        rod,
+        "-o",
+        color=color,
+        label=rf"$T={temperature:g}$",
+    )
 
 ax.set_xlabel(r"$\ell \cdot t$")
 ax.set_ylabel(r"$\mathrm{ROD} / t$")
 ax.legend()
-
-ax.set_ylim(0.2, 2)
 
 plt.show()

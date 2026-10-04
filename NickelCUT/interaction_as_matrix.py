@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
 
-ELL_STEP = data["index_of_lowest_ROD"]
+ELL_STEP = -1
 L = data["L"]
 N = L * L
 

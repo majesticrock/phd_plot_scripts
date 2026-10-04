@@ -5,21 +5,21 @@ from Momentum import Momentum
 from load_flow_files import load_flow_file, load_final_flow_state
 from nickel_cut_parameters import FLOW_PARAMETERS
 
+from copy import copy
+
 L = FLOW_PARAMETERS["L"]
 N = L * L
-beta = 20.
+beta = 1. / FLOW_PARAMETERS["T"]
 def fermi(energy):
     return 1.0 / (1.0 + np.exp(beta * energy))
 
-data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
-ELL_STEP = 0#data["index_of_lowest_ROD"]
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
+ELL_STEP = -1
 
 dispersion      = data["extracted_channels"][ELL_STEP]["epsilon_tilde"]
 self_energy     = data["extracted_channels"][ELL_STEP]["dispersion"] - dispersion
 dw_channel      = data["extracted_channels"][ELL_STEP]["density_wave_differing"] - data["extracted_channels"][ELL_STEP]["density_wave_same"]
 direct_channel  = data["extracted_channels"][ELL_STEP]["single_particle_energy_differing"] + data["extracted_channels"][ELL_STEP]["single_particle_energy_same"]
-
-print(data["extracted_channels"][ELL_STEP]["density_wave_differing"][:,0])
 
 MOM_GAMMA = Momentum(L, L//2, L//2)
 MOM_PI = Momentum(L, 0, 0)
@@ -33,23 +33,23 @@ MOM_PI = Momentum(L, 0, 0)
 
 Delta = np.ones_like(dispersion)
 
-
 mu = 0.
 best_val = 1.
 unique_energies = np.unique(dispersion + self_energy)
 for i in range(len(unique_energies)-1):
     x = unique_energies[i]
-    filling_x = np.average(fermi(dispersion + self_energy - x))
-    if np.abs(filling_x - 0.5) < best_val:
-        best_val = np.abs(filling_x - 0.5)
-        mu = x
-            
+    filling_error = np.abs(np.average(fermi(dispersion + self_energy - x)) - data["filling"])
+    if filling_error < best_val:
+        best_val = copy(filling_error)
+        mu       = copy(x)
+    
     x = 0.5 * (unique_energies[i+1] + unique_energies[i])
-    filling_x = np.average(fermi(dispersion + self_energy - x))
-    if np.abs(filling_x - 0.5) < best_val:
-        best_val = np.abs(filling_x - 0.5)
-        mu = x
-print(mu, best_val)
+    filling_error = np.abs(np.average(fermi(dispersion + self_energy - x)) - data["filling"])
+    if filling_error < best_val:
+        best_val = copy(filling_error)
+        mu       = copy(x)
+
+print("mu =", mu, "    filling =", np.average(fermi(dispersion + self_energy - mu)),    "    trying to get", data["filling"])
 
 def H_MF(k: Momentum):
     return np.array([

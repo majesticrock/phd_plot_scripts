@@ -10,7 +10,7 @@ from create_momentum_labels import create_momentum_labels
 
 
 MEAN_FIELD_FILE_NAME = "mean_field_across_flow.json.gz"
-PLOT_L_INDICES = [0, 5, 10, 13, -1]
+PLOT_L_INDICES = [-4, -3, -2, -1]
 
 PLOTS = [
 	("Delta_AFM", r"$\Delta_{\mathrm{AFM}}(\mathbf{k})$"),

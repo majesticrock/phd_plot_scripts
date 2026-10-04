@@ -24,44 +24,59 @@ p = Momentum(L, 0, L//2)
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
-CHANNEL = "superconductivity"
 
-fig, ax = plt.subplots()
-matrices = [
-    flow_data[CHANNEL][p.pos].reshape(L, L) * N #- 2 * flow_data["single_particle_energy_same"][p.pos].reshape(L, L) * N
-    for flow_data in data["extracted_channels"]
-]
+class PauseAnimation:
+    def __init__(self):
+        fig, ax = plt.subplots()
+        self.matrices = [
+            flow_data["superconductivity"][p.pos].reshape(L, L) * N
+            #(flow_data["density_wave_differing"][p.pos] - flow_data["density_wave_same"][p.pos]).reshape(L, L) * N
+            for flow_data in data["extracted_channels"]
+        ]
 
-vmax = max(np.max(np.abs(V)) for V in matrices)
-if vmax == 0.0:
-    vmax += 0.1
-im = ax.imshow(matrices[0], vmin=-vmax, vmax=vmax, **im_show_kwargs)
+        vmax = max(np.max(np.abs(V)) for V in self.matrices)
+        if vmax == 0.0:
+            vmax += 0.1
+        self.im = ax.imshow(self.matrices[0], vmin=-vmax, vmax=vmax, **im_show_kwargs)
 
-# Set custom tick labels for momentum space
-ticks, labels = create_momentum_labels(L)
-ax.set_xticks(ticks)
-ax.set_xticklabels(labels)
-ax.set_yticks(ticks)
-ax.set_yticklabels(labels)
+        # Set custom tick labels for momentum space
+        ticks, labels = create_momentum_labels(L)
+        ax.set_xticks(ticks)
+        ax.set_xticklabels(labels)
+        ax.set_yticks(ticks)
+        ax.set_yticklabels(labels)
 
-ax.set_xlabel(r"$k_x$")
-ax.set_ylabel(r"$k_y$")
-title = ax.set_title(CHANNEL)
-fig.colorbar(im, label=r"$V(k_x,k_y)$")
-fig.tight_layout()
+        ax.set_xlabel(r"$k_x$")
+        ax.set_ylabel(r"$k_y$")
+        self.title = ax.set_title("0")
+        fig.colorbar(self.im, label=r"$V(k_x,k_y)$")
+        fig.tight_layout()
 
-def update(ell_step):
-    im.set_data(matrices[ell_step])
-    title.set_text(f"{CHANNEL}, ELL_STEP={ell_step}, l={data['l_times'][ell_step]:.3g}")
-    return im, title
+        self.animation = FuncAnimation(
+            fig,
+            self.update,
+            frames=len(self.matrices),
+            interval=400,
+            blit=False,
+            repeat=True,
+        )
+        
+        self.paused = False
 
-animation = FuncAnimation(
-    fig,
-    update,
-    frames=len(matrices),
-    interval=400,
-    blit=False,
-    repeat=True,
-)
+        fig.canvas.mpl_connect('button_press_event', self.toggle_pause)
+
+    def toggle_pause(self, *args, **kwargs):
+        if self.paused:
+            self.animation.resume()
+        else:
+            self.animation.pause()
+        self.paused = not self.paused
+
+    def update(self, ell_step):
+        self.im.set_data(self.matrices[ell_step])
+        self.title.set_text(f"ELL_STEP={ell_step}, $\\ell={data['l_times'][ell_step]:.3g}$")
+        return self.im, self.title
+
+pa = PauseAnimation()
 
 plt.show()
