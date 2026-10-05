@@ -29,8 +29,9 @@ class PauseAnimation:
     def __init__(self):
         fig, ax = plt.subplots()
         self.matrices = [
-            flow_data["superconductivity"][p.pos].reshape(L, L) * N
-            #(flow_data["density_wave_differing"][p.pos] - flow_data["density_wave_same"][p.pos]).reshape(L, L) * N
+            #flow_data["superconductivity"][p.pos].reshape(L, L) * N
+            (flow_data["density_wave_differing"][p.pos] - flow_data["density_wave_same"][p.pos]).reshape(L, L) * N
+            #(flow_data["single_particle_energy_differing"][p.pos] + flow_data["single_particle_energy_same"][p.pos]).reshape(L, L) * N
             for flow_data in data["extracted_channels"]
         ]
 

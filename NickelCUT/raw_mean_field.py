@@ -9,7 +9,7 @@ from copy import copy
 
 L = FLOW_PARAMETERS["L"]
 N = L * L
-beta = 1. / FLOW_PARAMETERS["T"]
+beta = 1. / (FLOW_PARAMETERS["T"] if FLOW_PARAMETERS["T"] > 0.0 else 0.01)
 def fermi(energy):
     return 1.0 / (1.0 + np.exp(beta * energy))
 
@@ -31,25 +31,26 @@ MOM_PI = Momentum(L, 0, 0)
 #direct_channel  = 2 * (data["interactions_differing_spin"] + 2 * data["interactions_same_spin"])[:,:,MOM_GAMMA.pos]
 
 
-Delta = np.ones_like(dispersion)
+Delta       = np.random.rand(*self_energy.shape)
+self_energy *= np.random.rand(*self_energy.shape)
 
 mu = 0.
 best_val = 1.
 unique_energies = np.unique(dispersion + self_energy)
 for i in range(len(unique_energies)-1):
     x = unique_energies[i]
-    filling_error = np.abs(np.average(fermi(dispersion + self_energy - x)) - data["filling"])
+    filling_error = np.abs(2. * np.average(fermi(dispersion + self_energy - x)) - data["filling"])
     if filling_error < best_val:
         best_val = copy(filling_error)
         mu       = copy(x)
     
     x = 0.5 * (unique_energies[i+1] + unique_energies[i])
-    filling_error = np.abs(np.average(fermi(dispersion + self_energy - x)) - data["filling"])
+    filling_error = np.abs(2. * np.average(fermi(dispersion + self_energy - x)) - data["filling"])
     if filling_error < best_val:
         best_val = copy(filling_error)
         mu       = copy(x)
 
-print("mu =", mu, "    filling =", np.average(fermi(dispersion + self_energy - mu)),    "    trying to get", data["filling"])
+print("mu =", mu, "    filling =", 2. * np.average(fermi(dispersion + self_energy - mu)),    "    trying to get", data["filling"])
 
 def H_MF(k: Momentum):
     return np.array([
@@ -87,8 +88,25 @@ def compute_single_new(k: Momentum):
 error = 100.
 new_delta = np.zeros_like(Delta)
 new_self_energy = np.zeros_like(Delta)
+SIGMA = 0.5
 
 while error > 1e-5:
+    mu = 0.
+    best_val = 1.
+    unique_energies = np.unique(dispersion + self_energy)
+    for i in range(len(unique_energies)-1):
+        x = unique_energies[i]
+        filling_error = np.abs(2. * np.average(fermi(dispersion + self_energy - x)) - data["filling"])
+        if filling_error < best_val:
+            best_val = copy(filling_error)
+            mu       = copy(x)
+
+        x = 0.5 * (unique_energies[i+1] + unique_energies[i])
+        filling_error = np.abs(2. * np.average(fermi(dispersion + self_energy - x)) - data["filling"])
+        if filling_error < best_val:
+            best_val = copy(filling_error)
+            mu       = copy(x)
+    
     fill_expecs()
     
     for ix in range(L):
@@ -96,11 +114,11 @@ while error > 1e-5:
             k = Momentum(L, ix, iy)
             new_delta[k.pos], new_self_energy[k.pos] = compute_single_new(k)
     
-    error = np.sqrt(np.sum((new_delta - Delta)**2))
-    Delta = new_delta.copy()
-    self_energy = new_self_energy.copy()
+    error = np.sqrt(np.sum((new_delta - Delta)**2 + (new_self_energy - self_energy)**2))
+    Delta       = (1-SIGMA) * new_delta + SIGMA * Delta
+    self_energy = (1-SIGMA) * new_self_energy + SIGMA * self_energy
     
-    print("Delta_max =", Delta[np.argmax(np.abs(Delta))], "  Error =", error, "  Filling =", np.average(NUM_expecs))
+    print("Delta_max =", Delta[np.argmax(np.abs(Delta))], "  Error =", error, "  Filling =", 2. * np.average(NUM_expecs))
 
 fig, ax = plt.subplots(figsize=(7, 5), constrained_layout=True)
 Delta = Delta.reshape(L, L)
@@ -117,5 +135,21 @@ ax.set_xticks(ticks)
 ax.set_yticks(ticks)
 tick_labels = [r"$-\pi$", r"$-\pi/2$", "0", r"$\pi/2$"]
 ax.set_xticklabels(tick_labels)
+
+
+
+fig2, ax2 = plt.subplots(figsize=(7, 5), constrained_layout=True)
+eps = (dispersion + self_energy - mu).reshape(L, L)
+
+vmin2 = -max(abs(np.min(eps)), np.max(eps))
+im2 = ax2.imshow(eps, origin="lower", cmap="seismic", vmin=vmin2, vmax=-vmin2)
+ax2.set_xlabel(r"$q_x$")
+ax2.set_ylabel(r"$q_y$")
+fig2.colorbar(im2, ax=ax2, label=r"$\varepsilon(\mathbf{k})$")
+
+ax2.set_xticks(ticks)
+ax2.set_yticks(ticks)
+ax2.set_xticklabels(tick_labels)
+
 
 plt.show()

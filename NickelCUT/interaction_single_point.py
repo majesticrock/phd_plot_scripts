@@ -7,9 +7,9 @@ from nickel_cut_parameters import FLOW_PARAMETERS
 
 from Momentum import Momentum
 
-data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
 
-ELL_STEP = data["index_of_lowest_ROD"]
+ELL_STEP = 1#data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
 
