@@ -9,7 +9,7 @@ from Momentum import Momentum
 
 data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
 
-ELL_STEP = 1#data["index_of_lowest_ROD"]
+ELL_STEP = -1#data["index_of_lowest_ROD"]
 L = data["L"]
 N = L * L
 
@@ -25,7 +25,7 @@ p = Momentum(L, 0, L//2).pos
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
-CHANNEL = "superconductivity"
+CHANNEL = "single_particle_energy_same"
 
 fig, ax = plt.subplots()
 V = data["extracted_channels"][ELL_STEP][CHANNEL][p].reshape(L, L) * N
