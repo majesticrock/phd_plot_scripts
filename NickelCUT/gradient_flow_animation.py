@@ -16,7 +16,7 @@ im_show_kwargs = {
     "origin":         "lower",
     "aspect":         "equal",
     "interpolation" : "nearest",
-    "cmap" :          "seismic"
+    "cmap" :          "viridis"
 }
 
 p = Momentum(L, 0, L//2)
@@ -36,7 +36,7 @@ class PauseAnimation:
         if len(l_values) != len(data["extracted_channels"]):
             raise ValueError("l_times and extracted_channels must have equal lengths.")
 
-        max_l = np.max(l_values)
+        max_l = l_values[-2]
         if L_MIN > max_l:
             raise ValueError(f"L_MIN={L_MIN} exceeds the maximum available l-value ({max_l}).")
 
@@ -46,18 +46,35 @@ class PauseAnimation:
             raise ValueError(f"No available l-values fall in the range [{L_MIN}, {upper_l}].")
 
         self.matrices = [[], [], []]
-        for flow_data in data["extracted_channels"]:
+        for i in range(len(data["extracted_channels"])-1):
+            early = data["extracted_channels"][i]
+            late = data["extracted_channels"][i+1]
+            dl = data["l_times"][i+1] - data["l_times"][i]
+            
             self.matrices[0].append(
-                flow_data["superconductivity"][p.pos].reshape(L, L) * N
+                np.abs(late["superconductivity"][p.pos]
+                    - early["superconductivity"][p.pos]
+                ).reshape(L, L) * N / dl
             )
             self.matrices[1].append(
-                (flow_data["density_wave_differing"][p.pos]
-                 - flow_data["density_wave_same"][p.pos]).reshape(L, L) * N
+                np.abs(late["density_wave_differing"][p.pos] - late["density_wave_same"][p.pos]
+                    - early["density_wave_differing"][p.pos] - early["density_wave_same"][p.pos]
+                ).reshape(L, L) * N / dl
             )
             self.matrices[2].append(
-                (flow_data["single_particle_energy_differing"][p.pos]
-                 + flow_data["single_particle_energy_same"][p.pos]).reshape(L, L) * N
+                np.abs(late["single_particle_energy_differing"][p.pos] #+ late["single_particle_energy_same"][p.pos]
+                    - early["single_particle_energy_differing"][p.pos] #+ early["single_particle_energy_same"][p.pos]
+                ).reshape(L, L) * N / dl
             )
+
+        self.l_inf_norms = [
+            np.asarray([np.max(np.abs(matrix)) for matrix in channel_matrices])
+            for channel_matrices in self.matrices
+        ]
+        self.l2_rms_norms = [
+            np.asarray([np.sqrt(np.mean(matrix**2)) for matrix in channel_matrices])
+            for channel_matrices in self.matrices
+        ]
 
         vmax = max(
             np.max(np.abs(channel_matrices[index]))
@@ -66,12 +83,21 @@ class PauseAnimation:
         )
         if vmax == 0.0:
             vmax += 0.1
+        vmax = 4
+        vmin = min(
+            np.min(np.abs(channel_matrices[index]))
+            for channel_matrices in self.matrices
+            for index in self.frame_indices
+        )
 
-        fig, axes = plt.subplots(1, len(CHANNELS), figsize=(15, 5), layout="constrained")
+        fig = plt.figure(figsize=(15, 9), layout="constrained")
+        grid = fig.add_gridspec(2, len(CHANNELS), height_ratios=(2, 1))
+        axes = [fig.add_subplot(grid[0, index]) for index in range(len(CHANNELS))]
+        norm_ax = fig.add_subplot(grid[1, :])
         self.images = [
             ax.imshow(
                 self.matrices[channel_index][self.frame_indices[0]],
-                vmin=-vmax,
+                vmin=vmin,
                 vmax=vmax,
                 **im_show_kwargs,
             )
@@ -88,8 +114,30 @@ class PauseAnimation:
             ax.set_title(channel)
         axes[0].set_ylabel(r"$k_y$")
 
+        colors = plt.get_cmap("tab10").colors
+        for channel_index, (channel, color) in enumerate(zip(CHANNELS, colors)):
+            norm_ax.plot(
+                l_values[:-1],
+                self.l_inf_norms[channel_index],
+                color=color,
+                label=rf"{channel} $L_\infty$",
+            )
+            norm_ax.plot(
+                l_values[:-1],
+                self.l2_rms_norms[channel_index],
+                color=color,
+                linestyle="--",
+                label=rf"{channel} $L_2/\sqrt{{N}}$",
+            )
+        norm_ax.set_xlabel(r"$\ell$")
+        norm_ax.set_ylabel(r"Norm of $|\partial_\ell V|$")
+        norm_ax.grid(True, alpha=0.3)
+        norm_ax.set_ylim(0, None)
+        norm_ax.set_xlim(l_values[0], l_values[-2])
+        norm_ax.legend(ncol=3)
+
         self.title = fig.suptitle("")
-        fig.colorbar(self.images[0], ax=axes, label=r"$V(k_x,k_y)$")
+        fig.colorbar(self.images[0], ax=axes, label=r"$|\partial \ell V(k_x,k_y)|$")
 
         self.animation = FuncAnimation(
             fig,

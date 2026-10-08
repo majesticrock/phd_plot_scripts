@@ -1,10 +1,10 @@
 FLOW_PARAMETERS = {
-    "L": 14,
-    "T": 0.04,
+    "L": 8,
+    "T": 0.16,
     "U_0": 3.,
     "tprime": -0.3,
-    "E_F": -1.1,
-    "subdir" : "",
+    "E_F": -1.21,
+    "subdir" : "testmirror",
 }
 
 HALF_FILLED_FLOW_PARAMETERS = {
