@@ -22,7 +22,7 @@ im_show_kwargs = {
 p = Momentum(L, 0, L//2)
 
 L_MIN = 0
-L_MAX = 13
+L_MAX = 50
 
 CHANNELS = (
     "SC",

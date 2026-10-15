@@ -5,6 +5,19 @@ from collections import defaultdict
 from mrock.get_data import DataLoader
 from nickel_cut_parameters import FLOW_PARAMETERS
 
+metzner_data = np.array([
+[-0.7450836820083683, 0.1517948717948718],
+[-0.7989539748953975, 0.14991452991452991],
+[-0.8308577405857741, 0.14991452991452991],
+[-0.8998953974895398, 0.11504273504273504],
+[-0.9506276150627615, 0.11452991452991454],
+[-1.0003138075313807, 0.10974358974358975],
+[-1.1498953974895398, 0.06444444444444444],
+[-1.2006276150627615, 0.039487179487179475],
+[-1.2524058577405857, 0.024444444444444435],
+[-1.297907949790795, 0.014871794871794852],
+[-1.349163179916318, 0.010256410256410248]]).T
+
 MEAN_FIELD_FILE_NAME = "mean_field_solution.json.gz"
 data_loader = DataLoader()
 
@@ -63,8 +76,11 @@ for active_status, points in points_by_status.items():
         label=label,
     )
 
-ax.set_xlabel(r"$\delta$")
+ax.plot(-metzner_data[0], metzner_data[1], color="k")
+
+ax.set_xlabel(r"$\mu / t$")
 ax.set_ylabel(r"$T / t$")
+ax.set_ylim(0, None)
 ax.legend()
 
 plt.show()

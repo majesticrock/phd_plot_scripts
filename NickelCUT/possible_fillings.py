@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 tolerance = 1e-14
-L=16
+L=10
 T_PRIME=-0.3
 
 k = np.linspace(-np.pi, np.pi, L, endpoint=False)
@@ -16,7 +16,9 @@ energies = np.sort(energies)
 print("Bandwidth =", np.max(energies) - np.min(energies))
 
 unique_energies = energies[np.concatenate(([True], np.abs(np.diff(energies)) > tolerance))]
-print("Largest energy spacing:", np.max(np.abs((np.diff(unique_energies)))))
+energy_spacings = np.diff(unique_energies)
+print("Smallest nonzero energy spacing:", np.min(energy_spacings))
+print("Largest nonzero energy spacing:", np.max(energy_spacings))
 
 def compute_single_filling(chemical_potential):
     energy_offsets = energies - chemical_potential
