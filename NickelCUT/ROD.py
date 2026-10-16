@@ -8,7 +8,9 @@ fig, ax = plt.subplots()
 
 ax.plot(data["l_times"], data["residual_offdiagonalities"], "-o")
 ax.plot(data["l_times"], data["max_interactions"], "-s")
-#ax.plot(data["l_times"], data["derivative_residual_offdiagonalities"], "-x")
+ax.plot(data["l_times"], data["derivative_residual_offdiagonalities"], "-x")
+
+print("l_max =", data["l_times"][-1])
 
 ax.set_xlabel(r"$\ell \cdot t$")
 ax.set_ylabel(r"$\mathrm{ROD} / t$")

@@ -53,13 +53,14 @@ plots = [
 	("Delta_AFM", r"$\Delta_{\mathrm{AFM}}(\mathbf{k})$"),
 	("Delta_CDW", r"$\Delta_{\mathrm{CDW}}(\mathbf{k})$"),
 	("Delta_SC", r"$\Delta_{\mathrm{SC}}(\mathbf{k})$"),
+ 	("epsilon_up", r"$\varepsilon(\mathbf{k})$"),
 ]
 
 value_limit = max(
 	0.1,
 	max(np.max(np.abs(np.asarray(data[key]))) for key, _ in plots),
 )
-fig, axes = plt.subplots(1, 3, figsize=(15, 5), layout="constrained")
+fig, axes = plt.subplots(1, len(plots), figsize=(18, 5), layout="constrained")
 for ax, (key, title) in zip(axes.flat, plots):
 	image = plot_order_parameter(ax, data[key], title, value_limit)
 fig.colorbar(image, ax=axes, label=r"$\Delta(\mathbf{k})$")

@@ -1,13 +1,65 @@
-from mrock.get_data import DataLoader, nickel_cut_params
+import math
 import os
+from pathlib import Path
 import re
+
 import pandas as pd
+from mrock.get_data import DataLoader, nickel_cut_params
 
 FLOW_FILE_NAME = "flow"
 DENSE_FLOW_FILE_NAME = "dense_flow"
 FINAL_STATE_FILE_NAME = "final_flow_state"
 
 BINARY_DIR = "binaries"
+
+
+def find_available_temperatures(parameters, file_pattern, file_name_regex):
+    """Find temperatures with matching flow files at the selected parameters."""
+    loader = DataLoader()
+    base_directory = loader._to_path(
+        "nickel_cut",
+        parameters["subdir"],
+        L=parameters["L"],
+    )
+    relative_base = base_directory.relative_to(loader.data_dir)
+    flow_files = loader.get_all_files(relative_base, file_pattern)
+    file_name_re = re.compile(file_name_regex)
+
+    fixed_parameters = {
+        key: parameters[key] for key in ("L", "U_0", "tprime", "E_F")
+    }
+    available = set()
+
+    for flow_file in flow_files:
+        path = Path(flow_file)
+        if not file_name_re.match(path.name):
+            continue
+
+        components = {}
+        for part in path.parent.parts:
+            if "=" in part:
+                key, value = part.split("=", 1)
+                components[key] = value
+
+        try:
+            matches_fixed_parameters = all(
+                math.isclose(
+                    float(components[key]),
+                    float(value),
+                    rel_tol=1e-12,
+                    abs_tol=1e-12,
+                )
+                for key, value in fixed_parameters.items()
+            )
+            temperature = float(components["T"])
+        except (KeyError, ValueError):
+            continue
+
+        if matches_fixed_parameters:
+            available.add(temperature)
+
+    return sorted(available)
+
 
 # The first output files are simply called "FLOW_FILE_NAME.ENDING"
 # Simulations resumed from a state are then numbered via "FLOW_FILE_NAME.ENDING{number}" starting with 1

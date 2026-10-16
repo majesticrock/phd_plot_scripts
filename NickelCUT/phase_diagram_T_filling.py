@@ -5,7 +5,7 @@ from collections import defaultdict
 from mrock.get_data import DataLoader
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-metzner_data = np.array([
+metzner_tc = np.array([
 [-0.7450836820083683, 0.1517948717948718],
 [-0.7989539748953975, 0.14991452991452991],
 [-0.8308577405857741, 0.14991452991452991],
@@ -18,10 +18,19 @@ metzner_data = np.array([
 [-1.297907949790795, 0.014871794871794852],
 [-1.349163179916318, 0.010256410256410248]]).T
 
+metzner_dwave = np.array([
+[-1.121018062397373, 0.07020134228187919],
+[-1.0996715927750411, 0.07221476510067114],
+[-1.05, 0.04751677852348993],
+[-1.000328407224959, 0.04228187919463086],
+[-0.9506568144499179, 0.0006711409395973034]
+]).T
+
 MEAN_FIELD_FILE_NAME = "mean_field_solution.json.gz"
 data_loader = DataLoader()
 
-data = data_loader.load_all(f"nickel_cut/L={FLOW_PARAMETERS['L']}",
+subdir = f"/{FLOW_PARAMETERS['subdir']}" if FLOW_PARAMETERS['subdir'] != "" else ""
+data = data_loader.load_all(f"nickel_cut{subdir}/L={FLOW_PARAMETERS['L']}",
                      MEAN_FIELD_FILE_NAME, 
                      condition=[
                          f"U_0={FLOW_PARAMETERS['U_0']}", 
@@ -76,7 +85,8 @@ for active_status, points in points_by_status.items():
         label=label,
     )
 
-ax.plot(-metzner_data[0], metzner_data[1], color="k")
+ax.plot(-metzner_tc[0], metzner_tc[1], color="k")
+ax.plot(-metzner_dwave[0], metzner_dwave[1], color="k", ls=":")
 
 ax.set_xlabel(r"$\mu / t$")
 ax.set_ylabel(r"$T / t$")

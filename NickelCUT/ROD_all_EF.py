@@ -71,12 +71,19 @@ for color_index, e_f in enumerate(available_efs):
     l0 = 0.0
 
     l_times = data["l_times"]
-    rod = data["residual_offdiagonalities"]
 
     ax.plot(
         l0 + l_times,
-        rod,
+        data["residual_offdiagonalities"],
         "-o",
+        color=color,
+        label=rf"$E_F={e_f:g}$",
+    )
+    
+    ax.plot(
+        l0 + l_times,
+        data["derivative_residual_offdiagonalities"],
+        "--s",
         color=color,
         label=rf"$E_F={e_f:g}$",
     )
@@ -85,6 +92,6 @@ ax.set_xlabel(r"$\ell \cdot t$")
 ax.set_ylabel(r"$\mathrm{ROD} / t$")
 ax.legend()
 
-ax.set_ylim(0.2, 2)
+ax.set_ylim(0., 2)
 
 plt.show()

@@ -10,12 +10,13 @@ from create_momentum_labels import create_momentum_labels
 
 
 MEAN_FIELD_FILE_NAME = "mean_field_across_flow.json.gz"
-PLOT_L_INDICES = [0, 10, -5, -1]
+PLOT_L_INDICES = [-5, -2, -1]
 
 PLOTS = [
 	("Delta_AFM", r"$\Delta_{\mathrm{AFM}}(\mathbf{k})$"),
 	("Delta_CDW", r"$\Delta_{\mathrm{CDW}}(\mathbf{k})$"),
 	("Delta_SC", r"$\Delta_{\mathrm{SC}}(\mathbf{k})$"),
+ 	("epsilon_up", r"$\varepsilon(\mathbf{k})$"),
 ]
 
 
@@ -73,7 +74,7 @@ value_limit = max(
 fig, axes = plt.subplots(
 	len(indices_to_plot),
 	len(PLOTS),
-	figsize=(10, 12),
+	figsize=(14, 12),
 	squeeze=False,
 	layout="constrained",
 )
