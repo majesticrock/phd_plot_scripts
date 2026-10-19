@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 from Momentum import Momentum
 from ieom import (
-    chi_ieom as _chi_ieom,
-    compute_dynamical_matrix as _compute_dynamical_matrix,
-    compute_norm_matrix as _compute_norm_matrix,
+    chi_ieom_sc as _chi_ieom,
+    compute_dynamical_matrix_sc as _compute_dynamical_matrix,
+    compute_norm_matrix_sc as _compute_norm_matrix,
     compute_occupation_numbers,
     hartree_fock as _hartree_fock,
 )
@@ -28,8 +28,8 @@ def compute_dynamical_matrix(occupation_numbers, x):
 def compute_norm_matrix(occupation_numbers, x):
     return _compute_norm_matrix(L, occupation_numbers, x)
 
-def chi_ieom(occupation_numbers, x):
-    return _chi_ieom(data, occupation_numbers, x)
+def chi_ieom(occupation_numbers, x, state):
+    return _chi_ieom(data, occupation_numbers, x, state)
 
 def find_ieom_divergence(
     x,
@@ -88,6 +88,8 @@ def find_ieom_divergence(
 
     return beta_center, f_center, vec_center, weight_center
 
+beta = 1. / FLOW_PARAMETERS["T"]
+occupation_numbers = compute_occupation_numbers(beta, hartree_fock(beta))
 
 n = L // 2
 path = (
@@ -96,56 +98,71 @@ path = (
     + [Momentum(L, index, index) for index in range(1, n + 1)]
 )
 
-#fig_hf, ax_hf = plt.subplots(layout="constrained")
-#hf_dispersion = hartree_fock(10.)
-#eps0 = np.asarray([
-#    dispersion_0[momentum.pos] for momentum in path
-#])
-#eps_hf = np.asarray([
-#    hf_dispersion[momentum.pos] for momentum in path
-#])
+fig_hf, ax_hf = plt.subplots(layout="constrained")
+hf_dispersion = hartree_fock(10.)
+eps0 = np.asarray([
+    data["dispersion"][momentum.pos] for momentum in path
+])
+eps_hf = np.asarray([
+    hf_dispersion[momentum.pos] for momentum in path
+])
+
+ax_hf.plot(np.arange(len(path)), eps0, label="Raw")
+ax_hf.plot(np.arange(len(path)), eps_hf, label="HF")
+ax_hf.set_xticks([0, n, 2 * n, 3 * n])
+ax_hf.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
+ax_hf.set_xlabel(r"$\mathbf{k}$")
+ax_hf.set_ylabel(r"$\varepsilon_k$")
+ax_hf.grid(axis="x", linestyle=":")
+ax_hf.legend()
+
+
+
+#beta, f, vec, weight = find_ieom_divergence(
+#                    Momentum(L, L//2, L//2),
+#                    beta_min=0.1,
+#                    beta_max=30.,
+#                    beta_tolerance=0.01,
+#                    weight_tolerance=1e-11)
 #
-#ax_hf.plot(np.arange(len(path)), eps0, label="Raw")
-#ax_hf.plot(np.arange(len(path)), eps_hf, label="HF")
-#ax_hf.set_xticks([0, n, 2 * n, 3 * n])
-#ax_hf.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
-#ax_hf.set_xlabel(r"$\mathbf{k}$")
-#ax_hf.set_ylabel(r"$\varepsilon_k$")
-#ax_hf.grid(axis="x", linestyle=":")
-#ax_hf.legend()
-#
-#plt.show()
+#fig_vector, ax_vector = plt.subplots(layout="constrained")
+#ax_vector.set_title(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
+#print(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
+#im = ax_vector.imshow(vec.reshape(L, L), aspect="equal")
+#cbar = fig_vector.colorbar(im, ax=ax_vector)
+#cbar.set_label("Eigenvector")
+#ax_vector.set_xlabel("$q_x$")
+#ax_vector.set_xlabel("$q_y$")
+#beta *= 0.9
 
+s_wave_state = np.ones(N)
+d_wave_state = np.ones(N)
+for i in range(N):
+    x = np.pi * (2 * (i % L) - L) / L
+    y = np.pi * (2 * (i // L) - L) / L
+    d_wave_state[i] = (np.cos(x) - np.cos(y)) / np.sqrt(2)
 
-beta, f, vec, weight = find_ieom_divergence(
-                    Momentum(L, L//2, L//2),
-                    beta_min=0.1,
-                    beta_max=30.,
-                    beta_tolerance=0.01,
-                    weight_tolerance=1e-11)
+s_wave_state /= np.sqrt(N)
+d_wave_state /= np.sqrt(N)
 
-fig_vector, ax_vector = plt.subplots(layout="constrained")
-ax_vector.set_title(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
-print(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
-im = ax_vector.imshow(vec.reshape(L, L), aspect="equal")
-cbar = fig_vector.colorbar(im, ax=ax_vector)
-cbar.set_label("Eigenvector")
-ax_vector.set_xlabel("$q_x$")
-ax_vector.set_xlabel("$q_y$")
-beta *= 0.9
-occupation_numbers = compute_occupation_numbers(beta, hartree_fock(beta))
+chi_s_values = np.asarray([
+    chi_ieom(occupation_numbers, momentum, s_wave_state) for momentum in path
+])
 
-chi_values = np.asarray([
-    chi_ieom(occupation_numbers, momentum) for momentum in path
+chi_d_values = np.asarray([
+    chi_ieom(occupation_numbers, momentum, d_wave_state) for momentum in path
 ])
 
 fig, ax = plt.subplots()
-ax.plot(np.arange(len(path)), chi_values)
+ax.plot(np.arange(len(path)), chi_s_values, "r-", label="$s$-wave")
+ax.plot(np.arange(len(path)), chi_d_values, "b--", label="$d$-wave")
+
 ax.set_xticks([0, n, 2 * n, 3 * n])
 ax.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
 ax.set_xlabel(r"$\mathbf{x}$")
 ax.set_ylabel(r"$\chi_{\mathrm{IEOM}}(\mathbf{x})$")
 ax.grid(axis="x", linestyle=":")
+ax.legend()
 fig.tight_layout()
 
 plt.show()

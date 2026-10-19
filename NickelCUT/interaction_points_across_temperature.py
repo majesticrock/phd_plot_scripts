@@ -91,17 +91,13 @@ for c, channel in enumerate(CHANNELS):
                 zorder=3,
             )
 
-        point_label = (
-            f"$({momentum_labels[x_index][1:-1]}, "
-            f"{momentum_labels[y_index][1:-1]})$"
-        )
         line_handles.append(
             Line2D(
                 [],
                 [],
                 color=color,
                 linestyle=line_style,
-                label=f"{channel} {point_label}",
+                label=f"{channel}",
             )
         )
 

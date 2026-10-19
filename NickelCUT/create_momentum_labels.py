@@ -5,9 +5,9 @@ def create_momentum_labels(L):
     Labels follow: pi * (2*i/L - 1), simplified as much as possible."""
     from math import gcd
     
-    ticks = np.arange(L)
+    ticks = np.array([0, L//4, L//2, 3*L//4])
     labels = []
-    for i in range(L):
+    for i in ticks:
         numerator = 2 * i - L
         denominator = L
         

@@ -32,12 +32,11 @@ def hartree_fock(flow_data, beta):
             (
                 differing_spin[:, :, gamma.pos]
                 + 2.0 * same_spin[:, :, gamma.pos]
-            )
-            * occupations[None, :],
+            ) * occupations[None, :],
             axis=-1,
         )
 
-        error = np.sqrt(np.sum((self_energy - new_self_energy) ** 2))
+        error = np.sqrt(np.sum((self_energy - new_self_energy)**2))
         self_energy = 0.5 * (self_energy + new_self_energy)
         if not np.isfinite(error):
             raise RuntimeError("Hartree-Fock self-consistency produced a non-finite error.")
@@ -49,7 +48,7 @@ def hartree_fock(flow_data, beta):
     return self_energy + epsilon_tilde
 
 
-def compute_dynamical_matrix(flow_data, occupation_numbers, x):
+def compute_dynamical_matrix_sc(flow_data, occupation_numbers, x):
     """Construct the C++ IEOM dynamical matrix for transfer momentum x."""
     L = flow_data["L"]
     N = L * L
@@ -145,7 +144,7 @@ def compute_dynamical_matrix_spin(flow_data, occupation_numbers, x):
     return dynamical_matrix
 
 
-def compute_norm_matrix(L, occupation_numbers, x):
+def compute_norm_matrix_sc(L, occupation_numbers, x):
     """Construct the diagonal IEOM norm matrix for transfer momentum x."""
     norm_diagonal = np.empty(L * L, dtype=float)
 
@@ -175,27 +174,17 @@ def compute_norm_matrix_spin(L, occupation_numbers, x):
     return np.diag(norm_diagonal)
 
 
-def chi_ieom(flow_data, occupation_numbers, x):
+def chi_ieom_sc(flow_data, occupation_numbers, x, state):
     L = flow_data["L"]
-    norm_matrix = compute_norm_matrix(L, occupation_numbers, x)
-    dynamical_matrix = compute_dynamical_matrix(flow_data, occupation_numbers, x)
-    return np.sum(
-        norm_matrix
-        @ np.linalg.pinv(dynamical_matrix, hermitian=True)
-        @ norm_matrix
-    ) / (L * L)
+    norm_matrix = compute_norm_matrix_sc(L, occupation_numbers, x)
+    dynamical_matrix = compute_dynamical_matrix_sc(flow_data, occupation_numbers, x)
+    tmp = norm_matrix @ state
+    return np.dot(tmp.T @ np.linalg.pinv(dynamical_matrix, hermitian=True), tmp) 
 
 
-def chi_ieom_spin(flow_data, occupation_numbers, x):
+def chi_ieom_spin(flow_data, occupation_numbers, x, state):
     L = flow_data["L"]
     norm_matrix = compute_norm_matrix_spin(L, occupation_numbers, x)
-    dynamical_matrix = compute_dynamical_matrix_spin(
-        flow_data,
-        occupation_numbers,
-        x,
-    )
-    return np.sum(
-        norm_matrix
-        @ np.linalg.pinv(dynamical_matrix, hermitian=True)
-        @ norm_matrix
-    ) / (L * L)
+    dynamical_matrix = compute_dynamical_matrix_spin(flow_data, occupation_numbers, x)
+    tmp = norm_matrix @ state
+    return np.dot(tmp.T @ np.linalg.pinv(dynamical_matrix, hermitian=True), tmp) 

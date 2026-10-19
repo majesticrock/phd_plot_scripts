@@ -85,7 +85,6 @@ for color_index, e_f in enumerate(available_efs):
         data["derivative_residual_offdiagonalities"],
         "--s",
         color=color,
-        label=rf"$E_F={e_f:g}$",
     )
 
 ax.set_xlabel(r"$\ell \cdot t$")
