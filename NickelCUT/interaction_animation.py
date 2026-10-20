@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -88,14 +90,14 @@ class PauseAnimation:
             ax.set_title(channel)
         axes[0].set_ylabel(r"$k_y$")
 
-        self.title = fig.suptitle("")
+        self.title = fig.suptitle(f"ELL_STEP={0}, $\\ell={data['l_times'][0]:.3g}$")
         fig.colorbar(self.images[0], ax=axes, label=r"$V(k_x,k_y)$")
 
         self.animation = FuncAnimation(
             fig,
             self.update,
             frames=self.frame_indices,
-            interval=400,
+            interval=600,
             blit=False,
             repeat=True,
         )
@@ -118,5 +120,11 @@ class PauseAnimation:
         return (*self.images, self.title)
 
 pa = PauseAnimation()
+
+#pa.animation.save(
+#    str(Path(__file__).with_name("interaction_animation.mp4")),
+#    writer="ffmpeg",
+#    fps=2,
+#)
 
 plt.show()

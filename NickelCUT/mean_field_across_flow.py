@@ -10,13 +10,13 @@ from create_momentum_labels import create_momentum_labels
 
 
 MEAN_FIELD_FILE_NAME = "mean_field_across_flow.json.gz"
-PLOT_L_INDICES = [-5, -2, -1]
+PLOT_L_INDICES = [0, 5, 10, 15, 20]
 
 PLOTS = [
-	("Delta_AFM", r"$\Delta_{\mathrm{AFM}}(\mathbf{k})$"),
-	("Delta_CDW", r"$\Delta_{\mathrm{CDW}}(\mathbf{k})$"),
+	#("Delta_AFM", r"$\Delta_{\mathrm{AFM}}(\mathbf{k})$"),
+	#("Delta_CDW", r"$\Delta_{\mathrm{CDW}}(\mathbf{k})$"),
 	("Delta_SC", r"$\Delta_{\mathrm{SC}}(\mathbf{k})$"),
- 	("epsilon_up", r"$\varepsilon(\mathbf{k})$"),
+ 	#("epsilon_up", r"$\varepsilon(\mathbf{k})$"),
 ]
 
 
@@ -78,6 +78,7 @@ fig, axes = plt.subplots(
 	squeeze=False,
 	layout="constrained",
 )
+axes = np.asarray(axes)
 
 for row, index in enumerate(indices_to_plot):
 	solution = solutions[index]
