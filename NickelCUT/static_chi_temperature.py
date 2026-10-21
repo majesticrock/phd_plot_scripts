@@ -24,7 +24,7 @@ data = (
         f"U_0 == {FLOW_PARAMETERS['U_0']} "
         f"& tprime == {FLOW_PARAMETERS['tprime']} "
         f"& E_F == {FLOW_PARAMETERS['E_F']} "
-        f"& not {flags[0]} & not {flags[1]} & not {flags[2]}"
+        f"& not {flags[0]} & not {flags[1]} "
     )
     .sort_values("T", ignore_index=True, ascending=False)
 )
@@ -67,13 +67,13 @@ for _, row in data.iterrows():
 
         axes[i].plot(
             np.arange(len(path)),
-            chi_s_values + 0.25 * _,
+            chi_s_values,# + 0.25 * _,
             color=color,
             ls="-",
         )
         axes[i].plot(
             np.arange(len(path)),
-            chi_d_values + 0.25 * _,
+            chi_d_values,# + 0.25 * _,
             color=color,
             ls="--",
         )
