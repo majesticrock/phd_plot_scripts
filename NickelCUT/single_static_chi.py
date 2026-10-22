@@ -52,6 +52,7 @@ for i, label in enumerate(["SC", "spin", "charge"]):
     axes[i].set_xticks([0, n, 2 * n, 3 * n])
     axes[i].set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
     axes[i].set_xlabel(r"$\mathbf{q}$")
+    axes[i].set_title(label)
     axes[i].grid(axis="x", linestyle=":")
 
 axes[0].set_ylabel(r"$\chi_{\mathrm{IEOM}}(\mathbf{q})$")

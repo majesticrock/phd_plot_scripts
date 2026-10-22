@@ -24,7 +24,8 @@ data = (
         f"U_0 == {FLOW_PARAMETERS['U_0']} "
         f"& tprime == {FLOW_PARAMETERS['tprime']} "
         f"& E_F == {FLOW_PARAMETERS['E_F']} "
-        f"& not {flags[0]} & not {flags[1]} "
+        #f"& not {flags[0]} & not {flags[1]} & not {flags[2]}"
+        f"& T > 0.1"
     )
     .sort_values("T", ignore_index=True, ascending=False)
 )
@@ -54,7 +55,7 @@ fig, axes = plt.subplots(
     sharey=True,
 )
 
-axes[0].set_ylim(-0.1, 5)
+axes[0].set_ylim(0., 10.)
 
 for _, row in data.iterrows():
     # Color both curves according to the row's temperature
