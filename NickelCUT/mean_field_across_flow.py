@@ -10,7 +10,7 @@ from create_momentum_labels import create_momentum_labels
 
 
 MEAN_FIELD_FILE_NAME = "mean_field_across_flow.json.gz"
-PLOT_L_INDICES = [0, -10, -1]
+PLOT_L_INDICES = [0, -2, -1]
 
 PLOTS = [
 	("Delta_AFM", r"$\Delta_{\mathrm{AFM}}(\mathbf{k})$"),
@@ -55,6 +55,7 @@ def plot_order_parameter(ax, values, title, value_limit, lattice_size, ticks, la
 
 
 data = load_mean_field_across_flow()
+print(f"Data has been created on {data['time']}")
 solutions = data["solutions"]
 lattice_size = data.get("L", FLOW_PARAMETERS["L"])
 
