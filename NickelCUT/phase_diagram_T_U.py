@@ -24,6 +24,7 @@ flags = [
     "negative_excitation_charge",
     "negative_excitation_sc",
     "negative_excitation_spin",
+    "pomeranchuk_instability"
 ]
 
 # Find the maximum T for each U_0 and flag.
@@ -48,14 +49,14 @@ for flag in flags:
         max_T.index,
         max_T[flag],
         marker="o",
-        label=flag.replace("negative_excitation_", "").capitalize(),
+        label=flag.replace("negative_excitation_", "").replace("_", " ").capitalize(),
     )
 
 # Axis labels and formatting
-ax.set_xlabel(r"$\mu / t$")
+ax.set_xlabel(r"$U_0 / t$")
 ax.set_ylabel(r"$T / t$")
 ax.legend()
-ax.set_ylim(0, 0.16)
+ax.set_ylim((0, None))
 ax.grid(True, alpha=0.3)
 
 plt.tight_layout()

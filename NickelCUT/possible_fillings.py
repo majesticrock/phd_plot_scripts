@@ -38,8 +38,8 @@ for i in range(1, len(unique_energies)):
     mu = 0.5 * (unique_energies[i] + unique_energies[i-1])
     print(f"#{i}:\tmu={mu:.6f}\t|   n={compute_single_filling(mu):.6f}   |   [{unique_energies[i-1]:.4f}\t, {unique_energies[i]:.4f}\t]")
 
-chemical_potentials = np.linspace(energies[0], energies[-1], 200)
-temperatures = np.array([0.04, 0.1, 0.2])
+chemical_potentials = np.linspace(energies[0], energies[-1], 800)
+temperatures = np.array([0.01, 0.04, 0.1])
 
 fig, ax = plt.subplots()
 for temperature in temperatures:
