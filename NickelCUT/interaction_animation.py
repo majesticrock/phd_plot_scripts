@@ -23,12 +23,13 @@ im_show_kwargs = {
 
 p = Momentum(L, 0, L//2)
 
-L_MIN = 0.4
-L_MAX = 0.6
+L_MIN = 0.
+L_MAX = 20.
 
 CHANNELS = (
     "SC",
     "AFM",
+    "CDW",
     "HF",
 )
 
@@ -47,7 +48,7 @@ class PauseAnimation:
         if self.frame_indices.size == 0:
             raise ValueError(f"No available l-values fall in the range [{L_MIN}, {upper_l}].")
 
-        self.matrices = [[], [], []]
+        self.matrices = [[], [], [], []]
         for flow_data in data["extracted_channels"]:
             self.matrices[0].append(
                 flow_data["superconductivity"][p.pos].reshape(L, L) * N
@@ -57,6 +58,10 @@ class PauseAnimation:
                  - flow_data["density_wave_same"][p.pos]).reshape(L, L) * N
             )
             self.matrices[2].append(
+                            (flow_data["density_wave_differing"][p.pos]
+                             + flow_data["density_wave_same"][p.pos]).reshape(L, L) * N
+                        )
+            self.matrices[3].append(
                 (flow_data["single_particle_energy_differing"][p.pos]
                  + flow_data["single_particle_energy_same"][p.pos]).reshape(L, L) * N
             )
@@ -69,7 +74,7 @@ class PauseAnimation:
         if vmax == 0.0:
             vmax += 0.1
 
-        fig, axes = plt.subplots(1, len(CHANNELS), figsize=(15, 5), layout="constrained")
+        fig, axes = plt.subplots(1, len(CHANNELS), figsize=(18, 5), layout="constrained")
         self.images = [
             ax.imshow(
                 self.matrices[channel_index][self.frame_indices[0]],

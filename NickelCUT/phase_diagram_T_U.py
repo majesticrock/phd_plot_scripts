@@ -7,10 +7,11 @@ from mrock.get_data import DataLoader
 
 loader = DataLoader()
 
+subdir = FLOW_PARAMETERS["subdir"] + "/" if FLOW_PARAMETERS["subdir"] != "" else ""
 # Load and filter data
 data = (
     loader.load_all(
-        f"nickel_cut/L={FLOW_PARAMETERS['L']}",
+        f"nickel_cut/{subdir}L={FLOW_PARAMETERS['L']}",
         "ieom_susceptibility.json.gz",
     )
     .query(

@@ -4,7 +4,7 @@ from scipy.special import expit
 
 
 def solve_hartree_fock(flow_point, beta, target_filling,
-                       max_iter=600, tol=1e-10, mixing=0.5):
+                       max_iter=1200, tol=1e-10, mixing=0.5):
     """
     Solve the spin-invariant Hartree-Fock equations for one flow step.
 
@@ -57,7 +57,7 @@ def solve_hartree_fock(flow_point, beta, target_filling,
 
     # Initialize as in the C++ implementation.
     sigma = raw_dispersion - epsilon
-
+    
     def chemical_potential(energies):
         # The occupation is per spin, so the total filling has a factor 2.
         def filling_residual(mu):

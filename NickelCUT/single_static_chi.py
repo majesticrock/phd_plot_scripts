@@ -7,7 +7,7 @@ from nickel_cut_parameters import FLOW_PARAMETERS
 from mrock.get_data import DataLoader, nickel_cut_params
 loader = DataLoader()
 
-data = loader.load_panda("nickel_cut", ".", "ieom_susceptibility.json.gz", **nickel_cut_params(**FLOW_PARAMETERS))
+data = loader.load_panda("nickel_cut", FLOW_PARAMETERS["subdir"], "ieom_susceptibility.json.gz", **nickel_cut_params(**FLOW_PARAMETERS))
 L = data["L"]
 
 X, Y = np.meshgrid(np.arange(0, L), np.arange(0, L))

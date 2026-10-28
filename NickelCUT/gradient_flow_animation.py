@@ -58,7 +58,7 @@ class PauseAnimation:
             )
             self.matrices[1].append(
                 np.abs(late["density_wave_differing"][p.pos] - late["density_wave_same"][p.pos]
-                    - early["density_wave_differing"][p.pos] - early["density_wave_same"][p.pos]
+                    - (early["density_wave_differing"][p.pos] - early["density_wave_same"][p.pos])
                 ).reshape(L, L) * N / dl
             )
             self.matrices[2].append(
