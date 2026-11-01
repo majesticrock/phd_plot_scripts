@@ -13,7 +13,7 @@ from mrock.get_data import *
 data_loader = DataLoader()
 from mrock_centralized_scripts.legend import  *
 
-MAX_FREQ = 15
+MAX_FREQ = 14
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 print(TIME_TO_UNITLESS)
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
@@ -24,18 +24,19 @@ FFT_TMAX = 7
 
 # Default parameters in one place
 params = {
-    "DIR": "cascade_16",
+    "DIR": "cascade2",
     "MODEL": "PiFlux",
-    "v_F": 2e6,
+    "v_F": 2.5e6,
     "W": 600,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
     "TAU_DIAG": 5,
-    "T_AVE": 28
+    "T_AVE": 40,
+    "field_amplitude": 1
 }
 
-T_DELAY = 0.21
+T_DELAY = 0.0
 
 def gaussian(x, mu, gamma):
     return (1 / (gamma * np.sqrt(2 * np.pi))) * np.exp(-((x - mu)**2) / (2 * gamma**2))
@@ -62,7 +63,7 @@ main_df = data_loader.load_panda("HHG", f"{params['DIR']}/exp_laser/{params['MOD
                                   tau_diag=params["TAU_DIAG"], tau_offdiag=params["TAU_OFFDIAG"], t0=T_DELAY))
 times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
 sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
-__kernel = gaussian(times, times[len(times)//2], sigma)
+__kernel = cauchy(times, times[len(times)//2], sigma)
 
 signal_A  = -np.gradient(np.convolve(df_A["current_density_time"]   , __kernel, mode='same'))
 signal_B  = -np.gradient(np.convolve(df_B["current_density_time"]   , __kernel, mode='same'))
@@ -106,6 +107,8 @@ freqs = rfftfreq(n, dt_sim)
 
 # --- Figure setup ---
 fig, ax = cdf.create_frame(figsize=(7,4.8))
+ax.plot(freqs, fftplot, label="Simulation")
+ax.set_ylim(1e-6, 2)
 # --- Experimental data ---
 if T_DELAY == 0:
     EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
@@ -133,11 +136,10 @@ if T_DELAY == 0:
     exp_fft = np.abs(rfft(exp_sig_u, n_exp))**2
     exp_fft /= np.max(exp_fft)
     ax.plot(exp_freqs, exp_fft , label="Experiment", ls="--", color="k")
-    
-ax.plot(freqs, fftplot, label="Simulation")
+
 
 if T_DELAY == 0:
-    peaks = [1, 2.67, 4.2, 5.6, 6.85, 8.3, 9.25]
+    peaks = [1, 2.7, 4.4, 5.7, 7, 8.3, 9.4]
 else:
     peaks = [1, 2.82, 4.73, 7.06, 8.7, 9.5, 11.3]
     
@@ -156,7 +158,6 @@ for i, peak in enumerate(peaks, start=1):
 ax.legend(loc="upper right")
 ax.set_yscale("log")
 ax.set_xlim(0, MAX_FREQ)
-ax.set_ylim(1e-8, 2)
 
 fig.tight_layout()
 

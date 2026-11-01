@@ -53,8 +53,11 @@ for ax in axes[1]:
     ax.set_xticks([0, n, 2 * n, 3 * n])
     ax.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
 
-for ax in axes[:,0]:
-    ax.set_ylabel(r"$\chi (q)$")
+axes[0,0].set_title("SC")
+axes[0,1].set_title("Charge")
+axes[0,2].set_title("Spin")
+axes[0,0].set_ylabel(r"$\chi_s (q)$")
+axes[1,0].set_ylabel(r"$\chi_d (q)$")
 
 ax.set_ylim(0, 2.5)
 
@@ -72,14 +75,34 @@ fig.colorbar(
     label=r"$\ell \cdot t$",
 )
 
-fig_ev, ax_ev = plt.subplots(layout="constrained")
-ax_ev.set_xlabel(r"$\ell \cdot t$")
-ax_ev.set_ylabel(r"Most extremal eigenvalue")
+fig_ev, (ax_ev, ax_deriv) = plt.subplots(ncols=2, figsize=(10, 5), layout="constrained")
 
-ax_ev.plot(data["l_times"], data["extremal_sc_eigenvalues"], ls="-", label="SC")
+
+ax_ev.plot(data["l_times"], data["extremal_sc_eigenvalues"],     ls="-",  label="SC")
 ax_ev.plot(data["l_times"], data["extremal_charge_eigenvalues"], ls="--", label="Charge")
-ax_ev.plot(data["l_times"], data["extremal_spin_eigenvalues"], ls="-.", label="Spin")
+ax_ev.plot(data["l_times"], data["extremal_spin_eigenvalues"],   ls="-.", label="Spin")
+ax_ev.plot(data["l_times"], np.sqrt(
+    data["extremal_sc_eigenvalues"] * data["extremal_sc_eigenvalues"]
+    + data["extremal_charge_eigenvalues"] * data["extremal_charge_eigenvalues"]
+     + data["extremal_spin_eigenvalues"] * data["extremal_spin_eigenvalues"]
+), ls=":", c="k", label="Total")
 
+ax_ev.set_xlabel(r"$\ell \cdot t$")
+ax_ev.set_ylabel(r"$\lambda_\mathrm{ex}$")
 ax_ev.legend()
+
+ax_deriv.plot(data["l_times"], np.gradient(data["extremal_sc_eigenvalues"],     data["l_times"]),     ls="-",  label="SC")
+ax_deriv.plot(data["l_times"], np.gradient(data["extremal_charge_eigenvalues"], data["l_times"]), ls="--", label="Charge")
+ax_deriv.plot(data["l_times"], np.gradient(data["extremal_spin_eigenvalues"],   data["l_times"]),   ls="-.", label="Spin")
+
+ax_deriv.plot(data["l_times"], np.gradient(np.sqrt(
+    data["extremal_sc_eigenvalues"] * data["extremal_sc_eigenvalues"]
+    + data["extremal_charge_eigenvalues"] * data["extremal_charge_eigenvalues"]
+     + data["extremal_spin_eigenvalues"] * data["extremal_spin_eigenvalues"]
+), data["l_times"]), ls=":", c="k", label="Total")
+
+ax_deriv.set_xlabel(r"$\ell \cdot t$")
+ax_deriv.set_ylabel(r"$\partial_\ell \lambda_\mathrm{ex}$")
+#ax_deriv.set_ylim(-3, 3)
 
 plt.show()

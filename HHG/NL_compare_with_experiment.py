@@ -14,32 +14,32 @@ from mrock.get_data import *
 data_loader = DataLoader()
 from mrock_centralized_scripts.legend import  *
 
-MAX_FREQ = 20
+MAX_FREQ = 10.5
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
 # FFT window (unitless time)
-FFT_TMIN = 1.0
-FFT_TMAX = 9.0
+FFT_TMIN = 3.0
+FFT_TMAX = 7.
 
 # === Choose sweep parameter here ===
-sweep_param = "field_amplitude"
-sweep_values = [ 0.1, 0.2, 0.5, 0.7, 1.0]
-
 sweep_param = "W"
-sweep_values = [ 500, 600, 700 ]
+sweep_values = [ 400, 450, 500, 550, 600 ]
+
+sweep_param = "TAU_DIAG"
+sweep_values = [ 3, 5, 7 ]
 
 # Default parameters in one place
 PARAMS = {
-    "DIR": "cascade_16",
+    "DIR": "cascade2",
     "MODEL": "PiFlux",
-    "v_F": 2e6,
+    "v_F": 2.5e6,
     "W": 600,
     "T": 300,
     "E_F": 118,
     "TAU_OFFDIAG": -1,
-    "TAU_DIAG": 5,
-    "T_AVE": 28,
+    "TAU_DIAG": 10,
+    "T_AVE": 30,
     "field_amplitude": 1
 }
 
@@ -129,8 +129,8 @@ def run_and_plot(ax, ax_fft, params, color, label=None, data_norm=None):
     fftplot = np.abs(rfft(signal_AB_u - plot_data_combined, n))**2
     label = f"{sweep_param}={params[sweep_param]}" if label is None else label
     
-    if data_norm is None:
-        data_norm = np.max(fftplot)
+    #if data_norm is None:
+    data_norm = np.max(fftplot)
     ax_fft.plot(freqs_scipy, fftplot[mask] / data_norm, color=color, label=label)
     
     return main_df, data_norm
@@ -138,12 +138,13 @@ def run_and_plot(ax, ax_fft, params, color, label=None, data_norm=None):
 
 # --- Figure setup ---
 fig, ax = cdt.create_frame()
-fig_fft, ax_fft = cdf.create_frame()
+fig_fft, ax_fft = cdf.create_frame(figsize=(6.4, 8))
 
 ax_fft.set_yscale("log")
 ax_fft.set_xlim(0, MAX_FREQ)
+ax_fft.set_ylim(1e-5, 2.)
 
-for i in range(1, MAX_FREQ, 2):
+for i in range(1, int(MAX_FREQ), 2):
     ax_fft.axvline(i, color="gray", ls="--")
 
 # Colormap setup
