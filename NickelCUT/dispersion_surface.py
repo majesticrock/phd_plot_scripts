@@ -5,10 +5,11 @@ from create_momentum_labels import create_momentum_labels
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
+dense = False
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=dense)
 
 L = data["L"]
-ELL_INDEX = -1
+ELL_INDEX = -1 if dense else -1
 print("ROD of plotted data =", data["residual_offdiagonalities"][ELL_INDEX], ", index =", ELL_INDEX)
 
 # turns a L*L 1D array into a L x L 2D array
@@ -16,7 +17,10 @@ def convert_1d_to_2d(arr):
     return np.reshape(arr, (-1, L))
 
 X, Y = np.meshgrid(np.arange(0, L), np.arange(0, L))
-Z = convert_1d_to_2d(data["extracted_channels"][ELL_INDEX]["dispersion"])
+if dense:
+    Z = convert_1d_to_2d(data["extracted_channels"][ELL_INDEX]["dispersion"])
+else:
+    Z = convert_1d_to_2d(data["extracted_channels.dispersion"])
 norm = plt.Normalize(Z.min(), Z.max())
 colors = cm.inferno(norm(Z))
 

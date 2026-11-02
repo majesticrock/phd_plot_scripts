@@ -75,34 +75,37 @@ fig.colorbar(
     label=r"$\ell \cdot t$",
 )
 
-fig_ev, (ax_ev, ax_deriv) = plt.subplots(ncols=2, figsize=(10, 5), layout="constrained")
+fig_ev, (ax_ev, ax_deriv) = plt.subplots(ncols=2, figsize=(10, 5), layout="constrained", sharex=True)
+
+evs = np.array([
+    data["extremal_sc_eigenvalues"],
+    data["extremal_charge_eigenvalues"],
+    data["extremal_spin_eigenvalues"]
+])
 
 
-ax_ev.plot(data["l_times"], data["extremal_sc_eigenvalues"],     ls="-",  label="SC")
-ax_ev.plot(data["l_times"], data["extremal_charge_eigenvalues"], ls="--", label="Charge")
-ax_ev.plot(data["l_times"], data["extremal_spin_eigenvalues"],   ls="-.", label="Spin")
-ax_ev.plot(data["l_times"], np.sqrt(
-    data["extremal_sc_eigenvalues"] * data["extremal_sc_eigenvalues"]
-    + data["extremal_charge_eigenvalues"] * data["extremal_charge_eigenvalues"]
-     + data["extremal_spin_eigenvalues"] * data["extremal_spin_eigenvalues"]
-), ls=":", c="k", label="Total")
+ax_ev.plot(data["l_times"], evs[0], ls="-",  marker="o", label="SC")
+ax_ev.plot(data["l_times"], evs[1], ls="--", marker="o", label="Charge")
+ax_ev.plot(data["l_times"], evs[2], ls="-.", marker="o", label="Spin")
+ax_ev.plot(data["l_times"], np.sqrt(evs[0]**2 + evs[1]**2 + evs[2]**2), ls=":", c="k", label="Total")
 
 ax_ev.set_xlabel(r"$\ell \cdot t$")
 ax_ev.set_ylabel(r"$\lambda_\mathrm{ex}$")
 ax_ev.legend()
 
-ax_deriv.plot(data["l_times"], np.gradient(data["extremal_sc_eigenvalues"],     data["l_times"]),     ls="-",  label="SC")
-ax_deriv.plot(data["l_times"], np.gradient(data["extremal_charge_eigenvalues"], data["l_times"]), ls="--", label="Charge")
-ax_deriv.plot(data["l_times"], np.gradient(data["extremal_spin_eigenvalues"],   data["l_times"]),   ls="-.", label="Spin")
+gradients = np.abs(np.array([np.gradient(channel_evs, data["l_times"]) for channel_evs in evs]))
+ex_gradient = np.sqrt(gradients[0]**2 + gradients[1]**2 + gradients[2]**2)
 
-ax_deriv.plot(data["l_times"], np.gradient(np.sqrt(
-    data["extremal_sc_eigenvalues"] * data["extremal_sc_eigenvalues"]
-    + data["extremal_charge_eigenvalues"] * data["extremal_charge_eigenvalues"]
-     + data["extremal_spin_eigenvalues"] * data["extremal_spin_eigenvalues"]
-), data["l_times"]), ls=":", c="k", label="Total")
+ax_deriv.plot(data["l_times"], gradients[0] / ex_gradient[0], ls="-",  marker="o", label="SC")
+ax_deriv.plot(data["l_times"], gradients[1] / ex_gradient[0], ls="--", marker="o", label="Charge")
+ax_deriv.plot(data["l_times"], gradients[2] / ex_gradient[0], ls="-.", marker="o", label="Spin")
+
+ax_deriv.plot(data["l_times"], ex_gradient / ex_gradient[0], ls=":", c="k", marker="o", label="Total")
 
 ax_deriv.set_xlabel(r"$\ell \cdot t$")
-ax_deriv.set_ylabel(r"$\partial_\ell \lambda_\mathrm{ex}$")
-#ax_deriv.set_ylim(-3, 3)
+ax_deriv.set_ylabel(r"$\partial_\ell \lambda_\mathrm{ex} / [\partial_\ell \lambda_\mathrm{ex}(0)]$")
+ax_deriv.set_yscale("log")
+ax_ev.set_xscale("log")
+#ax_deriv.set_ylim(0, None)
 
 plt.show()
