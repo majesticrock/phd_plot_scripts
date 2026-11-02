@@ -8,14 +8,14 @@ from mrock_centralized_scripts.legend import  legend
 
 def create_frame(electric_field=False):
     fig, ax = plt.subplots()
-    ax.set_xlabel(legend(r"t / (2 \pi T_L)"))
+    ax.set_xlabel(legend(r"t / T_L"))
     ax.set_ylabel(f"${'E(t)' if electric_field else 'A(t)'} $ arb. units")
     fig.tight_layout()
     
     return fig, ax
 
 def add_laser_to_plot(df, ax, electric_field=False, label=None, normalize=False, **kwargs):
-    times = np.linspace(0, df["t_end"] - df["t_begin"], df["n_measurements"]) / (2 * np.pi)
+    times = np.linspace(0, df["t_end"] - df["t_begin"], df["n_measurements"])
     A = df["laser_function"]
 
     if electric_field:
@@ -38,26 +38,22 @@ def plot_laser(df, electric_field=False):
     plt.show()
 
 if __name__ == '__main__':
-    TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
+    HBAR = 0.6582119569509065
     __PLOT_E_FIELD__ = True
     fig, ax = create_frame(__PLOT_E_FIELD__)
 
-    main_df = data_loader.load_panda("HHG", "cascade_prec/exp_laser/PiFlux", "current_density.json.gz", 
-                    **hhg_params(T=300, E_F=118, v_F=1e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
-    #add_laser_to_plot(main_df, ax, False, label="Vector potential")
-    add_laser_to_plot(main_df, ax, True, label="Electric field", normalize=True)
-    N_extra = 15
-    T_SHIFT = N_extra * 0.03318960199004975 * main_df["photon_energy"] / TIME_TO_UNITLESS
+    main_df = data_loader.load_panda("HHG", "cascade2/exp_laser/PiFlux", "current_density.json.gz", 
+                    **hhg_params(T=300, E_F=118, v_F=2.5e6, band_width=600, field_amplitude=1., photon_energy=1, tau_diag=5, tau_offdiag=-1, t0=0))
+    #add_laser_to_plot(main_df, ax, False, label="Vector potential", normalize=True)
+    add_laser_to_plot(main_df, ax, True,  label="Electric field", normalize=True)
+    N_extra = 7.5
     
-    #main_df = data_loader.load_panda("HHG", "test/dcos_laser/PiFlux", "current_density.json.gz", 
-    #                **hhg_params(T=300, E_F=118, v_F=1e6, band_width=200, field_amplitude=1., photon_energy=1, tau_diag=10, tau_offdiag=-1, t0=0))
-    #main_df["t_begin"] += T_SHIFT
-    #main_df["t_end"] = T_SHIFT + main_df["t_end"] * 2 * np.pi
-    #add_laser_to_plot(main_df, ax, False, label="Dcos", normalize=False)
+    CONVERT_TO_UNITLESS = main_df["photon_energy"] / HBAR
+    T_SHIFT = N_extra * 0.03318960199004975 * CONVERT_TO_UNITLESS
     
     ax.axhline(0, ls="-", linewidth=1.5)
     
-    time_scale = 6.67111 * main_df["photon_energy"] / TIME_TO_UNITLESS
+    time_scale = 6.67111 * CONVERT_TO_UNITLESS
     dt = time_scale / 201 # number of sample points of the electric field
     ax.axvline(N_extra * dt, c="k")
     ax.axvline(time_scale + N_extra * dt, c="k")
@@ -66,7 +62,7 @@ if __name__ == '__main__':
     EXP_PATH = "../raw_data_phd/" if os.name == "nt" else "data/"
     LASER = np.loadtxt(f"{EXP_PATH}HHG/pulse_AB.dat").transpose()
     
-    ax.plot(T_SHIFT + LASER[0] * main_df["photon_energy"] / TIME_TO_UNITLESS, (LASER[1] + LASER[2]) / np.max(np.abs(LASER[1] + LASER[2])), 
+    ax.plot(T_SHIFT + LASER[0] * CONVERT_TO_UNITLESS, (LASER[1] + LASER[2]) / np.max(np.abs(LASER[1] + LASER[2])), 
             label="Exp", ls="--")
-    
+    ax.legend()
     plt.show()

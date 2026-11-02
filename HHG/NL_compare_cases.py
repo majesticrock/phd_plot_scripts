@@ -14,7 +14,7 @@ from mrock.get_data import *
 data_loader = DataLoader()
 from mrock_centralized_scripts.legend import  *
 
-MAX_FREQ = 12.5
+MAX_FREQ = 14.5
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
@@ -83,7 +83,7 @@ def run_and_plot(ax_fft, params, label=None, data_norm=None):
 
     times = np.linspace(0, df_A["t_end"] - df_A["t_begin"], len(df_A["current_density_time"])) / (2 * np.pi)
     sigma = 0.001 * params["T_AVE"] * main_df["photon_energy"] / TIME_TO_UNITLESS
-    __kernel = cauchy(times, times[len(times)//2], sigma)
+    __kernel = sech_distrubution(times, times[len(times)//2], sigma)
     
     signal_A  = -np.gradient(np.convolve(df_A["current_density_time"]   , __kernel, mode='same'))
     signal_B  = -np.gradient(np.convolve(df_B["current_density_time"]   , __kernel, mode='same'))
@@ -140,11 +140,11 @@ def run_and_plot(ax_fft, params, label=None, data_norm=None):
 
 
 # --- Figure setup ---
-fig_fft, ax_fft = cdf.create_frame(figsize=(6.4, 8))
+fig_fft, ax_fft = cdf.create_frame(figsize=(6.4, 6))
 
 ax_fft.set_yscale("log")
 ax_fft.set_xlim(0, MAX_FREQ)
-ax_fft.set_ylim(1e-5, 2.)
+ax_fft.set_ylim(1e-6, 2.)
 
 for i in range(1, int(MAX_FREQ), 2):
     ax_fft.axvline(i, color="gray", ls="--")
