@@ -14,7 +14,7 @@ from mrock.get_data import *
 data_loader = DataLoader()
 from mrock_centralized_scripts.legend import  *
 
-MAX_FREQ = 12.5
+MAX_FREQ = 13.5
 TIME_TO_UNITLESS = 2 * np.pi * 0.6582119569509065
 FWHM_TO_SIGMA = 2 * np.sqrt(2 * np.log(2))
 
@@ -27,29 +27,29 @@ PARAMS = [
     {
         "DIR": "cascade_2cycle",
         "MODEL": "PiFlux",
-        "v_F": 1.5e6,
-        "W": 450,
+        "v_F": 2.5e6,
+        "W": 600,
         "T": 300,
         "E_F": 118,
         "TAU_OFFDIAG": -1,
-        "TAU_DIAG": 7,
+        "TAU_DIAG": 5,
         "T_AVE": 40,
-        "field_amplitude": 1.6,
-        "photon_energy": 5.25,
+        "field_amplitude": 1,
+        "photon_energy": 1,
         "label": "2 cycles",
     },
     {
         "DIR": "cascade_8cycle",
         "MODEL": "PiFlux",
-        "v_F": 1.5e6,
-        "W": 450,
+        "v_F": 2.5e6,
+        "W": 600,
         "T": 300,
         "E_F": 118,
         "TAU_OFFDIAG": -1,
-        "TAU_DIAG": 7,
+        "TAU_DIAG": 5,
         "T_AVE": 40,
-        "field_amplitude": 1.6,
-        "photon_energy": 5.25,
+        "field_amplitude": 1,
+        "photon_energy": 1,
         "label": "8 cycles",
     }
 ]
@@ -144,7 +144,7 @@ def run_and_plot(ax_fft, params, data_norm=None):
 
 
 # --- Figure setup ---
-fig_fft, ax_fft = cdf.create_frame(figsize=(6.4, 8))
+fig_fft, ax_fft = cdf.create_frame(figsize=(6.4, 6.4))
 
 ax_fft.set_yscale("log")
 ax_fft.set_xlim(0, MAX_FREQ)

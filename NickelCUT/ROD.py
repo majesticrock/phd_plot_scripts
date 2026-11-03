@@ -3,7 +3,7 @@ from load_flow_files import *
 from nickel_cut_parameters import FLOW_PARAMETERS
 import numpy as np
 
-data = load_flow_file(**FLOW_PARAMETERS, force_json=False, dense=True)
+data = load_flow_file(**FLOW_PARAMETERS, force_json=False, dense=False)
 
 fig, ax = plt.subplots()
 
