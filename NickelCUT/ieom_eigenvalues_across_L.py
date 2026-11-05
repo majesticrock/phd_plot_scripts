@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
+from finite_size_energy_gap import energy_gap_for_parameters
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
 
-SYSTEM_SIZES = (8, 10, 12, 16)
+SYSTEM_SIZES = ( 16, 18)#8, 10, 12, 14,
 CHANNELS = (
     ("extremal_sc_eigenvalues", "SC", "-"),
     ("extremal_charge_eigenvalues", "Charge", "--"),
@@ -14,13 +15,12 @@ CHANNELS = (
 )
 
 fig, axes = plt.subplots(
-    nrows=2,
-    ncols=2,
-    figsize=(11, 8),
+    nrows=1,
+    ncols=3,
+    figsize=(15, 4.5),
     layout="constrained",
     sharex=True,
 )
-axes = axes.flat
 colors = plt.get_cmap("tab10")
 size_handles = [
     Line2D([0], [0], color=colors(index % colors.N), label=f"L={size}")
@@ -43,6 +43,12 @@ for size_index, system_size in enumerate(SYSTEM_SIZES):
         [data[key][:point_count] for key, _, _ in CHANNELS]
     )
     color = colors(size_index % colors.N)
+    energy_gap = energy_gap_for_parameters(
+        system_size,
+        FLOW_PARAMETERS["tprime"],
+        FLOW_PARAMETERS["E_F"],
+    )
+    ell_threshold = 1.0 / energy_gap
 
     for channel_index, (_, label, linestyle) in enumerate(CHANNELS):
         axes[channel_index].plot(
@@ -51,22 +57,28 @@ for size_index, system_size in enumerate(SYSTEM_SIZES):
             color=color,
         )
 
-    total_eigenvalue = np.sqrt(np.sum(eigenvalues**2, axis=0))
-    axes[3].plot(
-        l_times,
-        total_eigenvalue,
-        color=color,
-    )
+    for ax in axes:
+        ax.axvline(
+            ell_threshold,
+            color=color,
+            linestyle=":",
+            alpha=0.8,
+        )
 
 for ax, (_, label, _) in zip(axes, CHANNELS):
-    ax.set_title(label)
-axes[3].set_title("Total")
+    ax.set_title(
+        {
+            "SC": "Superconducting channel",
+            "Charge": "Charge channel",
+            "Spin": "Spin channel",
+        }[label]
+    )
 
 for ax in axes:
     ax.set_ylabel(r"$\lambda_\mathrm{ex}$")
     ax.legend(handles=size_handles, title="System size")
 
-for ax in axes[2:]:
+for ax in axes:
     ax.set_xlabel(r"$\ell \cdot t$")
 
 plt.show()

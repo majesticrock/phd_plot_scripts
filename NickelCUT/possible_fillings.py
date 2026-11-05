@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 tolerance = 1e-14
-L=10
-T_PRIME=0.
+L=12
+T_PRIME=-0.3
 
 k = np.linspace(-np.pi, np.pi, L, endpoint=False)
 cos_x, cos_y = np.meshgrid(np.cos(k), np.cos(k))
@@ -38,6 +38,8 @@ for i in range(1, len(unique_energies)):
     mu = 0.5 * (unique_energies[i] + unique_energies[i-1])
     print(f"#{i}:\tmu={mu:.6f}\t|   n={compute_single_filling(mu):.6f}   |   [{unique_energies[i-1]:.4f}\t, {unique_energies[i]:.4f}\t]")
 
+print(f"VHF:\tmu={4*T_PRIME:3f}\t|   n={compute_filling(np.array([4*T_PRIME]), 0.1)[0]:6f}")
+print(f"Special:\tmu={-0.85:3f}\t|   n={compute_filling(np.array([-0.85]), 0.1)[0]:6f}")
 chemical_potentials = np.linspace(energies[0], energies[-1], 800)
 temperatures = np.array([0.01, 0.04, 0.1])
 

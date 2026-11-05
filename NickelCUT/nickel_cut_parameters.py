@@ -1,9 +1,9 @@
 FLOW_PARAMETERS = {
-    "L": 12,
+    "L": 18,
     "T": 0.12,
     "U_0": 3.,
     "tprime": -0.3,
-    "E_F": -1.21,
+    "E_F": -1.42,
     "subdir" : "ieom",
 }
 

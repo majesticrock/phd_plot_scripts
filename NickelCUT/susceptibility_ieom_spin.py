@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Momentum import Momentum
 from ieom import (
-    chi_ieom_spin as _chi_ieom_spin,
+    compute_static_susceptibilities,
     compute_dynamical_matrix_spin as _compute_dynamical_matrix_spin,
     compute_norm_matrix_spin as _compute_norm_matrix_spin,
     compute_occupation_numbers,
@@ -12,6 +11,8 @@ from ieom import (
 from load_flow_files import load_final_flow_state
 from nickel_cut_parameters import FLOW_PARAMETERS
 
+
+INTERNAL_MOMENTUM_INTERPOLATION_FACTOR = 1
 
 data = load_final_flow_state(**FLOW_PARAMETERS, resume_num="", force_json=False)
 L = data["L"]
@@ -27,9 +28,6 @@ def compute_dynamical_matrix(occupation_numbers, x):
 
 def compute_norm_matrix(occupation_numbers, x):
     return _compute_norm_matrix_spin(L, occupation_numbers, x)
-
-def chi_ieom(occupation_numbers, x, state):
-    return _chi_ieom_spin(data, occupation_numbers, x, state)
 
 def find_ieom_divergence(
     x,
@@ -89,77 +87,24 @@ def find_ieom_divergence(
     return beta_center, f_center, vec_center, weight_center
 
 
-n = L // 2
-path = (
-    [Momentum(L, n, y) for y in range(n, -1, -1)]
-    + [Momentum(L, x, 0) for x in range(n - 1, -1, -1)]
-    + [Momentum(L, index, index) for index in range(1, n + 1)]
+susceptibility_data = compute_static_susceptibilities(
+    data,
+    internal_momentum_interpolation_factor=INTERNAL_MOMENTUM_INTERPOLATION_FACTOR,
 )
-
-#fig_hf, ax_hf = plt.subplots(layout="constrained")
-#hf_dispersion = hartree_fock(10.)
-#eps0 = np.asarray([
-#    dispersion_0[momentum.pos] for momentum in path
-#])
-#eps_hf = np.asarray([
-#    hf_dispersion[momentum.pos] for momentum in path
-#])
-#
-#ax_hf.plot(np.arange(len(path)), eps0, label="Raw")
-#ax_hf.plot(np.arange(len(path)), eps_hf, label="HF")
-#ax_hf.set_xticks([0, n, 2 * n, 3 * n])
-#ax_hf.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])
-#ax_hf.set_xlabel(r"$\mathbf{k}$")
-#ax_hf.set_ylabel(r"$\varepsilon_k$")
-#ax_hf.grid(axis="x", linestyle=":")
-#ax_hf.legend()
-#
-#plt.show()
-
-
-#beta, f, vec, weight = find_ieom_divergence(
-#                    Momentum(L, 0, 0),
-#                    beta_min=1.,
-#                    beta_max=70.,
-#                    beta_tolerance=0.005,
-#                    weight_tolerance=1e-11)
-#
-#fig_vector, ax_vector = plt.subplots(layout="constrained")
-#ax_vector.set_title(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
-#print(f"$T={1./beta:.6f}$  $W={weight:.6f}$")
-#im = ax_vector.imshow(vec.reshape(L, L), aspect="equal")
-#cbar = fig_vector.colorbar(im, ax=ax_vector)
-#cbar.set_label("Eigenvector")
-#ax_vector.set_xlabel("$q_x$")
-#ax_vector.set_xlabel("$q_y$")
-#
-#beta *= 0.9
-#occupation_numbers = compute_occupation_numbers(beta, hartree_fock(beta))
-
-beta = 1. / FLOW_PARAMETERS["T"]
-occupation_numbers = compute_occupation_numbers(beta, hartree_fock(beta))
-
-s_wave_state = np.ones(N)
-d_wave_state = np.ones(N)
-for i in range(N):
-    x = np.pi * (2 * (i % L) - L) / L
-    y = np.pi * (2 * (i // L) - L) / L
-    d_wave_state[i] = (np.cos(x) - np.cos(y)) / np.sqrt(2)
-
-s_wave_state /= np.sqrt(N)
-d_wave_state /= np.sqrt(N)
-
-chi_s_values = np.asarray([
-    chi_ieom(occupation_numbers, momentum, s_wave_state) for momentum in path
-])
-
-chi_d_values = np.asarray([
-    chi_ieom(occupation_numbers, momentum, d_wave_state) for momentum in path
-])
+for (q_x, q_y), eigenvalue in zip(
+    susceptibility_data["q_points"],
+    susceptibility_data["leading_eigenvalues"]["spin"],
+):
+    print(
+        f"spin q=({q_x}, {q_y}): leading eigenvalue={eigenvalue:.10g}, "
+        f"1 + eigenvalue={1.0 + eigenvalue:.10g}"
+    )
+chi_s_values, chi_d_values = np.asarray(susceptibility_data["spin"]).T
+n = L // 2
 
 fig, ax = plt.subplots()
-ax.plot(np.arange(len(path)), chi_s_values, "r-", label="$s$-wave")
-ax.plot(np.arange(len(path)), chi_d_values, "b--", label="$d$-wave")
+ax.plot(np.arange(len(chi_s_values)), chi_s_values, "r-", label="$s$-wave")
+ax.plot(np.arange(len(chi_d_values)), chi_d_values, "b--", label="$d$-wave")
 
 ax.set_xticks([0, n, 2 * n, 3 * n])
 ax.set_xticklabels([r"$\Gamma$", "X", "M", r"$\Gamma$"])

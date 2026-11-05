@@ -4,6 +4,7 @@ import matplotlib.colors as mc
 
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
+from finite_size_energy_gap import energy_gap_for_parameters
 from Momentum import Momentum
 
 # ------------------------------------------------------------
@@ -20,6 +21,12 @@ data = load_flow_file(
 print("Loaded data was produced on", data["time"])
 
 L = data["L"]
+energy_gap = energy_gap_for_parameters(
+    L,
+    FLOW_PARAMETERS["tprime"],
+    FLOW_PARAMETERS["E_F"],
+)
+ell_threshold = 1.0 / energy_gap
 end_index = data["number_of_data_points"]
 l_times = data["l_times"]
 
@@ -89,6 +96,12 @@ ax_ev.plot(l_times, np.sqrt(evs[0]**2 + evs[1]**2 + evs[2]**2), ls=":", marker="
 
 ax_ev.set_xlabel(r"$\ell \cdot t$")
 ax_ev.set_ylabel(r"$\lambda_\mathrm{ex}$")
+ax_ev.axvline(
+    ell_threshold,
+    color="gray",
+    linestyle=":",
+    label=rf"$1/\Delta E={ell_threshold:.3g}$",
+)
 ax_ev.legend()
 
 gradients = np.abs(np.array([np.gradient(channel_evs, l_times) for channel_evs in evs]))
@@ -103,6 +116,7 @@ ax_deriv.plot(l_times, ex_gradient / ex_gradient[0], ls=":", c="k", marker="o", 
 ax_deriv.set_xlabel(r"$\ell \cdot t$")
 ax_deriv.set_ylabel(r"$|\frac{\partial}{\partial \ell} \lambda_\mathrm{ex}| / |\frac{\partial}{\partial \ell} \lambda_\mathrm{ex}(0)|$")
 ax_deriv.set_yscale("log")
+ax_deriv.axvline(ell_threshold, color="gray", linestyle=":")
 #ax_ev.set_xscale("log")
 #ax_deriv.set_ylim(0, None)
 
@@ -113,7 +127,8 @@ ax_rod.set_xlabel(r"$\ell \cdot t$")
 ax_rod.set_ylabel(r"$\mathrm{ROD} / t$")
 
 ax_rod.set_ylim(0, None)
-ax_rod.set_xlim(0, l_times[-1])
+ax_rod.set_xlim(0, None)
+ax_rod.axvline(ell_threshold, color="gray", linestyle=":")
 ax_rod.legend()
 
 plt.show()
