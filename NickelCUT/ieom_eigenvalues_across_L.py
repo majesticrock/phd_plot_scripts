@@ -7,7 +7,7 @@ from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
 
-SYSTEM_SIZES = ( 16, 18)#8, 10, 12, 14,
+SYSTEM_SIZES = ( 10, 12, 14 )
 CHANNELS = (
     ("extremal_sc_eigenvalues", "SC", "-"),
     ("extremal_charge_eigenvalues", "Charge", "--"),
@@ -46,7 +46,7 @@ for size_index, system_size in enumerate(SYSTEM_SIZES):
     energy_gap = energy_gap_for_parameters(
         system_size,
         FLOW_PARAMETERS["tprime"],
-        FLOW_PARAMETERS["E_F"],
+        data["E_F"],
     )
     ell_threshold = 1.0 / energy_gap
 

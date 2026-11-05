@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-L = 16
-T_PRIME = -0.3
+L = 12
+T_PRIME = -0.25
 FERMI_LEVEL = -0.75
 ENERGY_TOLERANCE = 1e-12
 FINE_MESH_SIZE = 201
@@ -216,7 +216,7 @@ def main():
         ax_gap.legend()
     fig_gap.tight_layout()
 
-    lattice_sizes = np.arange(8, 24, 2)
+    lattice_sizes = np.arange(8, 34, 2)
     size_gap_values = [
         energy_gap_for_parameters(lattice_size, T_PRIME, FERMI_LEVEL)
         for lattice_size in lattice_sizes

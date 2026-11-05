@@ -24,7 +24,7 @@ L = data["L"]
 energy_gap = energy_gap_for_parameters(
     L,
     FLOW_PARAMETERS["tprime"],
-    FLOW_PARAMETERS["E_F"],
+    data["E_F"],
 )
 ell_threshold = 1.0 / energy_gap
 end_index = data["number_of_data_points"]

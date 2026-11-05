@@ -12,10 +12,10 @@ dense = True
 
 FLOW_FILE_PATTERN = f"{'dense_' if dense else ''}flow.json.gz*"
 FLOW_FILE_RE = re.compile(fr"^{FLOW_FILE_PATTERN}\d*$")
-EF_DIR_RE = re.compile(r"^E_F=(.+)$")
+FILLING_DIR_RE = re.compile(r"^filling=(.+)$")
 
 
-def find_available_fermi_energies(parameters):
+def find_available_fillings(parameters):
     loader = DataLoader()
 
     fixed_parameters = nickel_cut_params(
@@ -23,9 +23,9 @@ def find_available_fermi_energies(parameters):
         parameters["T"],
         parameters["U_0"],
         parameters["tprime"],
-        parameters["E_F"],
+        parameters["filling"],
     )
-    fixed_parameters.pop("E_F")
+    fixed_parameters.pop("filling")
 
     base_directory = loader._to_path(
         "nickel_cut",
@@ -44,31 +44,31 @@ def find_available_fermi_energies(parameters):
         if not FLOW_FILE_RE.match(path.name):
             continue
 
-        match = EF_DIR_RE.match(path.parent.name)
+        match = FILLING_DIR_RE.match(path.parent.name)
         if match:
             available.add(float(match.group(1)))
 
     return sorted(available)
 
 
-available_efs = find_available_fermi_energies(FLOW_PARAMETERS)
+available_fillings = find_available_fillings(FLOW_PARAMETERS)
 
-if not available_efs:
+if not available_fillings:
     raise RuntimeError("No flow data found for the selected parameters.")
 
 cmap = plt.get_cmap("viridis")
-norm = Normalize(vmin=min(available_efs), vmax=max(available_efs))
+norm = Normalize(vmin=min(available_fillings), vmax=max(available_fillings))
 
 fig, ax = plt.subplots(figsize=(12, 8), layout="constrained")
 
-for color_index, e_f in enumerate(available_efs):
+for filling in available_fillings:
     parameters = {
         **FLOW_PARAMETERS,
-        "E_F": e_f,
+        "filling": filling,
     }
 
     data = load_flow_file(**parameters, force_json=False, dense=dense)
-    color = cmap(norm(e_f))
+    color = cmap(norm(filling))
     l0 = 0.0
 
     l_times = data["l_times"]
@@ -79,7 +79,7 @@ for color_index, e_f in enumerate(available_efs):
         rod,
         "-o",
         color=color,
-        label=rf"$E_F={e_f:g}$",
+        label=rf"$n={filling:g}$",
     )
 
 ax.set_xlabel(r"$\ell \cdot t$")

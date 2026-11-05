@@ -15,7 +15,7 @@ data = (
         "ieom_susceptibility.json.gz",
     )
     .query(
-        f"E_F == {FLOW_PARAMETERS['E_F']} "
+        f"filling == {FLOW_PARAMETERS['filling']} "
         f"& tprime == {FLOW_PARAMETERS['tprime']}"
     )
     .sort_values("T", ignore_index=True)

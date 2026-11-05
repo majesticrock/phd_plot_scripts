@@ -13,7 +13,6 @@ dense = True
 
 FLOW_FILE_PATTERN = f"{'dense_' if dense else ''}flow.json.gz*"
 FLOW_FILE_RE = re.compile(fr"^{FLOW_FILE_PATTERN}\d*$")
-EF_DIR_RE = re.compile(r"^E_F=(.+)$")
 
 def find_available_temperatures(parameters):
     loader = DataLoader()
@@ -26,7 +25,7 @@ def find_available_temperatures(parameters):
     flow_files = loader.get_all_files(relative_base, FLOW_FILE_PATTERN)
 
     fixed_parameters = {
-        key: parameters[key] for key in ("L", "U_0", "tprime", "E_F")
+        key: parameters[key] for key in ("L", "U_0", "tprime", "filling")
     }
     available = set()
 

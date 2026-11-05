@@ -5,7 +5,7 @@ from create_momentum_labels import create_momentum_labels
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-dense = True
+dense = False
 data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=dense)
 
 L = data["L"]

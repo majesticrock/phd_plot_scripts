@@ -28,7 +28,7 @@ cos_x, cos_y = np.meshgrid(np.cos(k), np.cos(k))
 energies = -2. * (
     (cos_x + cos_y) 
     + 2 * FLOW_PARAMETERS["tprime"] * cos_x * cos_y
-) - FLOW_PARAMETERS["E_F"]
+) - data["E_F"]
 
 integrated_ROD = np.trapezoid(data["residual_offdiagonalities"]**2, l_times) * data["L"] * data["L"]
 H0_norm = np.sqrt(np.sum(energies**2))

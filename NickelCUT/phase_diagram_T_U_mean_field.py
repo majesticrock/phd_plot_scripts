@@ -15,7 +15,7 @@ data = (
         MEAN_FIELD_FILE_NAME,
     )
     .query(
-        f"E_F == {FLOW_PARAMETERS['E_F']} "
+        f"filling == {FLOW_PARAMETERS['filling']} "
         f"& tprime == {FLOW_PARAMETERS['tprime']}"
     )
     .sort_values("T", ignore_index=True)
@@ -68,7 +68,7 @@ for active_status, points in points_by_status.items():
         label=label,
     )
 
-ax.set_xlabel(r"$\mu / t$")
+ax.set_xlabel(r"$U_0 / t$")
 ax.set_ylabel(r"$T / t$")
 ax.set_ylim(0, None)
 ax.legend()

@@ -23,7 +23,7 @@ data = (
     .query(
         f"U_0 == {FLOW_PARAMETERS['U_0']} "
         f"& tprime == {FLOW_PARAMETERS['tprime']} "
-        f"& E_F == {FLOW_PARAMETERS['E_F']} "
+        f"& filling == {FLOW_PARAMETERS['filling']} "
         f"& not {flags[0]} & not {flags[1]} & not {flags[2]}"
         f"& T > 0.0"
     )

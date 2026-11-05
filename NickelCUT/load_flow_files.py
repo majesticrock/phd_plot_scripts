@@ -26,7 +26,7 @@ def find_available_temperatures(parameters, file_pattern, file_name_regex):
     file_name_re = re.compile(file_name_regex)
 
     fixed_parameters = {
-        key: parameters[key] for key in ("L", "U_0", "tprime", "E_F")
+        key: parameters[key] for key in ("L", "U_0", "tprime", "filling")
     }
     available = set()
 
@@ -63,14 +63,14 @@ def find_available_temperatures(parameters, file_pattern, file_name_regex):
 
 # The first output files are simply called "FLOW_FILE_NAME.ENDING"
 # Simulations resumed from a state are then numbered via "FLOW_FILE_NAME.ENDING{number}" starting with 1
-def load_flow_file(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=False, dense=False):
+def load_flow_file(subdir, L, T, U_0, tprime, filling, resume_num="", force_json=False, dense=False):
     USED_FLOW_FILE_NAME = DENSE_FLOW_FILE_NAME if dense else FLOW_FILE_NAME
     data_loader = DataLoader()
     JSON_FILE = os.path.join(data_loader._to_path(
-        "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, E_F)
+        "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, filling)
     ), f"{USED_FLOW_FILE_NAME}.json.gz{resume_num}")
     PKL_FILE = os.path.join(data_loader._to_path(
-        f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, E_F)
+        f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, filling)
     ), f"{USED_FLOW_FILE_NAME}.pkl{resume_num}")
 
     JSON_TIME = os.path.getmtime(JSON_FILE)
@@ -86,14 +86,14 @@ def load_flow_file(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=Fal
     print("Flow terminated because", data["end_reason"])
     return data
 
-def load_all_resumed_files(subdir, L, T, U_0, tprime, E_F, force_json=False):
+def load_all_resumed_files(subdir, L, T, U_0, tprime, filling, force_json=False):
     data_loader = DataLoader()
     file_with_out_ending = data_loader._to_path(
-        "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, E_F)
+        "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, filling)
     )
 
     cache_file = os.path.join(data_loader._to_path(
-        f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, E_F)
+        f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, filling)
     ), "flow_all.pkl")
 
     # Match: flow.json.gz, flow.json.gz1, flow.json.gz2, ...
@@ -132,13 +132,13 @@ def load_all_resumed_files(subdir, L, T, U_0, tprime, E_F, force_json=False):
 
     return dataframes
 
-def load_final_flow_state(subdir, L, T, U_0, tprime, E_F, resume_num="", force_json=False):
+def load_final_flow_state(subdir, L, T, U_0, tprime, filling, resume_num="", force_json=False):
     data_loader = DataLoader()
     JSON_FILE = os.path.join(data_loader._to_path(
-        "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, E_F)
+        "nickel_cut", subdir, **nickel_cut_params(L, T, U_0, tprime, filling)
     ), f"{FINAL_STATE_FILE_NAME}.json.gz{resume_num}")
     PKL_FILE = os.path.join(data_loader._to_path(
-        f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, E_F)
+        f"nickel_cut", os.path.join(subdir, BINARY_DIR), **nickel_cut_params(L, T, U_0, tprime, filling)
     ), f"{FINAL_STATE_FILE_NAME}.pkl{resume_num}")
     
     if os.path.isfile(PKL_FILE) and not force_json:

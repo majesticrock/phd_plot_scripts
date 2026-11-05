@@ -73,7 +73,7 @@ def extract_hoppings(dispersion, L):
 def initial_hopping(dx, dy):
     distance_squared = dx * dx + dy * dy
     if distance_squared == 0:
-        return FLOW_PARAMETERS["E_F"]
+        return data["E_F"]
     if distance_squared == 1:
         return 1.0
     if distance_squared == 2:

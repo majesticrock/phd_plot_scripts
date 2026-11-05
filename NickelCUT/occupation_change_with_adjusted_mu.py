@@ -29,7 +29,7 @@ cos_x, cos_y = np.meshgrid(np.cos(k), np.cos(k))
 disperion_null = -2. * (
     (cos_x + cos_y) 
     + 2 * FLOW_PARAMETERS["tprime"] * cos_x * cos_y
-) - FLOW_PARAMETERS["E_F"]
+) - data["E_F"]
 occupation_null = fermi_occupation(disperion_null, FLOW_PARAMETERS["T"])
 
 delta_n = occupation_null - occupation_hf

@@ -36,7 +36,7 @@ data = data_loader.load_all(f"nickel_cut{subdir}/L={FLOW_PARAMETERS['L']}",
                          f"U_0={FLOW_PARAMETERS['U_0']}", 
                         f"tprime={FLOW_PARAMETERS['tprime']}"
                     ])
-data = data.sort_values("E_F").reset_index(drop=True)
+data = data.sort_values("filling").reset_index(drop=True)
 
 ORDER_PARAMETERS = {
     "Delta_SC": "SC",
@@ -66,7 +66,7 @@ for _, row in data.iterrows():
         )
         for column in ORDER_PARAMETERS
     )
-    points_by_status[active_status]["x"].append(-row["E_F"])#1.0 - float(row["filling"]))
+    points_by_status[active_status]["x"].append(1.0 - float(row["filling"]))
     points_by_status[active_status]["y"].append(float(row["T"]))
 
 fig, ax = plt.subplots(layout="constrained")
@@ -88,7 +88,7 @@ for active_status, points in points_by_status.items():
 ax.plot(-metzner_tc[0], metzner_tc[1], color="k")
 ax.plot(-metzner_dwave[0], metzner_dwave[1], color="k", ls=":")
 
-ax.set_xlabel(r"$\mu / t$")
+ax.set_xlabel(r"$\delta = 1 - n$")
 ax.set_ylabel(r"$T / t$")
 ax.set_ylim(0, None)
 ax.legend()

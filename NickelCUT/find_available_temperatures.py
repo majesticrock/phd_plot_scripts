@@ -13,7 +13,7 @@ def find_available_temperatures(parameters, file_pattern):
     all_files = loader.get_all_files(relative_base, file_pattern)
 
     fixed_parameters = {
-        key: parameters[key] for key in ("L", "U_0", "tprime", "E_F")
+        key: parameters[key] for key in ("L", "U_0", "tprime", "filling")
     }
     available = set()
 

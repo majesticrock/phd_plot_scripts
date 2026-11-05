@@ -54,9 +54,9 @@ flags = [
 max_T = pd.DataFrame({
     flag: (
         data.loc[data[flag]]
-        .groupby("E_F")["T"]
+        .groupby("filling")["T"]
         .max()
-        .reindex(sorted(data["E_F"].unique()), fill_value=-1)
+        .reindex(sorted(data["filling"].unique()), fill_value=-1)
     )
     for flag in flags
 }).fillna(-1)
@@ -66,9 +66,9 @@ fig, ax = plt.subplots(figsize=(8, 5))
 for flag in flags:
     valid = data.loc[data[flag]]
 
-    # Row corresponding to the maximum T for each E_F
-    idx = valid.groupby("E_F")["T"].idxmax()
-    points = valid.loc[idx].set_index("E_F").reindex(max_T.index)
+    # Row corresponding to the maximum T for each target filling.
+    idx = valid.groupby("filling")["T"].idxmax()
+    points = valid.loc[idx].set_index("filling").reindex(max_T.index)
 
     ax.plot(
         1. - points["hartree_fock_filling"],
