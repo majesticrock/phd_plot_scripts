@@ -9,7 +9,7 @@ from finite_size_energy_gap import (
     _find_fermi_surface_mask,
 )
 
-L=32
+L=14
 
 def _contour_points(context, fermi_level):
     segments = context["contour_generator"].lines(fermi_level)
@@ -98,13 +98,17 @@ def main():
     grid = adaptive_grid(L, T_PRIME, FERMI_LEVEL)
     coarse_context = grid["coarse_context"]
 
+    n_adaptive = len(grid['fine_points']) + len(grid['coarse_points'])
+    n_uniform = L * L
     print(f"L = {L}, coarse grid = {grid['coarse_size']} x {grid['coarse_size']}")
     print(f"t' = {T_PRIME:g}, Fermi level = {FERMI_LEVEL:g}")
     print(f"Coarse-grid Fermi-surface points: {np.count_nonzero(grid['coarse_surface_mask'])}")
     print(f"Retained fine-grid points near the Fermi surface: {len(grid['fine_points'])}")
     print(f"Retained coarse-grid points away from the Fermi surface: {len(grid['coarse_points'])}")
-    print(f"Total adaptive points: {len(grid['fine_points']) + len(grid['coarse_points'])}")
-    print(f"Uniform L x L points: {L * L}")
+    print(f"Total adaptive points: {n_adaptive}")
+    print(f"Uniform L x L points: {n_uniform}")
+    print(f"\nInteraction right-hand-side momentum evaluations:")
+    print(f"Adaptive: {n_adaptive * n_adaptive * n_uniform * n_uniform}     Uniform: {n_uniform**4}")
 
     fig, ax = plt.subplots(figsize=(8, 8), layout="constrained")
     fine = ax.scatter(
