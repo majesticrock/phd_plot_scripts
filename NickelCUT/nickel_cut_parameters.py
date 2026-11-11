@@ -1,9 +1,9 @@
 FLOW_PARAMETERS = {
-    "L": 16,
-    "T": 0.09,
+    "L": 18,
+    "T": 0.15,
     "U_0": 3.,
     "tprime": -0.3,
-    "filling": 0.85,
+    "filling": 0.95,
     "subdir" : ".",
 }
 

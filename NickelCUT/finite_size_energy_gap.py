@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-L = 12
-T_PRIME = -0.25
-FERMI_LEVEL = -0.75
+L = 22
+T_PRIME = -0.3
+FERMI_LEVEL = -2.
 ENERGY_TOLERANCE = 1e-12
 FINE_MESH_SIZE = 201
 

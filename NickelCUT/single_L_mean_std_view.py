@@ -6,7 +6,7 @@ from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
 
-SYSTEM_SIZES = np.array([ 10, 12, 14, 16 ])
+SYSTEM_SIZES = np.array([ 10, 12, 14, 16, 18 ])
 CHANNELS = (
     ("extremal_sc_eigenvalues", "SC", "o"),
     ("extremal_charge_eigenvalues", "Charge", "s"),

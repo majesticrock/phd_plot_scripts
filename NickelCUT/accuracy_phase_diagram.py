@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge, Circle
 from matplotlib.colors import to_rgba
 from matplotlib.lines import Line2D
 import numpy as np
@@ -13,12 +14,12 @@ from mrock.get_data import DataLoader
 from nickel_cut_parameters import FLOW_PARAMETERS
 
 
-SYSTEM_SIZES = (10, 12, 14, 16)
+SYSTEM_SIZES = ( 14, 16, 18)
 FLOW_FILE_RE = re.compile(r"^flow\.json\.gz$")
 CHANNELS = (
-    ("extremal_sc_eigenvalues", "SC", "tab:red", "o"),
-    ("extremal_charge_eigenvalues", "Charge", "tab:blue", "s"),
-    ("extremal_spin_eigenvalues", "Spin", "tab:green", "v"),
+    ("extremal_sc_eigenvalues", "SC", "tab:red"),
+    ("extremal_charge_eigenvalues", "Charge", "tab:blue"),
+    ("extremal_spin_eigenvalues", "Spin", "tab:green"),
 )
 METZNER_TC = np.array([
     [-0.7450836820083683, 0.968416, 0.1517948717948718],
@@ -41,6 +42,45 @@ METZNER_DWAVE = np.array([
     [-0.9506568144499179, 0.879313, 0.0006711409395973034],
 ]).T
 
+
+def _alpha_from_std(std: float) -> float:
+    if not np.isfinite(std) or std <= 0.0:
+        return 1.0                # no variance -> fully opaque
+    return 1.0 / (1.0 + 10 * std)      # simple decreasing mapping
+
+def _draw_pie_with_boundary(ax,
+                            x: float,
+                            y: float,
+                            means: np.ndarray,
+                            stds: np.ndarray,
+                            colors: list[tuple[float, float, float]],
+                            max_radius: float = 0.015,
+                            boundary_width: float = 0.6):
+    if boundary_width > 0:
+        circ = Circle((x, y), radius=max_radius,
+                      edgecolor='black',
+                      facecolor='none',
+                      linewidth=boundary_width,
+                      zorder=4)
+        ax.add_patch(circ)
+    clipped_means = np.clip(means, -1.0, 1.0)
+    radii = max_radius * (1.0 - clipped_means)
+
+    for i, (radius, std, col) in enumerate(zip(radii, stds, colors)):
+        if radius <= 0.0:
+            continue
+
+        alpha = _alpha_from_std(std)
+        rgba = (*col[:3], alpha)
+
+        theta1 = i * 120.0
+        theta2 = (i + 1) * 120.0
+
+        wedge = Wedge((x, y), radius, theta1, theta2,
+                      facecolor=rgba,
+                      edgecolor=rgba,
+                      zorder=3) 
+        ax.add_patch(wedge)
 
 def _available_points():
     loader = DataLoader()
@@ -119,7 +159,7 @@ def _channel_values_at_threshold(system_size, temperature, filling):
     threshold_index = int(np.argmin(np.abs(l_times - 1.0 / energy_gap)))
     values = np.array([
         np.asarray(data[key][:point_count], dtype=float)[threshold_index]
-        for key, _, _, _ in CHANNELS
+        for key, _, _ in CHANNELS
     ])
     if not np.all(np.isfinite(values)):
         raise ValueError(
@@ -127,16 +167,6 @@ def _channel_values_at_threshold(system_size, temperature, filling):
             f"T={temperature:g}, filling={filling:g}."
         )
     return values
-
-
-def _opacity(mean, std):
-    if mean <= 0.0 or not np.isfinite(std):
-        return 1.0
-    if std <= 0.0:
-        return 0.0
-    standard_deviations_to_zero = mean / std
-    return 1.0 / (1.0 + standard_deviations_to_zero)
-
 
 points_by_size = _available_points()
 if not points_by_size:
@@ -164,39 +194,34 @@ for (temperature, filling), available_sizes in sorted(points_by_size.items()):
     points.append((temperature, filling, means, stds))
 
 fig, ax = plt.subplots(figsize=(8, 5), layout="constrained")
-marker_offsets = np.linspace(-0.006, 0.006, len(CHANNELS))
 channel_handles = []
+base_colors = [to_rgba(col) for _, _, col in CHANNELS]
 
-for channel_index, (_, label, color, marker) in enumerate(CHANNELS):
-    rgba = to_rgba(color)
-    x_values = []
-    y_values = []
-    facecolors = []
+for channel_index, (_, label, color) in enumerate(CHANNELS):
+    pie_max_radius = 0.005
 
     for temperature, filling, means, stds in points:
-        alpha = _opacity(means[channel_index], stds[channel_index])
-        x_values.append(1.0 - filling + marker_offsets[channel_index])
-        y_values.append(temperature)
-        facecolors.append((*rgba[:3], alpha))
+        x_center = 1.0 - filling
+        y_center = temperature
 
-    ax.scatter(
-        x_values,
-        y_values,
-        marker=marker,
-        s=55,
-        facecolors=facecolors,
-        edgecolors=facecolors,
-    )
+        _draw_pie_with_boundary(ax,
+                            x_center, y_center,
+                            means, stds,
+                            base_colors,
+                            max_radius=pie_max_radius,
+                            boundary_width=0.6)
+    
     channel_handles.append(
-        Line2D(
-            [0],
-            [0],
-            marker=marker,
-            linestyle="",
-            color=color,
-            label=label,
+            Line2D(
+                [0],
+                [0],
+                marker="s",
+                linestyle="",
+                color=color,
+                label=label,
+            )
         )
-    )
+
 
 ax.plot(1-METZNER_TC[1], METZNER_TC[2], color="k")
 ax.plot(1-METZNER_DWAVE[1], METZNER_DWAVE[2], color="k", linestyle=":")
@@ -207,5 +232,6 @@ ax.grid(True, alpha=0.3)
 ax.legend(
     handles=channel_handles
 )
+ax.set_aspect('equal', adjustable='box')
 
 plt.show()
