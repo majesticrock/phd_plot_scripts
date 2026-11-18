@@ -7,7 +7,7 @@ from nickel_cut_parameters import FLOW_PARAMETERS
 
 from Momentum import Momentum
 
-data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=False)
 
 ELL_STEP = -1#data["index_of_lowest_ROD"]
 L = data["L"]
@@ -20,12 +20,12 @@ im_show_kwargs = {
     "cmap" :          "seismic"
 }
 
-p = Momentum(L, 0, L//2).pos
+p = Momentum(L, L//2-3, L//2+4).pos
 
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
-CHANNEL = "single_particle_energy_same"
+CHANNEL = "superconductivity"
 
 fig, ax = plt.subplots()
 V = data["extracted_channels"][ELL_STEP][CHANNEL][p].reshape(L, L) * N

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
 
-data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=True)
+data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=False)
 
 ELL_STEP = -1
 L = data["L"]
@@ -19,7 +19,7 @@ im_show_kwargs = {
 # density_wave_differing | density_wave_same
 # single_particle_energy_differing | single_particle_energy_same
 # superconductivity
-CHANNEL = "single_particle_energy_differing"
+CHANNEL = "superconductivity"
 
 fig, ax = plt.subplots()
 

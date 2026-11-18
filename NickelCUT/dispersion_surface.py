@@ -4,7 +4,9 @@ from matplotlib import cm
 from create_momentum_labels import create_momentum_labels
 from load_flow_files import load_flow_file
 from nickel_cut_parameters import FLOW_PARAMETERS
+from hartree_fock import solve_hartree_fock
 
+PLOT_HARTREE_FOCK_DISPERSION = True
 dense = False
 data = load_flow_file(**FLOW_PARAMETERS, resume_num="", force_json=False, dense=dense)
 
@@ -17,7 +19,17 @@ def convert_1d_to_2d(arr):
     return np.reshape(arr, (-1, L))
 
 X, Y = np.meshgrid(np.arange(0, L), np.arange(0, L))
-Z = convert_1d_to_2d(data["extracted_channels"][ELL_INDEX]["dispersion"])
+flow_point = data["extracted_channels"][ELL_INDEX]
+if PLOT_HARTREE_FOCK_DISPERSION:
+    plotted_dispersion, _, _ = solve_hartree_fock(
+        flow_point,
+        beta=data["beta"],
+        target_filling=data["filling"],
+    )
+else:
+    plotted_dispersion = flow_point["dispersion"]
+
+Z = convert_1d_to_2d(plotted_dispersion)
 norm = plt.Normalize(Z.min(), Z.max())
 colors = cm.inferno(norm(Z))
 

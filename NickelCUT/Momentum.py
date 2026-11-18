@@ -1,7 +1,24 @@
 import math
 from dataclasses import dataclass
+from fractions import Fraction
 
 import numpy as np
+
+
+def _format_pi_multiple(numerator: int, denominator: int) -> str:
+    coefficient = Fraction(numerator, denominator)
+    if coefficient == 0:
+        return "0"
+
+    sign = "-" if coefficient < 0 else ""
+    coefficient = abs(coefficient)
+    if coefficient == 1:
+        return f"{sign}π"
+    if coefficient.denominator == 1:
+        return f"{sign}{coefficient.numerator}π"
+
+    multiple = "" if coefficient.numerator == 1 else str(coefficient.numerator)
+    return f"{sign}{multiple}π/{coefficient.denominator}"
 
 
 @dataclass(frozen=True)
@@ -107,6 +124,11 @@ class Momentum:
             f"{self.ky / math.pi:.3f}π)"
             f")"
         )
+
+    def to_string(self) -> str:
+        kx = _format_pi_multiple(2 * self.x - self.L, self.L)
+        ky = _format_pi_multiple(2 * self.y - self.L, self.L)
+        return f"({kx}, {ky})"
 
 
 def Gamma(L):

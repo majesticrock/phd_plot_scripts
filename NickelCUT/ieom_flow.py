@@ -67,7 +67,7 @@ axes[1,0].set_ylabel(r"$\chi_d (q)$")
 
 ax.set_ylim(0, 2.5)
 
-for i in range(0, end_index, 5):
+for i in range(0, end_index):
     color = cmap(norm(l_times[i]))
 
     for j, label in enumerate(["sc", "charge", "spin"]):

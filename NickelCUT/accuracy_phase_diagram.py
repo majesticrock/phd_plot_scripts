@@ -14,7 +14,7 @@ from mrock.get_data import DataLoader
 from nickel_cut_parameters import FLOW_PARAMETERS
 
 
-SYSTEM_SIZES = ( 14, 16, 18)
+SYSTEM_SIZES = ( 10, 12, 14, 16, 18)
 FLOW_FILE_RE = re.compile(r"^flow\.json\.gz$")
 CHANNELS = (
     ("extremal_sc_eigenvalues", "SC", "tab:red"),
@@ -43,11 +43,6 @@ METZNER_DWAVE = np.array([
 ]).T
 
 
-def _alpha_from_std(std: float) -> float:
-    if not np.isfinite(std) or std <= 0.0:
-        return 1.0                # no variance -> fully opaque
-    return 1.0 / (1.0 + 10 * std)      # simple decreasing mapping
-
 def _draw_pie_with_boundary(ax,
                             x: float,
                             y: float,
@@ -67,20 +62,35 @@ def _draw_pie_with_boundary(ax,
     radii = max_radius * (1.0 - clipped_means)
 
     for i, (radius, std, col) in enumerate(zip(radii, stds, colors)):
-        if radius <= 0.0:
-            continue
-
-        alpha = _alpha_from_std(std)
-        rgba = (*col[:3], alpha)
-
         theta1 = i * 120.0
         theta2 = (i + 1) * 120.0
 
-        wedge = Wedge((x, y), radius, theta1, theta2,
-                      facecolor=rgba,
-                      edgecolor=rgba,
-                      zorder=3) 
-        ax.add_patch(wedge)
+        if radius > 0.0:
+            mean_wedge = Wedge((x, y), radius, theta1, theta2,
+                               facecolor=col[:3],
+                               edgecolor=col[:3],
+                               zorder=3)
+            ax.add_patch(mean_wedge)
+
+        if np.isfinite(std) and std > 0.0:
+            inner_radius = max_radius * (
+                1.0 - np.clip(clipped_means[i] + std, -1.0, 1.0)
+            )
+            outer_radius = max_radius * (
+                1.0 - np.clip(clipped_means[i] - std, -1.0, 1.0)
+            )
+            if outer_radius > inner_radius:
+                std_shading = Wedge(
+                    (x, y),
+                    outer_radius,
+                    theta1,
+                    theta2,
+                    width=outer_radius - inner_radius,
+                    facecolor=(*col[:3], 0.25),
+                    edgecolor="none",
+                    zorder=3.5,
+                )
+                ax.add_patch(std_shading)
 
 def _available_points():
     loader = DataLoader()
@@ -136,7 +146,7 @@ def _channel_values_at_threshold(system_size, temperature, filling):
         "T": temperature,
         "filling": filling,
     }
-    data = load_flow_file(**parameters, resume_num="", force_json=False, dense=False)
+    data = load_flow_file(**parameters, resume_num="", force_json=False, dense=False, print_which=False)
     point_count = int(data["number_of_data_points"])
     l_times = np.asarray(data["l_times"][:point_count], dtype=float)
     if point_count == 0 or l_times.size == 0:

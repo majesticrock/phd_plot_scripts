@@ -63,7 +63,9 @@ def find_available_temperatures(parameters, file_pattern, file_name_regex):
 
 # The first output files are simply called "FLOW_FILE_NAME.ENDING"
 # Simulations resumed from a state are then numbered via "FLOW_FILE_NAME.ENDING{number}" starting with 1
-def load_flow_file(subdir, L, T, U_0, tprime, filling, resume_num="", force_json=False, dense=False):
+def load_flow_file(subdir, L, T, U_0, tprime, filling, resume_num="", force_json=False, dense=False, print_which=True):
+    printer = print if print_which else lambda *args: None
+    
     USED_FLOW_FILE_NAME = DENSE_FLOW_FILE_NAME if dense else FLOW_FILE_NAME
     data_loader = DataLoader()
     JSON_FILE = os.path.join(data_loader._to_path(
@@ -76,14 +78,14 @@ def load_flow_file(subdir, L, T, U_0, tprime, filling, resume_num="", force_json
     JSON_TIME = os.path.getmtime(JSON_FILE)
             
     if os.path.isfile(PKL_FILE) and os.path.getmtime(PKL_FILE) > JSON_TIME and not force_json:
-        print(f"Loading pickle {PKL_FILE}...")
+        printer(f"Loading pickle {PKL_FILE}...")
         data = pd.read_pickle(PKL_FILE)
     else:
-        print(f"Loading json {JSON_FILE}...")
+        printer(f"Loading json {JSON_FILE}...")
         data = data_loader.load_panda_file(JSON_FILE)
         data.to_pickle(PKL_FILE)
-    print("Loaded data have been produced on", data["time"])
-    print("Flow terminated because", data["end_reason"])
+    printer("Loaded data have been produced on", data["time"])
+    printer("Flow terminated because", data["end_reason"])
     return data
 
 def load_all_resumed_files(subdir, L, T, U_0, tprime, filling, force_json=False):
